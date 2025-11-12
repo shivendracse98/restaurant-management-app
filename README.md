@@ -1,73 +1,121 @@
-# RestaurantApp
+## 🍴 **TasteTown – Restaurant Management Web App**
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
+### 🚀 Overview
 
-## Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
-=======
-**Edit a file, create a new file, and clone from Bitbucket in under 2 minutes**
-
-When you're done, you can delete the content in this README and update the file with details for others getting started with your repository.
-
-*We recommend that you open this README in another tab as you perform the tasks below. You can [watch our video](https://youtu.be/0ocf7u76WSo) for a full demo of all the steps in this tutorial. Open the video in a new tab to avoid leaving Bitbucket.*
+**TasteTown** is a full-featured restaurant management system built using **Angular 17** and **JSON Server** (mock backend).
+It supports multiple roles — **Admin**, **Staff**, and **Customer** — with real-time menu management, order tracking, and tiffin subscription handling.
 
 ---
 
-## Edit a file
+### 🧩 **Core Features**
 
-You’ll start by editing this README file to learn how to edit a file in Bitbucket.
+#### 👨‍💼 Admin
 
-1. Click **Source** on the left side.
-2. Click the README.md link from the list of files.
-3. Click the **Edit** button.
-4. Delete the following text: *Delete this line to make a change to the README from Bitbucket.*
-5. After making your change, click **Commit** and then **Commit** again in the dialog. The commit page will open and you’ll see the change you just made.
-6. Go back to the **Source** page.
+* Manage menu items (create, edit, delete)
+* View and manage all orders
+* Track payments & analytics dashboard
 
----
+#### 👩‍🍳 Staff
 
-## Create a file
+* POS (Point of Sale) interface for dine-in/takeaway
+* Manage tiffin subscriptions
+* View today’s and ongoing orders
+* Revenue summary with daily analytics
 
-Next, you’ll add a new file to this repository.
+#### 🧑‍🍽️ Customer
 
-1. Click the **New file** button at the top of the **Source** page.
-2. Give the file a filename of **contributors.txt**.
-3. Enter your name in the empty file space.
-4. Click **Commit** and then **Commit** again in the dialog.
-5. Go back to the **Source** page.
-
-Before you move on, go ahead and explore the repository. You've already seen the **Source** page, but check out the **Commits**, **Branches**, and **Settings** pages.
+* Browse menu and place orders
+* Manage cart and order history
+* Subscribe to tiffin plans
+* Secure authentication & profile management
 
 ---
 
-## Clone a repository
+### ⚙️ **Tech Stack**
 
-Use these steps to clone from SourceTree, our client for using the repository command-line free. Cloning allows you to work on your files locally. If you don't yet have SourceTree, [download and install first](https://www.sourcetreeapp.com/). If you prefer to clone from the command line, see [Clone a repository](https://confluence.atlassian.com/x/4whODQ).
+* **Frontend:** Angular 17 (Standalone Components, TypeScript, SCSS)
+* **Mock Backend:** JSON Server (`db.json`)
+* **Charts:** ng2-charts (Chart.js)
+* **Routing & Guards:** Angular Router, Auth/Admin/Staff Guards
+* **Authentication:** Role-based with session persistence
+* **UI:** Custom SCSS (modern, minimal, and luxurious theme)
 
-1. You’ll see the clone button under the **Source** heading. Click that button.
-2. Now click **Check out in SourceTree**. You may need to create a SourceTree account or log in.
-3. When you see the **Clone New** dialog in SourceTree, update the destination path and name if you’d like to and then click **Clone**.
-4. Open the directory you just created to see your repository’s files.
+---
 
-Now that you're more familiar with your Bitbucket repository, go ahead and add a new file locally. You can [push your change back to Bitbucket with SourceTree](https://confluence.atlassian.com/x/iqyBMg), or you can [add, commit,](https://confluence.atlassian.com/x/8QhODQ) and [push from the command line](https://confluence.atlassian.com/x/NQ0zDQ).
+### 🧠 **Project Structure**
+
+```
+src/
+├── app/
+│   ├── core/                # Core services & guards
+│   ├── features/            # Feature modules (admin, staff, customer)
+│   │   ├── admin/
+│   │   ├── staff/
+│   │   ├── customer/
+│   ├── models/              # Data models
+│   ├── app.component.*      # Root component
+│   ├── app.routes.ts        # Routing configuration
+│
+├── assets/                  # Images and static assets
+├── environments/            # Environment configurations
+└── db.json                  # Mock API data for JSON Server
+```
+
+---
+
+### 🧾 **Setup Instructions**
+
+1. **Clone Repository**
+
+   ```bash
+   git clone https://Shivendra1998@bitbucket.org/Shivendra1998/restaurant-management-app.git
+   cd restaurant-management-app
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Run Mock Backend**
+
+   ```bash
+   npx json-server --watch db.json --port 3000
+   ```
+
+4. **Start Angular App**
+
+   ```bash
+   ng serve
+   ```
+
+5. **Open in Browser**
+
+   ```
+   http://localhost:4200
+   ```
+
+---
+
+### 🧭 **Upcoming Enhancements**
+
+* [ ] Complete Payment Management for Admin
+* [ ] Advanced Menu Management UI
+* [ ] Enhanced Role-Based Analytics Dashboard
+* [ ] Cloud Backend (Spring Boot / Node)
+* [ ] Deployed Production Version
+
+---
+
+### 👨‍💻 **Author**
+
+**Shivendra Yadav**
+📧 [[shivendraydv98@gmail.com](mailto:shivendraydv98@gmail.com)]
+🌐 Bitbucket: [Shivendra1998](https://bitbucket.org/Shivendra1998/)
+
+---
+
+### 💎 **License**
+
+This project is licensed under the **MIT License**.
