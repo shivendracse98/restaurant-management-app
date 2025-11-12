@@ -1,0 +1,53 @@
+<div class="checkout-container">
+  <div class="checkout-card">
+    <h2>🛒 Checkout</h2>
+    <p class="subtext">Almost there! Please confirm your delivery details below.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="checkout-form">
+      <div class="form-group">
+        <label>👤 Name</label>
+        <input formControlName="customerName" readonly />
+      </div>
+
+      <div class="form-group">
+        <label>📞 Phone</label>
+        <input formControlName="customerPhone" placeholder="Enter 10-digit phone" />
+        <small *ngIf="form.get('customerPhone')?.hasError('pattern') && form.get('customerPhone')?.touched">
+          ⚠️ Enter a valid phone number
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>🏠 Address</label>
+        <textarea formControlName="address" placeholder="Enter delivery address"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>🍴 Order Type</label>
+        <select formControlName="orderType">
+          <option value="DELIVERY">Delivery</option>
+          <option value="PARCEL">Takeaway</option>
+          <option value="DINE_IN">Dine In</option>
+        </select>
+      </div>
+
+      <div class="summary-card">
+        <h3>🧾 Order Summary</h3>
+        <div class="summary-items">
+          <div *ngFor="let item of cart.items" class="item-line">
+            <span>{{ item.menuItem.name }} × {{ item.qty }}</span>
+            <strong>₹{{ item.menuItem.price * item.qty }}</strong>
+          </div>
+        </div>
+        <div class="summary-total">
+          <span>Total</span>
+          <strong>₹{{ total }}</strong>
+        </div>
+      </div>
+
+      <button class="btn primary" type="submit" [disabled]="loading || form.invalid || cart.getCount() === 0">
+        {{ loading ? 'Processing...' : '✅ Place Order & Pay via UPI' }}
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+<div class="orders-container" *ngIf="!loading">
+  <h2>📦 My Orders</h2>
+
+  <div *ngIf="errorMsg" class="error-msg">{{ errorMsg }}</div>
+
+  <div *ngIf="orders.length === 0" class="no-orders">
+    <p>No orders yet 😋</p>
+    <button routerLink="/menu" class="btn primary">Browse Menu</button>
+  </div>
+
+  <div *ngFor="let order of orders" class="order-card">
+    <div class="order-header">
+      <h3>Order #{{ order.id }}</h3>
+      <span class="status" [ngClass]="order.status.toLowerCase()">{{ order.status }}</span>
+    </div>
+
+    <p class="date">🕓 {{ formatDate(order.createdAt) }}</p>
+
+    <ul class="items-list">
+      <li *ngFor="let item of order.items">
+        {{ item.qty }} × {{ item.name }} — ₹{{ item.price * item.qty }}
+      </li>
+    </ul>
+
+    <div class="order-footer">
+      <div class="total">💰 Total: ₹{{ order.total }}</div>
+      <div class="actions">
+        <button class="btn small secondary" (click)="reorder(order)">Reorder</button>
+        <button class="btn small danger" (click)="cancel(order)">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loader" *ngIf="loading">
+  <p>⏳ Loading your orders...</p>
+</div>

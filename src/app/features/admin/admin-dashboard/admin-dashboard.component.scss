@@ -1,0 +1,93 @@
+/* ==== ADMIN DASHBOARD ==== */
+
+.admin-dashboard {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 2.1rem 1rem 0 1rem;
+  background: linear-gradient(120deg, #FFF8E7 0, #FFF1DE 90%, #FDB86B 120%);
+  border-radius: 18px;
+  box-shadow: 0 3px 24px rgba(230,126,34,0.09);
+
+  h2 {
+    color: #E67E22;
+    font-size: 2.1rem;
+    font-weight: 800;
+    margin-bottom: 1.6rem;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2.1rem;
+  margin-top: 0.8rem;
+}
+
+.cards .card {
+  cursor: pointer;
+  background: linear-gradient(110deg, #FFF8E7 90%, #FEDAAB 110%);
+  border-radius: 18px;
+  box-shadow: 0 7px 26px rgba(230,126,34,0.11);
+  padding: 1.6rem 1.3rem 1.3rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  transition: box-shadow 0.16s, transform 0.17s, border 0.19s;
+  border: 2.1px solid #FFF1DE;
+  min-width: 180px;
+  position: relative;
+
+  h3 {
+    font-size: 1.28rem;
+    color: #E67E22;
+    font-weight: 700;
+    margin-bottom: 0.9rem;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  p {
+    color: #27AE60;
+    font-size: 1.02rem;
+    font-weight: 500;
+    margin-bottom: 0;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: #27AE60;
+    background: linear-gradient(109deg, #FFF8E7 75%, #CEF6C1 130%);
+    box-shadow: 0 13px 44px rgba(39,174,96,0.14);
+    transform: translateY(-7px) scale(1.04);
+  }
+}
+
+@media (max-width: 800px) {
+  .admin-dashboard {
+    padding: 1.1rem 0.11rem 0 0.11rem;
+    border-radius: 13px;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+  }
+}
+
+/* For great scrolling visuals with food dashboards */
+::-webkit-scrollbar {
+  width: 8px;
+  background: #FFF1DE;
+}
+::-webkit-scrollbar-thumb {
+  background: #E67E22;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #27AE60;
+}

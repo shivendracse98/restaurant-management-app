@@ -1,0 +1,16 @@
+<div class="detail-container" *ngIf="food">
+  <div class="back-bar">
+    <button class="back-btn" (click)="goBack()">← Back to Menu</button>
+  </div>
+
+  <img [src]="food.imageUrl" alt="{{ food.name }}" />
+
+  <div class="info">
+    <h2>{{ food.name }}</h2>
+    <p>{{ food.description }}</p>
+    <strong>Price: ₹{{ food.price }}</strong>
+
+    <!-- ✅ New button -->
+    <button class="add-btn" (click)="addToCart()">🛒 Add to Cart</button>
+  </div>
+</div>

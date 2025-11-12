@@ -1,0 +1,20 @@
+<div class="dashboard">
+  <h2>👋 Welcome back, {{ auth.currentUser()?.name }}</h2>
+
+  <div class="cards">
+    <div class="card" routerLink="/menu">
+      <h3>🍽️ Browse Menu</h3>
+      <p>Order from our delicious selection</p>
+    </div>
+
+    <div class="card" routerLink="/orders">
+      <h3>📦 My Orders</h3>
+      <p>View past and current orders</p>
+    </div>
+
+    <div class="card" routerLink="/cart">
+      <h3>🛒 My Cart</h3>
+      <p>Checkout your favorite dishes</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,249 @@
+<div class="staff-dashboard">
+  <div class="header-row">
+    <h2>👨‍🍳 Staff POS</h2>
+    <div class="header-actions">
+      <button class="small" (click)="switchTab('ORDER')">Take Order</button>
+      <button class="small" (click)="switchTab('TIFFIN')">Tiffin</button>
+      <button class="small" (click)="switchTab('ONGOING')">Ongoing</button>
+      <button class="small" (click)="switchTab('REVENUE')">Revenue</button>
+    </div>
+  </div>
+
+  <p class="message" *ngIf="message">{{ message }}</p>
+
+  <!-- ========== ORDER TAB ========= -->
+  <section *ngIf="activeTab === 'ORDER'" class="card">
+    <div class="row menu-search">
+      <input type="text" [(ngModel)]="searchTerm" placeholder="Search menu or category..." />
+    </div>
+
+    <div class="order-grid">
+      <div class="left">
+        <h3>Select Items</h3>
+        <div class="menu-grid">
+          <div class="menu-item" *ngFor="let m of filteredMenu">
+            <img [src]="m.imageUrl" [alt]="m.name" />
+            <div class="meta">
+              <div class="name">{{ m.name }}</div>
+              <div class="price">₹{{ m.price }}</div>
+            </div>
+            <button class="btn add" type="button" (click)="addItem(m)">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="right">
+        <h3>Order Summary</h3>
+        <form [formGroup]="orderForm" (ngSubmit)="placeOrder()">
+          <div class="form-row">
+            <label>Customer</label>
+            <input type="text" formControlName="customerName" />
+          </div>
+
+          <div class="form-row">
+            <label>Phone</label>
+            <input type="text" formControlName="customerPhone" />
+          </div>
+
+          <div class="form-row">
+            <label>Order Type</label>
+            <select formControlName="orderType">
+              <option value="DINE_IN">Dine In</option>
+              <option value="PARCEL">Parcel</option>
+              <option value="DELIVERY">Delivery</option>
+            </select>
+          </div>
+
+          <div class="summary" *ngIf="cartItems.length">
+            <table class="orders-table">
+              <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th></th></tr></thead>
+              <tbody>
+                <tr *ngFor="let it of cartItems; let i = index">
+                  <td>{{ it.name }}</td>
+                  <td>1</td>
+                  <td>₹{{ it.price }}</td>
+                  <td><button type="button" class="btn small danger" (click)="removeItemFromOrder(i)">Remove</button></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p class="total-line">Total: ₹{{ getTotal(cartItems) }}</p>
+          </div>
+
+          <button class="primary-btn" type="submit" [disabled]="isLoading">
+            {{ isLoading ? 'Placing...' : 'Place Order' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TIFFIN TAB ========= -->
+  <section *ngIf="activeTab === 'TIFFIN'" class="card">
+    <h3>🍱 Create Tiffin Subscription</h3>
+
+    <div class="tiffin-quick">
+      <div class="plan" (click)="selectTiffinPlan('plain')">
+        <div class="plan-name">Plain Thali</div>
+        <div class="plan-price">₹2700 / month</div>
+      </div>
+      <div class="plan" (click)="selectTiffinPlan('deluxe')">
+        <div class="plan-name">Deluxe Thali</div>
+        <div class="plan-price">₹3000 / month</div>
+      </div>
+      <div class="plan" (click)="selectTiffinPlan('special')">
+        <div class="plan-name">Special Thali</div>
+        <div class="plan-price">₹3300 / month</div>
+      </div>
+    </div>
+
+    <form [formGroup]="tiffinForm" (ngSubmit)="createTiffin()">
+      <div class="form-row"><label>Name</label><input formControlName="customerName" /></div>
+      <div class="form-row"><label>Phone</label><input formControlName="customerPhone" /></div>
+      <div class="form-row">
+        <label>Frequency</label>
+        <select formControlName="frequency">
+          <option value="DAILY">Daily</option>
+          <option value="WEEKLY">Weekly</option>
+          <option value="MONTHLY">Monthly</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Duration (months)</label><input type="number" formControlName="durationMonths" /></div>
+
+      <div class="form-row">
+        <label>Selected Menu</label>
+        <select formControlName="menuItemId">
+          <option *ngFor="let m of menuItems" [value]="m.id">{{ m.name }} — ₹{{ m.price }}</option>
+        </select>
+      </div>
+
+      <button class="primary-btn" type="submit">Create Subscription</button>
+    </form>
+
+    <h4 class="mt-16">Active Subscriptions ({{ subscriptionsCount }})</h4>
+    <table *ngIf="subscriptionsList.length" class="orders-table">
+      <thead><tr><th>Name</th><th>Phone</th><th>Plan</th><th>Freq</th><th>Amt</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let s of subscriptionsList">
+          <td>{{ s.customerName }}</td>
+          <td>{{ s.customerPhone }}</td>
+          <td>{{ s.menuPlan && s.menuPlan.length ? s.menuPlan[0].name : '' }}</td>
+          <td>{{ s.frequency }}</td>
+          <td>₹{{ s.totalPerDelivery }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ========== ONGOING ORDERS TAB ========= -->
+  <section *ngIf="activeTab === 'ONGOING'" class="card">
+    <h3>📋 Ongoing Orders</h3>
+
+    <div *ngIf="ongoingOrders.length; else noOngoing">
+      <table class="orders-table">
+        <thead><tr><th>ID</th><th>Table/Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let o of ongoingOrders">
+            <td>#{{ o.id }}</td>
+            <td>{{ o.tableNumber || o.customerName || 'Guest' }}</td>
+            <td>
+              <ul>
+                <li *ngFor="let it of o.items">{{ it.name }} × {{ it.qty }}</li>
+              </ul>
+            </td>
+            <td>₹{{ o.total }}</td>
+            <td>
+              <select [value]="o.status" (change)="updateOrderStatus(o, $any($event.target).value)">
+                <option value="PENDING">Pending</option>
+                <option value="PREPARING">Preparing</option>
+                <option value="READY">Ready</option>
+                <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+                <option value="DELIVERED">Delivered</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn small" (click)="openEdit(o)">✏️ Edit</button>
+              <button class="btn small" (click)="markPaymentDone(o)">💰 Mark Paid</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noOngoing>
+      <p>No ongoing orders right now.</p>
+    </ng-template>
+  </section>
+
+  <!-- ========== REVENUE TAB ========= -->
+  <section *ngIf="activeTab === 'REVENUE'" class="revenue-tab card">
+    <h3>📊 Today's Performance</h3>
+
+    <div class="summary-cards">
+      <div class="card small">
+        <h4>Total Orders</h4>
+        <p>{{ todayOrders.length }}</p>
+      </div>
+      <div class="card small">
+        <h4>Revenue Today</h4>
+        <p>₹{{ getTodayRevenueTotal() }}</p>
+      </div>
+      <div class="card small">
+        <h4>Active Subs</h4>
+        <p>{{ subscriptionsCount }}</p>
+      </div>
+    </div>
+
+    <div class="chart">
+      <canvas
+        baseChart
+        [datasets]="revenueChartData"
+        [labels]="revenueChartLabels"
+        [options]="revenueChartOptions"
+        chartType="bar">
+      </canvas>
+    </div>
+  </section>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-backdrop" *ngIf="showEditModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3>Edit Order #{{ editOrder?.id }}</h3>
+    <div class="modal-body">
+      <table class="orders-table small">
+        <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let it of editOrder.items; let i = index">
+            <td>{{ it.name }}</td>
+            <td>
+              <button class="qty-btn" (click)="decreaseQty(it)">−</button>
+              {{ it.qty }}
+              <button class="qty-btn" (click)="increaseQty(it)">+</button>
+            </td>
+            <td>₹{{ (it.price || 0) * (it.qty || 1) }}</td>
+            <td><button class="btn small danger" (click)="removeItemFromEdit(i)">Remove</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Add Items</h4>
+      <div class="menu-grid small">
+        <div class="menu-item" *ngFor="let m of filteredMenu">
+          <img [src]="m.imageUrl" [alt]="m.name" />
+          <div class="meta">
+            <div class="name">{{ m.name }}</div>
+            <div class="price">₹{{ m.price }}</div>
+          </div>
+          <button class="btn small" (click)="addItemToEdit(m)">Add</button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn" (click)="closeEdit()">Cancel</button>
+        <button class="btn primary" (click)="saveEdit()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>

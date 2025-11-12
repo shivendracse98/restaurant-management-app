@@ -1,0 +1,76 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { FoodItem } from '../../models/food-item.model';
+import { environment } from '../../../environments/environment';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class MenuService {
+  private readonly apiUrl = `${environment.apiBaseUrl}/menu`;
+
+  constructor(private http: HttpClient) {}
+
+  /**
+   * ✅ NEW: Fetch all menu items from backend (db.json / API)
+   */
+  getAllMenuItems(): Observable<FoodItem[]> {
+    return this.http.get<FoodItem[]>(this.apiUrl).pipe(
+      catchError(err => {
+        console.warn('⚠️ API fetch failed, falling back to static menu:', err);
+        return this.getMenu(); // fallback to local mock if API fails
+      })
+    );
+  }
+
+  /**
+   * ✅ LEGACY: Local mock menu (kept for compatibility)
+   * Used when no backend connection or older components still use it.
+   */
+  getMenu(): Observable<FoodItem[]> {
+    const items: FoodItem[] = [
+      {
+        id: 1,
+        name: 'Margherita Pizza',
+        description: 'Classic delight with 100% real mozzarella cheese.',
+        price: 299,
+        imageUrl: 'assets/pizza-margherita.jpg',
+        category: 'Pizza'
+      },
+      {
+        id: 2,
+        name: 'Veg Burger',
+        description: 'Crispy veg patty with fresh veggies and tangy sauce.',
+        price: 149,
+        imageUrl: 'assets/veg-burger.jpg',
+        category: 'Burger'
+      },
+      {
+        id: 3,
+        name: 'Pasta Alfredo',
+        description: 'Creamy Alfredo sauce with perfectly cooked pasta.',
+        price: 249,
+        imageUrl: 'assets/pasta-alfredo.jpg',
+        category: 'Pasta'
+      }
+    ];
+
+    return of(items);
+  }
+
+  /**
+   * ✅ Fetch a single item by ID
+   */
+  getMenuItemById(id: number | string): Observable<FoodItem> {
+    return this.http.get<FoodItem>(`${this.apiUrl}/${id}`);
+  }
+
+  /**
+   * ✅ Fetch menu items by category
+   */
+  getMenuByCategory(category: string): Observable<FoodItem[]> {
+    return this.http.get<FoodItem[]>(`${this.apiUrl}?category=${category}`);
+  }
+}

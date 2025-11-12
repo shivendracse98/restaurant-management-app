@@ -1,0 +1,800 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "123456",
+      "role": "CUSTOMER"
+    },
+    {
+      "id": "2",
+      "name": "Admin User",
+      "email": "admin@example.com",
+      "password": "admin123",
+      "role": "ADMIN"
+    },
+    {
+      "id": "3",
+      "name": "Staff Member",
+      "email": "staff@demo.com",
+      "password": "staff123",
+      "role": "STAFF"
+    }
+  ],
+  "menu": [
+    {
+      "id": "1",
+      "name": "Margherita Pizza",
+      "description": "Classic cheese pizza",
+      "price": 299,
+      "imageUrl": "assets/pizza-margherita.jpg",
+      "category": "Pizza"
+    },
+    {
+      "id": "2",
+      "name": "Veg Burger",
+      "description": "Crispy veg patty with lettuce",
+      "price": 149,
+      "imageUrl": "assets/veg-burger.jpg",
+      "category": "Burger"
+    },
+    {
+      "id": "3",
+      "name": "Pasta Alfredo",
+      "description": "Creamy white sauce pasta",
+      "price": 249,
+      "imageUrl": "assets/pasta-alfredo.jpg",
+      "category": "Pasta"
+    },
+    {
+      "id": "4",
+      "name": "Tiffin Veg Meal",
+      "description": "Complete veg meal for lunch or dinner",
+      "price": 120,
+      "imageUrl": "assets/images/tiffin.jpg",
+      "category": "Tiffin"
+    },
+    {
+      "id": "21",
+      "name": "Plain Rice (Half)",
+      "description": "Steamed white rice - half portion",
+      "price": 50,
+      "category": "Rice",
+      "imageUrl": "assets/images/plain-rice-half.jpg"
+    },
+    {
+      "id": "22",
+      "name": "Plain Rice (Full)",
+      "description": "Steamed white rice - full portion",
+      "price": 70,
+      "category": "Rice",
+      "imageUrl": "assets/images/plain-rice-half.jpg"
+    },
+    {
+      "id": "23",
+      "name": "Jeera Rice (Half)",
+      "description": "Fragrant basmati rice with cumin seeds",
+      "price": 60,
+      "category": "Rice",
+      "imageUrl": "assets/images/jeera-rice.jpg"
+    },
+    {
+      "id": "24",
+      "name": "Jeera Rice (Full)",
+      "description": "Fragrant basmati rice with cumin seeds",
+      "price": 90,
+      "category": "Rice",
+      "imageUrl": "assets/images/jeera-rice.jpg"
+    },
+    {
+      "id": "25",
+      "name": "Masala Rice (Half)",
+      "description": "Spicy and flavorful rice cooked with Indian spices",
+      "price": 70,
+      "category": "Rice",
+      "imageUrl": "assets/images/masala-rice.jpg"
+    },
+    {
+      "id": "26",
+      "name": "Masala Rice (Full)",
+      "description": "Spicy and flavorful rice cooked with Indian spices",
+      "price": 100,
+      "category": "Rice",
+      "imageUrl": "assets/images/masala-rice.jpg"
+    },
+    {
+      "id": "27",
+      "name": "Matar Pulao (Half)",
+      "description": "Green peas pulao cooked in mild spices",
+      "price": 80,
+      "category": "Rice",
+      "imageUrl": "assets/images/matar-pulao.webp"
+    },
+    {
+      "id": "28",
+      "name": "Matar Pulao (Full)",
+      "description": "Green peas pulao cooked in mild spices",
+      "price": 120,
+      "category": "Rice",
+      "imageUrl": "assets/images/matar-pulao.webp"
+    },
+    {
+      "id": "29",
+      "name": "Veg Biryani (Half)",
+      "description": "Spicy aromatic rice layered with mixed vegetables",
+      "price": 100,
+      "category": "Rice",
+      "imageUrl": "assets/images/veg-biryani.webp"
+    },
+    {
+      "id": "30",
+      "name": "Veg Biryani (Full)",
+      "description": "Spicy aromatic rice layered with mixed vegetables",
+      "price": 150,
+      "category": "Rice",
+      "imageUrl": "assets/images/veg-biryani.webp"
+    },
+    {
+      "id": "31",
+      "name": "Tawa Roti",
+      "description": "Soft wheat roti cooked on tawa",
+      "price": 7,
+      "category": "Roti",
+      "imageUrl": "assets/images/tawa-roti.jpg"
+    },
+    {
+      "id": "32",
+      "name": "Tawa Butter Roti",
+      "description": "Soft roti brushed with butter",
+      "price": 9,
+      "category": "Roti",
+      "imageUrl": "assets/images/tawa-roti.jpg"
+    },
+    {
+      "id": "33",
+      "name": "Tandoori Roti",
+      "description": "Crispy roti cooked in tandoor",
+      "price": 15,
+      "category": "Roti",
+      "imageUrl": "assets/images/tawa-roti.jpg"
+    },
+    {
+      "id": "34",
+      "name": "Tawa Paratha",
+      "description": "Flaky paratha cooked on tawa",
+      "price": 15,
+      "category": "Paratha",
+      "imageUrl": "assets/images/tawa-paratha.jpg"
+    },
+    {
+      "id": "35",
+      "name": "Aloo Paratha",
+      "description": "Stuffed with mashed potato and mild spices",
+      "price": 20,
+      "category": "Paratha",
+      "imageUrl": "assets/images/Aloo-Paratha.webp"
+    },
+    {
+      "id": "36",
+      "name": "Paneer Paratha",
+      "description": "Stuffed with fresh paneer and herbs",
+      "price": 50,
+      "category": "Paratha",
+      "imageUrl": "assets/images/Aloo-Paratha.webp"
+    },
+    {
+      "id": "37",
+      "name": "Mix Paratha",
+      "description": "Stuffed with mixed veggies and spices",
+      "price": 70,
+      "category": "Paratha",
+      "imageUrl": "assets/images/Aloo-Paratha.webp"
+    },
+    {
+      "id": "38",
+      "name": "Lachha Paratha",
+      "description": "Layered crispy paratha made with ghee",
+      "price": 75,
+      "category": "Paratha",
+      "imageUrl": "assets/images/lachha-paratha.jpg"
+    },
+    {
+      "id": "39",
+      "name": "Special Thali",
+      "description": "Complete thali with roti, rice, dal, sabzi, salad and sweet",
+      "price": 120,
+      "category": "Thali",
+      "imageUrl": "assets/images/special-thali.jpg"
+    },
+    {
+      "id": "40",
+      "name": "Deluxe Thali",
+      "description": "Dal, rice, 2 curries, roti, papad and dessert",
+      "price": 90,
+      "category": "Thali",
+      "imageUrl": "assets/images/deluxe-thali.jpg"
+    },
+    {
+      "id": "41",
+      "name": "Plain Thali",
+      "description": "Simple thali with rice, dal, roti, and sabzi",
+      "price": 70,
+      "category": "Thali",
+      "imageUrl": "assets/images/plain-thali.jpg"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord101",
+      "customerName": "Walk-in Guest",
+      "customerEmail": null,
+      "customerPhone": "N/A",
+      "orderType": "DINE_IN",
+      "tableNumber": 5,
+      "servedBy": "Staff Member",
+      "items": [
+        {
+          "menuItemId": 1,
+          "name": "Margherita Pizza",
+          "qty": 2,
+          "price": 299
+        }
+      ],
+      "total": 598,
+      "status": "DELIVERED",
+      "paymentStatus": "PAID",
+      "createdAt": "2025-11-09T11:00:00Z"
+    },
+    {
+      "id": "ord102",
+      "customerName": "Shivendra Yadav",
+      "customerEmail": "shivendra@demo.com",
+      "customerPhone": "9039919318",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 2,
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 149
+        }
+      ],
+      "total": 149,
+      "status": "DELIVERED",
+      "paymentStatus": "PAID",
+      "createdAt": "2025-11-09T10:45:00Z",
+      "paymentMethod": "CASH",
+      "paidAt": "2025-11-11T09:11:07.029Z",
+      "updatedBy": "Staff Member",
+      "updatedAt": "2025-11-11T09:55:23.418Z"
+    },
+    {
+      "id": "52ac",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 3,
+          "qty": 2,
+          "price": 249,
+          "name": "Pasta Alfredo"
+        },
+        {
+          "menuItemId": 2,
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 149
+        }
+      ],
+      "total": 946,
+      "status": "DELIVERED",
+      "createdAt": "2025-11-09T04:15:13.700Z",
+      "paymentStatus": "PAID",
+      "paymentMethod": "CASH",
+      "paidAt": "2025-11-11T09:47:41.655Z",
+      "updatedBy": "Staff Member",
+      "updatedAt": "2025-11-11T11:26:07.859Z"
+    },
+    {
+      "id": "ed70",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 2,
+          "qty": 2,
+          "price": 149,
+          "name": "Veg Burger"
+        },
+        {
+          "menuItemId": 3,
+          "name": "Pasta Alfredo",
+          "qty": 1,
+          "price": 249
+        },
+        {
+          "menuItemId": "4",
+          "name": "Tiffin Veg Meal",
+          "qty": 1,
+          "price": 120
+        }
+      ],
+      "total": 667,
+      "status": "DELIVERED",
+      "createdAt": "2025-11-09T04:19:25.328Z",
+      "updatedBy": "Staff Member",
+      "updatedAt": "2025-11-11T14:24:59.732Z"
+    },
+    {
+      "id": "d895",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        },
+        {
+          "menuItemId": 3,
+          "qty": 1,
+          "price": 249,
+          "name": "Pasta Alfredo"
+        }
+      ],
+      "total": 398,
+      "status": "PREPARING",
+      "createdAt": "2025-11-09T05:04:43.662Z"
+    },
+    {
+      "id": "457f",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 149,
+      "status": "OUT_FOR_DELIVERY",
+      "createdAt": "2025-11-09T05:07:53.754Z"
+    },
+    {
+      "id": "1678",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        },
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 3,
+          "qty": 1,
+          "price": 249,
+          "name": "Pasta Alfredo"
+        }
+      ],
+      "total": 697,
+      "status": "PENDING",
+      "createdAt": "2025-11-09T05:08:23.053Z"
+    },
+    {
+      "id": "8ede",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        },
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        }
+      ],
+      "total": 448,
+      "status": "PREPARING",
+      "createdAt": "2025-11-09T05:10:35.208Z"
+    },
+    {
+      "id": "22fd",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 3,
+          "qty": 1,
+          "price": 249,
+          "name": "Pasta Alfredo"
+        }
+      ],
+      "total": 249,
+      "status": "PENDING",
+      "createdAt": "2025-11-09T06:18:34.463Z"
+    },
+    {
+      "id": "d0e3",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "9586483122",
+      "address": "bhu",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-09T06:27:14.363Z"
+    },
+    {
+      "id": "632e",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "8596253615",
+      "address": "khngcb",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 2,
+          "qty": 2,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 298,
+      "status": "DELIVERED",
+      "createdAt": "2025-11-09T06:59:54.472Z"
+    },
+    {
+      "id": "aee4",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 3,
+          "qty": 1,
+          "price": 249,
+          "name": "Pasta Alfredo"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 398,
+      "status": "PENDING",
+      "createdAt": "2025-11-09T07:01:36.639Z"
+    },
+    {
+      "id": "442d",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        }
+      ],
+      "total": 299,
+      "status": "PREPARING",
+      "createdAt": "2025-11-09T07:01:56.497Z"
+    },
+    {
+      "id": "60a4",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 3,
+          "qty": 1,
+          "price": 249,
+          "name": "Pasta Alfredo"
+        }
+      ],
+      "total": 249,
+      "status": "PENDING",
+      "createdAt": "2025-11-09T07:05:06.542Z"
+    },
+    {
+      "id": "7906",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        }
+      ],
+      "total": 299,
+      "status": "PREPARING",
+      "createdAt": "2025-11-11T06:31:51.361Z"
+    },
+    {
+      "id": "1755",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 3,
+          "qty": 1,
+          "price": 249,
+          "name": "Pasta Alfredo"
+        }
+      ],
+      "total": 249,
+      "status": "PENDING",
+      "createdAt": "2025-11-11T07:51:08.049Z"
+    },
+    {
+      "id": "45fa",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "tableNumber": "11",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 3,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 2,
+          "price": 149,
+          "name": "Veg Burger"
+        },
+        {
+          "menuItemId": 3,
+          "qty": 1,
+          "price": 249,
+          "name": "Pasta Alfredo"
+        }
+      ],
+      "total": 1444,
+      "status": "PENDING",
+      "createdAt": "2025-11-11T09:51:16.863Z"
+    },
+    {
+      "id": "dbb3",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 30,
+          "qty": 1,
+          "price": 150,
+          "name": "Veg Biryani (Full)"
+        },
+        {
+          "menuItemId": 27,
+          "qty": 1,
+          "price": 80,
+          "name": "Matar Pulao (Half)"
+        }
+      ],
+      "total": 230,
+      "status": "PENDING",
+      "createdAt": "2025-11-11T14:56:55.059Z"
+    },
+    {
+      "id": "9d79",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": "4",
+          "qty": 1,
+          "price": 120,
+          "name": "Tiffin Veg Meal"
+        },
+        {
+          "menuItemId": "21",
+          "qty": 1,
+          "price": 50,
+          "name": "Plain Rice (Half)"
+        }
+      ],
+      "total": 170,
+      "status": "CANCELLED",
+      "createdAt": "2025-11-12T04:25:57.090Z"
+    },
+    {
+      "id": "3139",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": "25",
+          "qty": 1,
+          "price": 70,
+          "name": "Masala Rice (Half)"
+        }
+      ],
+      "total": 70,
+      "status": "DELIVERED",
+      "createdAt": "2025-11-12T04:26:55.839Z"
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": "sub101",
+      "customerName": "Rahul Sharma",
+      "customerPhone": "9876543210",
+      "startDate": "2025-11-10",
+      "frequency": "DAILY",
+      "durationMonths": 1,
+      "menuPlan": [
+        {
+          "menuItemId": 4,
+          "name": "Tiffin Veg Meal",
+          "qty": 1,
+          "price": 120
+        }
+      ],
+      "totalPerDelivery": 120,
+      "status": "ACTIVE",
+      "createdBy": "Staff Member",
+      "createdAt": "2025-11-08T12:00:00Z"
+    },
+    {
+      "id": "5740",
+      "customerName": "DK",
+      "customerPhone": "1236547896",
+      "startDate": "2025-11-09",
+      "frequency": "DAILY",
+      "durationMonths": 1,
+      "menuPlan": [
+        {
+          "menuItemId": 1,
+          "name": "Margherita Pizza",
+          "qty": 1,
+          "price": 299
+        }
+      ],
+      "totalPerDelivery": 299,
+      "status": "ACTIVE",
+      "createdBy": "Staff Member",
+      "createdAt": "2025-11-09T04:23:04.179Z"
+    },
+    {
+      "id": "1922",
+      "customerName": "Neeraj",
+      "customerPhone": "1231231236",
+      "startDate": "2025-11-11",
+      "frequency": "MONTHLY",
+      "durationMonths": 2,
+      "menuPlan": [
+        {
+          "menuItemId": 1,
+          "name": "Margherita Pizza",
+          "qty": 1,
+          "price": 299
+        }
+      ],
+      "totalPerDelivery": 299,
+      "status": "ACTIVE",
+      "createdBy": "Staff Member",
+      "createdAt": "2025-11-11T09:33:39.998Z"
+    },
+    {
+      "id": "9180",
+      "customerName": "PL",
+      "customerPhone": "9646253614",
+      "startDate": "2025-11-11",
+      "frequency": "DAILY",
+      "durationMonths": 3,
+      "menuPlan": [
+        {
+          "menuItemId": 40,
+          "name": "Deluxe Thali",
+          "qty": 1,
+          "price": 90
+        }
+      ],
+      "totalPerDelivery": 90,
+      "status": "ACTIVE",
+      "createdBy": "Staff Member",
+      "createdAt": "2025-11-11T14:24:05.008Z"
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay201",
+      "orderId": "ord101",
+      "amount": 598,
+      "method": "CASH",
+      "status": "PAID"
+    },
+    {
+      "id": "f92d",
+      "orderId": "d0e3",
+      "amount": 448,
+      "method": "UPI",
+      "status": "PENDING"
+    },
+    {
+      "id": "69d8",
+      "orderId": "632e",
+      "amount": 298,
+      "method": "UPI",
+      "status": "PENDING"
+    }
+  ],
+  "payments_config": {
+    "upiQrUrl": "assets/upi-qr.png",
+    "upiId": "your-upi@bank"
+  }
+}

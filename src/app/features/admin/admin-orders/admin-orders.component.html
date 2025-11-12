@@ -1,0 +1,59 @@
+<div class="admin-orders-container" *ngIf="!loading">
+  <h2>📋 Manage Orders</h2>
+
+  <div *ngIf="errorMsg" class="error-msg">{{ errorMsg }}</div>
+
+  <table *ngIf="orders.length > 0; else noOrders" class="orders-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Email</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Items</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let order of orders">
+        <td>#{{ order.id }}</td>
+        <td>{{ order.customerName }}</td>
+        <td>{{ order.customerEmail }}</td>
+        <td>₹{{ order.total }}</td>
+        <td>
+          <span class="status" [ngClass]="order.status.toLowerCase()">
+            {{ order.status }}
+          </span>
+        </td>
+        <td>{{ formatDate(order.createdAt) }}</td>
+        <td>
+          <ul>
+            <li *ngFor="let item of order.items">
+              {{ item.qty }} × {{ item.name }}
+            </li>
+          </ul>
+        </td>
+        <td>
+          <select [value]="order.status" (change)="onStatusChange(order, $event)">
+            <option value="PENDING">Pending</option>
+            <option value="PREPARING">Preparing</option>
+            <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+            <option value="DELIVERED">Delivered</option>
+            <option value="CANCELLED">Cancelled</option>
+        </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #noOrders>
+    <p class="no-orders">No orders found 😋</p>
+  </ng-template>
+</div>
+
+<div *ngIf="loading" class="loader">
+  <p>⏳ Loading orders...</p>
+</div>

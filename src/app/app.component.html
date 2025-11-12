@@ -1,0 +1,80 @@
+<!-- ============================
+     NAVIGATION BAR
+============================ -->
+<nav class="navbar">
+  <div class="nav-left">
+    <a class="logo" (click)="goHome()">🍴 TasteTown</a>
+  </div>
+
+  <div class="nav-links">
+    <!-- Guest Links -->
+    <ng-container *ngIf="!auth.isLoggedIn(); else loggedLinks">
+      <a routerLink="/home" routerLinkActive="active">Home</a>
+      <a routerLink="/menu" routerLinkActive="active">Menu</a>
+      <a routerLink="/login" routerLinkActive="active">Login</a>
+      <a routerLink="/register" routerLinkActive="active">Register</a>
+    </ng-container>
+
+    <!-- Logged-in Links -->
+    <ng-template #loggedLinks>
+      <!-- Admin -->
+      <ng-container *ngIf="auth.isAdmin(); else nonAdminLinks">
+        <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+        <a routerLink="/admin/orders" routerLinkActive="active">Orders</a>
+        <a routerLink="/admin/menu" routerLinkActive="active">Menu Mgmt</a>
+        <a routerLink="/admin/payments" routerLinkActive="active">Payments</a>
+        <a routerLink="/staff/pos" routerLinkActive="active">POS</a>
+      </ng-container>
+
+      <!-- Staff -->
+      <ng-template #nonAdminLinks>
+        <ng-container *ngIf="auth.isStaff(); else customerLinks">
+          <!-- POS -->
+          <a
+            [routerLink]="['/staff/pos']"
+            [queryParams]="{ tab: 'order' }"
+            routerLinkActive="active"
+          >
+            POS
+          </a>
+
+          <!-- Today's Orders -->
+          <a routerLink="/staff/today-orders" routerLinkActive="active">
+            Today's Orders
+          </a>
+
+        </ng-container>
+
+        <!-- Customer -->
+        <ng-template #customerLinks>
+          <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+          <a routerLink="/menu" routerLinkActive="active">Menu</a>
+          <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+            🛒 Cart
+            <span class="badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+          </a>
+          <a routerLink="/orders" routerLinkActive="active">My Orders</a>
+        </ng-template>
+      </ng-template>
+    </ng-template>
+  </div>
+
+  <div class="nav-right" *ngIf="auth.isLoggedIn()">
+    <span class="welcome">
+      👋 {{ auth.currentUser()?.name || auth.currentUser()?.email }}
+    </span>
+    <button class="btn logout" (click)="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- ============================
+     MAIN CONTENT
+============================ -->
+<main>
+  <router-outlet></router-outlet>
+</main>
+
+<!-- ============================
+     TOAST NOTIFICATION
+============================ -->
+<div class="toast" *ngIf="toastVisible">{{ toastMessage }}</div>

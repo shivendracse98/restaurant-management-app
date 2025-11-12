@@ -1,0 +1,51 @@
+<div class="cart-wrap" *ngIf="(items$ | async) as items">
+  <h2>Your Cart ({{ cart.getCount() }} items)</h2>
+
+  <div class="cart-list" *ngIf="items.length; else emptyTpl">
+    <div class="cart-row" *ngFor="let it of items; trackBy: trackById">
+      <img [src]="it.menuItem.imageUrl" [alt]="it.menuItem.name" />
+      <div class="meta">
+        <h4>{{ it.menuItem.name }}</h4>
+        <p class="small">{{ it.menuItem.description }}</p>
+
+        <div class="qty">
+          <button (click)="cart.updateQty(it.menuItem.id, it.qty - 1)">−</button>
+          <input
+            type="number"
+            [(ngModel)]="it.qty"
+            (change)="cart.updateQty(it.menuItem.id, it.qty)"
+            min="1"
+          />
+          <button (click)="cart.updateQty(it.menuItem.id, it.qty + 1)">+</button>
+        </div>
+      </div>
+
+      <div class="price">₹{{ it.menuItem.price * it.qty }}</div>
+      <button class="remove" (click)="cart.remove(it.menuItem.id)">Remove</button>
+    </div>
+
+    <div class="summary">
+      <div>Subtotal</div>
+      <div class="amount">₹{{ cart.getTotal() }}</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn clear" (click)="cart.clear()">Clear Cart</button>
+      <button
+        class="btn primary"
+        (click)="goToCheckout()"
+        [disabled]="!auth.isLoggedIn || cart.getCount() === 0">
+        Proceed to Checkout
+      </button>
+      <p *ngIf="!auth.isLoggedIn" class="warn">Please login to proceed with checkout.</p>
+    </div>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="empty-cart">
+      <img src="assets/images/empty-cart.png" alt="Empty Cart" />
+      <h3>Your cart is feeling lonely 🛒</h3>
+      <p>Add something delicious from our <a routerLink="/menu">Menu</a>!</p>
+    </div>
+  </ng-template>
+</div>

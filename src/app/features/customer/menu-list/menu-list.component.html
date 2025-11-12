@@ -1,0 +1,18 @@
+<div class="menu-container">
+  <h2>🍽️ Our Menu</h2>
+
+  <div class="menu-grid">
+    <div class="menu-item" *ngFor="let item of foodItems">
+      <div class="click-area" [routerLink]="['/menu', item.id]">
+        <img [src]="item.imageUrl" [alt]="item.name" />
+        <h3>{{ item.name }}</h3>
+        <p>{{ item.description }}</p>
+        <strong>₹{{ item.price }}</strong>
+      </div>
+
+      <button class="btn primary" (click)="addToCart(item)">
+        🛒 Add to Cart
+      </button>
+    </div>
+  </div>
+</div>
