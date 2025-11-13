@@ -15,6 +15,41 @@
 /* ============================================================
    1. ROOT & TYPOGRAPHY SETUP
    ============================================================ */
+/* src/styles.scss */
+
+// ==========================================
+// ANGULAR MATERIAL THEME
+// ==========================================
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+// ==========================================
+// NGXTOASTR STYLES
+// ==========================================
+@import 'ngx-toastr/toastr';
+
+// ==========================================
+// GLOBAL STYLES
+// ==========================================
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: #fafafa;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+
 
 :root {
   --primary: #E67E22;

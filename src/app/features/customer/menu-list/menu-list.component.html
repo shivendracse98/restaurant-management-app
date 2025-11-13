@@ -1,18 +1,59 @@
-<div class="menu-container">
-  <h2>🍽️ Our Menu</h2>
+<div class="menu-container" [ngClass]="'mode-' + viewMode">
+  <div class="menu-header">
+    <h2>🍽️ {{ isAdminMode() ? 'Manage Menu' : 'Our Menu' }}</h2>
+    <p *ngIf="isAdminMode()" class="admin-subtitle">Add, edit, or delete menu items</p>
+  </div>
 
   <div class="menu-grid">
-    <div class="menu-item" *ngFor="let item of foodItems">
-      <div class="click-area" [routerLink]="['/menu', item.id]">
+    <div class="menu-item" *ngFor="let item of foodItems; trackBy: trackByItemId">
+      <!-- Click Area - Different behavior for customer vs admin -->
+      <div
+        class="click-area"
+        *ngIf="isCustomerMode()"
+        [routerLink]="['/menu', item.id]"
+      >
         <img [src]="item.imageUrl" [alt]="item.name" />
         <h3>{{ item.name }}</h3>
         <p>{{ item.description }}</p>
         <strong>₹{{ item.price }}</strong>
       </div>
 
-      <button class="btn primary" (click)="addToCart(item)">
+      <!-- Admin View - Show item details in table-like format -->
+      <div class="item-details" *ngIf="isAdminMode()">
+        <img [src]="item.imageUrl" [alt]="item.name" class="admin-image" />
+        <div class="admin-info">
+          <h3>{{ item.name }}</h3>
+          <p class="category">{{ item.category }}</p>
+          <p class="description">{{ item.description }}</p>
+          <div class="price-section">
+            <strong class="price">₹{{ item.price }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer: Add to Cart Button -->
+      <button
+        *ngIf="isCustomerMode()"
+        class="btn primary add-to-cart"
+        (click)="addToCart(item)"
+      >
         🛒 Add to Cart
       </button>
+
+      <!-- Admin: Edit and Delete Buttons -->
+      <div *ngIf="isAdminMode()" class="admin-actions">
+        <button class="btn edit" (click)="editMenuItem(item)">
+          ✏️ Edit
+        </button>
+        <button class="btn delete" (click)="deleteMenuItem(item)">
+          🗑️ Delete
+        </button>
+      </div>
     </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="foodItems.length === 0" class="empty-state">
+    <p>{{ isAdminMode() ? 'No menu items available' : 'No items available' }}</p>
   </div>
 </div>

@@ -14,6 +14,9 @@ import { StaffPosComponent } from './features/staff/staff-pos/staff-pos.componen
 import { staffGuard } from './core/guards/staff.guard';
 import { CustomerDashboardComponent } from './features/customer/customer-dashboard/customer-dashboard.component';
 import { StaffTodayOrdersComponent } from './features/staff/staff-today-orders/staff-today-orders.component'; 
+import { MenuManagementComponent } from './features/admin/menu-management/menu-management.component';
+import { PendingPaymentsComponent } from './features/admin/payments/pending-payments.component';
+
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -23,6 +26,24 @@ export const routes: Routes = [
   { path: 'cart', component: CartComponent, canActivate: [authGuard] },
   { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
   { path: 'orders', component: OrdersComponent, canActivate: [authGuard] },
+
+  // // ✅ NEW: Order Tracking (for post-payment)
+  // {
+  //   path: 'order-tracking/:id',
+  //   loadComponent: () =>
+  //     import('./features/customer/order-tracking/order-tracking.component')
+  //       .then(m => m.OrderTrackingComponent),
+  //   canActivate: [authGuard, customerGuard]
+  // },
+
+  // // ✅ NEW: Order History
+  // {
+  //   path: 'order-history',
+  //   loadComponent: () =>
+  //     import('./features/customer/order-history/order-history.component')
+  //       .then(m => m.OrderHistoryComponent),
+  //   canActivate: [authGuard, customerGuard]
+  // },
   {
     path: 'customer/dashboard',
     loadComponent: () =>
@@ -38,7 +59,16 @@ export const routes: Routes = [
         .then(m => m.AdminDashboardComponent),
     canActivate: [authGuard, adminGuard],
   },
-
+  {
+    path: 'admin/menu',
+    component: MenuManagementComponent,
+    canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'admin/payments',
+    component: PendingPaymentsComponent,
+    canActivate: [authGuard, adminGuard],
+  },
   {
     path: 'admin/orders',
     loadComponent: () =>
@@ -62,4 +92,6 @@ export const routes: Routes = [
   { path: 'dashboard', component: CustomerDashboardComponent, canActivate: [authGuard, customerGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  // ✅ Catch-all wildcard route (must be last)
+  { path: '**', redirectTo: 'home' }
 ];

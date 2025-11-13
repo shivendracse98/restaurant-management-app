@@ -1,0 +1,123 @@
+.pending-payments-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-top: 4px solid #e67e22;
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        color: #999;
+      }
+    }
+  }
+
+  .header {
+    margin-bottom: 24px;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  .table-section {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .payments-table {
+      width: 100%;
+      border-collapse: collapse;
+
+      thead {
+        background: #f5f5f5;
+
+        th {
+          padding: 12px;
+          text-align: left;
+          font-weight: 600;
+          border-bottom: 2px solid #ddd;
+        }
+      }
+
+      tbody {
+        tr {
+          border-bottom: 1px solid #eee;
+
+          &:hover {
+            background: #f9f9f9;
+          }
+
+          td {
+            padding: 12px;
+
+            &.actions {
+              display: flex;
+              gap: 8px;
+
+              .btn {
+                padding: 6px 12px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 500;
+
+                &:hover {
+                  opacity: 0.8;
+                }
+
+                &.approve {
+                  background: #27ae60;
+                  color: white;
+                }
+
+                &.reject {
+                  background: #e74c3c;
+                  color: white;
+                }
+              }
+            }
+          }
+
+          .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+
+            &.pending {
+              background: #fff3cd;
+              color: #856404;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .loading,
+  .empty {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+  }
+}

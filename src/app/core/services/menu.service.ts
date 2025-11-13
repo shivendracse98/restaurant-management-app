@@ -73,4 +73,16 @@ export class MenuService {
   getMenuByCategory(category: string): Observable<FoodItem[]> {
     return this.http.get<FoodItem[]>(`${this.apiUrl}?category=${category}`);
   }
+
+  addMenuItem(item: Omit<FoodItem, 'id'>): Observable<FoodItem> {
+    return this.http.post<FoodItem>(this.apiUrl, item);
+  }
+
+  updateMenuItem(id: number, item: Partial<FoodItem>): Observable<FoodItem> {
+    return this.http.put<FoodItem>(`${this.apiUrl}/${id}`, item);
+  }
+
+  deleteMenuItem(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

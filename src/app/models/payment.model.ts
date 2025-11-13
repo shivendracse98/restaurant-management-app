@@ -1,9 +1,23 @@
 export interface Payment {
-  id?: number;
-  orderId: number;
+  id: string;
+  orderId: string;
   amount: number;
-  method: 'UPI' | 'CARD' | 'CASH';
-  transactionId?: string;
-  status: 'PENDING' | 'SUCCESS' | 'FAILED' | 'REJECTED';
-  createdAt?: string;
+  status: 'pending' | 'success' | 'failed' | 'cancelled';
+  paymentMethod: 'qr_code' | 'upi';
+  qrCodeUrl?: string;
+  upiId?: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  createdAt: Date;
+  approvedAt?: Date;
+  approvedBy?: string;
+  notes?: string;
+}
+
+export interface PaymentStats {
+  totalRevenue: number;
+  pendingApprovals: number;
+  successfulTransactions: number;
+  failedTransactions: number;
 }

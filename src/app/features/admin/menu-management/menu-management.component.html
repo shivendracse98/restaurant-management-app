@@ -1,0 +1,109 @@
+<div class="menu-management-container">
+  <div class="header">
+    <h2>🍽️ Menu Management</h2>
+    <button class="btn primary" (click)="openForm()" *ngIf="!showForm">
+      ➕ Add New Item
+    </button>
+  </div>
+
+  <!-- Add/Edit Form -->
+  <div class="form-section" *ngIf="showForm">
+    <h3>{{ editingId ? 'Edit Item' : 'Add New Item' }}</h3>
+    <div class="form-group">
+      <label>Item Name</label>
+      <input
+        type="text"
+        [(ngModel)]="newItem.name"
+        placeholder="Enter item name"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea
+        [(ngModel)]="newItem.description"
+        placeholder="Enter description"
+      ></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Price</label>
+        <input type="number" [(ngModel)]="newItem.price" placeholder="0" />
+      </div>
+
+      <div class="form-group">
+        <label>Category</label>
+        <input
+          type="text"
+          [(ngModel)]="newItem.category"
+          placeholder="e.g., Pizza"
+        />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Image URL</label>
+      <input
+        type="text"
+        [(ngModel)]="newItem.imageUrl"
+        placeholder="https://..."
+      />
+    </div>
+
+    <div class="form-actions">
+      <button class="btn secondary" (click)="cancelForm()">Cancel</button>
+      <button class="btn primary" (click)="saveItem()">
+        {{ editingId ? 'Update' : 'Add' }} Item
+      </button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-section" *ngIf="!showForm">
+    <input
+      type="text"
+      [(ngModel)]="searchText"
+      (input)="onSearch()"
+      placeholder="Search items..."
+      class="search-input"
+    />
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">Loading...</div>
+
+  <!-- Table -->
+  <div class="table-section" *ngIf="!loading && !showForm">
+    <table class="menu-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredItems; trackBy: trackByItemId">
+          <td>{{ item.id }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.category }}</td>
+          <td>₹{{ item.price }}</td>
+          <td class="actions">
+            <button class="btn-edit" (click)="editItem(item)">✏️ Edit</button>
+            <button class="btn-delete" (click)="deleteItem(item.id)">
+              🗑️ Delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="filteredItems.length === 0 && !loading && !showForm" class="empty">
+    <p>No items found</p>
+  </div>
+</div>

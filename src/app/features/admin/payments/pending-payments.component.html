@@ -1,0 +1,75 @@
+<div class="pending-payments-container">
+  <!-- Statistics -->
+  <div class="stats-section" *ngIf="stats">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.pendingApprovals }}</div>
+      <div class="stat-label">Pending Approvals</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">₹{{ stats.totalRevenue }}</div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.successfulTransactions }}</div>
+      <div class="stat-label">Approved</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.failedTransactions }}</div>
+      <div class="stat-label">Rejected</div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <h2>💳 Pending Payment Approvals</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">Loading...</div>
+
+  <!-- Table -->
+  <div class="table-section" *ngIf="!loading">
+    <table class="payments-table" *ngIf="pendingPayments.length > 0">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let payment of pendingPayments; trackBy: trackByPaymentId">
+          <td>{{ payment.orderId }}</td>
+          <td>
+            <strong>{{ payment.customerName }}</strong>
+            <br />
+            <small>{{ payment.customerPhone }}</small>
+          </td>
+          <td>₹{{ payment.amount }}</td>
+          <td>
+            <span class="badge pending">{{ payment.status | uppercase }}</span>
+          </td>
+          <td>{{ payment.createdAt | date: 'short' }}</td>
+          <td class="actions">
+            <button class="btn approve" (click)="approvePayment(payment)">
+              ✓ Approve
+            </button>
+            <button class="btn reject" (click)="rejectPayment(payment)">
+              ✕ Reject
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="pendingPayments.length === 0" class="empty">
+      <p>✓ No pending payments - All caught up!</p>
+    </div>
+  </div>
+</div>

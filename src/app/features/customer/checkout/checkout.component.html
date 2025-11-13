@@ -1,52 +1,99 @@
+<!-- src/app/features/customer/components/checkout/checkout.component.html -->
+
 <div class="checkout-container">
   <div class="checkout-card">
     <h2>🛒 Checkout</h2>
     <p class="subtext">Almost there! Please confirm your delivery details below.</p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="checkout-form">
+      <!-- Customer Name -->
       <div class="form-group">
-        <label>👤 Name</label>
-        <input formControlName="customerName" readonly />
-      </div>
-
-      <div class="form-group">
-        <label>📞 Phone</label>
-        <input formControlName="customerPhone" placeholder="Enter 10-digit phone" />
-        <small *ngIf="form.get('customerPhone')?.hasError('pattern') && form.get('customerPhone')?.touched">
-          ⚠️ Enter a valid phone number
+        <label>👤 Customer Name *</label>
+        <input type="text" 
+               formControlName="customerName" 
+               placeholder="Enter your name"
+               class="form-control" />
+        <small *ngIf="form.get('customerName')?.hasError('required') && form.get('customerName')?.touched"
+               class="error">
+          Name is required
+        </small>
+        <small *ngIf="form.get('customerName')?.hasError('minlength') && form.get('customerName')?.touched"
+               class="error">
+          Minimum 2 characters
         </small>
       </div>
 
+      <!-- Phone -->
       <div class="form-group">
-        <label>🏠 Address</label>
-        <textarea formControlName="address" placeholder="Enter delivery address"></textarea>
+        <label>📱 Phone *</label>
+        <input type="tel" 
+               formControlName="customerPhone" 
+               placeholder="10-digit phone number"
+               maxlength="10"
+               class="form-control" />
+        <small *ngIf="form.get('customerPhone')?.hasError('pattern') && form.get('customerPhone')?.touched"
+               class="error">
+          Enter valid 10-digit phone number
+        </small>
       </div>
 
+      <!-- Email -->
       <div class="form-group">
-        <label>🍴 Order Type</label>
-        <select formControlName="orderType">
-          <option value="DELIVERY">Delivery</option>
-          <option value="PARCEL">Takeaway</option>
-          <option value="DINE_IN">Dine In</option>
+        <label>📧 Email *</label>
+        <input type="email" 
+               formControlName="customerEmail" 
+               placeholder="your@email.com"
+               class="form-control" />
+        <small *ngIf="form.get('customerEmail')?.hasError('email') && form.get('customerEmail')?.touched"
+               class="error">
+          Enter valid email
+        </small>
+      </div>
+
+      <!-- Address -->
+      <div class="form-group">
+        <label>📍 Delivery Address *</label>
+        <textarea formControlName="address" 
+                  placeholder="Enter your delivery address"
+                  rows="3"
+                  class="form-control"></textarea>
+        <small *ngIf="form.get('address')?.hasError('required') && form.get('address')?.touched"
+               class="error">
+          Address is required
+        </small>
+      </div>
+
+      <!-- Order Type -->
+      <div class="form-group">
+        <label>📦 Order Type *</label>
+        <select formControlName="orderType" class="form-control">
+          <option value="DELIVERY">🚚 Delivery</option>
+          <option value="PICKUP">📍 Pickup</option>
+          <option value="DINE_IN">🍽️ Dine In</option>
         </select>
       </div>
 
-      <div class="summary-card">
-        <h3>🧾 Order Summary</h3>
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h3>Order Summary</h3>
         <div class="summary-items">
           <div *ngFor="let item of cart.items" class="item-line">
             <span>{{ item.menuItem.name }} × {{ item.qty }}</span>
-            <strong>₹{{ item.menuItem.price * item.qty }}</strong>
+            <span>₹{{ (item.menuItem.price * item.qty).toFixed(2) }}</span>
           </div>
         </div>
         <div class="summary-total">
-          <span>Total</span>
-          <strong>₹{{ total }}</strong>
+          <span>Total Amount</span>
+          <strong>₹{{ total.toFixed(2) }}</strong>
         </div>
       </div>
 
-      <button class="btn primary" type="submit" [disabled]="loading || form.invalid || cart.getCount() === 0">
-        {{ loading ? 'Processing...' : '✅ Place Order & Pay via UPI' }}
+      <!-- Submit Button -->
+      <button type="submit" 
+              [disabled]="loading || form.invalid || cart.getCount() === 0"
+              class="btn btn-submit">
+        <span *ngIf="!loading">✅ Place Order & Pay via UPI</span>
+        <span *ngIf="loading">⏳ Processing...</span>
       </button>
     </form>
   </div>

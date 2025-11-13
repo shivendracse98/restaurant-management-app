@@ -222,17 +222,24 @@
       "price": 70,
       "category": "Thali",
       "imageUrl": "assets/images/plain-thali.jpg"
+    },
+    {
+      "id": "8e82",
+      "name": "Special Thali",
+      "description": "Complete thali with roti, rice, dal, sabzi, salad and sweet",
+      "price": 120,
+      "imageUrl": "assets/images/special-thali.jpg",
+      "category": "Thali"
     }
   ],
   "orders": [
     {
-      "id": "ord101",
-      "customerName": "Walk-in Guest",
-      "customerEmail": null,
-      "customerPhone": "N/A",
-      "orderType": "DINE_IN",
-      "tableNumber": 5,
-      "servedBy": "Staff Member",
+      "id": "1",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "9999999999",
+      "address": "123 Main Street",
+      "orderType": "DELIVERY",
       "items": [
         {
           "menuItemId": 1,
@@ -242,387 +249,47 @@
         }
       ],
       "total": 598,
-      "status": "DELIVERED",
-      "paymentStatus": "PAID",
-      "createdAt": "2025-11-09T11:00:00Z"
-    },
-    {
-      "id": "ord102",
-      "customerName": "Shivendra Yadav",
-      "customerEmail": "shivendra@demo.com",
-      "customerPhone": "9039919318",
-      "orderType": "DELIVERY",
-      "items": [
-        {
-          "menuItemId": 2,
-          "name": "Veg Burger",
-          "qty": 1,
-          "price": 149
-        }
-      ],
-      "total": 149,
-      "status": "DELIVERED",
-      "paymentStatus": "PAID",
-      "createdAt": "2025-11-09T10:45:00Z",
-      "paymentMethod": "CASH",
-      "paidAt": "2025-11-11T09:11:07.029Z",
-      "updatedBy": "Staff Member",
-      "updatedAt": "2025-11-11T09:55:23.418Z"
-    },
-    {
-      "id": "52ac",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 1,
-          "qty": 1,
-          "price": 299,
-          "name": "Margherita Pizza"
-        },
-        {
-          "menuItemId": 3,
-          "qty": 2,
-          "price": 249,
-          "name": "Pasta Alfredo"
-        },
-        {
-          "menuItemId": 2,
-          "name": "Veg Burger",
-          "qty": 1,
-          "price": 149
-        }
-      ],
-      "total": 946,
-      "status": "DELIVERED",
-      "createdAt": "2025-11-09T04:15:13.700Z",
-      "paymentStatus": "PAID",
-      "paymentMethod": "CASH",
-      "paidAt": "2025-11-11T09:47:41.655Z",
-      "updatedBy": "Staff Member",
-      "updatedAt": "2025-11-11T11:26:07.859Z"
-    },
-    {
-      "id": "ed70",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 2,
-          "qty": 2,
-          "price": 149,
-          "name": "Veg Burger"
-        },
-        {
-          "menuItemId": 3,
-          "name": "Pasta Alfredo",
-          "qty": 1,
-          "price": 249
-        },
-        {
-          "menuItemId": "4",
-          "name": "Tiffin Veg Meal",
-          "qty": 1,
-          "price": 120
-        }
-      ],
-      "total": 667,
-      "status": "DELIVERED",
-      "createdAt": "2025-11-09T04:19:25.328Z",
-      "updatedBy": "Staff Member",
-      "updatedAt": "2025-11-11T14:24:59.732Z"
-    },
-    {
-      "id": "d895",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 2,
-          "qty": 1,
-          "price": 149,
-          "name": "Veg Burger"
-        },
-        {
-          "menuItemId": 3,
-          "qty": 1,
-          "price": 249,
-          "name": "Pasta Alfredo"
-        }
-      ],
-      "total": 398,
-      "status": "PREPARING",
-      "createdAt": "2025-11-09T05:04:43.662Z"
-    },
-    {
-      "id": "457f",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 2,
-          "qty": 1,
-          "price": 149,
-          "name": "Veg Burger"
-        }
-      ],
-      "total": 149,
-      "status": "OUT_FOR_DELIVERY",
-      "createdAt": "2025-11-09T05:07:53.754Z"
-    },
-    {
-      "id": "1678",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 2,
-          "qty": 1,
-          "price": 149,
-          "name": "Veg Burger"
-        },
-        {
-          "menuItemId": 1,
-          "qty": 1,
-          "price": 299,
-          "name": "Margherita Pizza"
-        },
-        {
-          "menuItemId": 3,
-          "qty": 1,
-          "price": 249,
-          "name": "Pasta Alfredo"
-        }
-      ],
-      "total": 697,
       "status": "PENDING",
-      "createdAt": "2025-11-09T05:08:23.053Z"
+      "createdAt": "2025-11-12T10:30:00Z"
     },
     {
-      "id": "8ede",
+      "id": "b3f6",
       "customerName": "Walk-in Guest",
       "customerPhone": "0000000000",
       "address": "Restaurant",
       "orderType": "DINE_IN",
       "items": [
         {
-          "menuItemId": 2,
+          "menuItemId": "30",
           "qty": 1,
-          "price": 149,
-          "name": "Veg Burger"
+          "price": 150,
+          "name": "Veg Biryani (Full)"
         },
         {
-          "menuItemId": 1,
+          "menuItemId": "28",
           "qty": 1,
-          "price": 299,
-          "name": "Margherita Pizza"
-        }
-      ],
-      "total": 448,
-      "status": "PREPARING",
-      "createdAt": "2025-11-09T05:10:35.208Z"
-    },
-    {
-      "id": "22fd",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 3,
-          "qty": 1,
-          "price": 249,
-          "name": "Pasta Alfredo"
-        }
-      ],
-      "total": 249,
-      "status": "PENDING",
-      "createdAt": "2025-11-09T06:18:34.463Z"
-    },
-    {
-      "id": "d0e3",
-      "customerName": "John Doe",
-      "customerEmail": "john@example.com",
-      "customerPhone": "9586483122",
-      "address": "bhu",
-      "orderType": "DELIVERY",
-      "items": [
-        {
-          "menuItemId": 1,
-          "qty": 1,
-          "price": 299,
-          "name": "Margherita Pizza"
+          "price": 120,
+          "name": "Matar Pulao (Full)"
         },
         {
-          "menuItemId": 2,
+          "menuItemId": "28",
           "qty": 1,
-          "price": 149,
-          "name": "Veg Burger"
-        }
-      ],
-      "total": 448,
-      "status": "PENDING",
-      "createdAt": "2025-11-09T06:27:14.363Z"
-    },
-    {
-      "id": "632e",
-      "customerName": "John Doe",
-      "customerEmail": "john@example.com",
-      "customerPhone": "8596253615",
-      "address": "khngcb",
-      "orderType": "DELIVERY",
-      "items": [
-        {
-          "menuItemId": 2,
-          "qty": 2,
-          "price": 149,
-          "name": "Veg Burger"
-        }
-      ],
-      "total": 298,
-      "status": "DELIVERED",
-      "createdAt": "2025-11-09T06:59:54.472Z"
-    },
-    {
-      "id": "aee4",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 3,
-          "qty": 1,
-          "price": 249,
-          "name": "Pasta Alfredo"
+          "price": 120,
+          "name": "Matar Pulao (Full)"
         },
         {
-          "menuItemId": 2,
+          "menuItemId": "34",
           "qty": 1,
-          "price": 149,
-          "name": "Veg Burger"
+          "price": 15,
+          "name": "Tawa Paratha"
         }
       ],
-      "total": 398,
+      "total": 405,
       "status": "PENDING",
-      "createdAt": "2025-11-09T07:01:36.639Z"
+      "createdAt": "2025-11-12T13:46:46.357Z"
     },
     {
-      "id": "442d",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 1,
-          "qty": 1,
-          "price": 299,
-          "name": "Margherita Pizza"
-        }
-      ],
-      "total": 299,
-      "status": "PREPARING",
-      "createdAt": "2025-11-09T07:01:56.497Z"
-    },
-    {
-      "id": "60a4",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 3,
-          "qty": 1,
-          "price": 249,
-          "name": "Pasta Alfredo"
-        }
-      ],
-      "total": 249,
-      "status": "PENDING",
-      "createdAt": "2025-11-09T07:05:06.542Z"
-    },
-    {
-      "id": "7906",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 1,
-          "qty": 1,
-          "price": 299,
-          "name": "Margherita Pizza"
-        }
-      ],
-      "total": 299,
-      "status": "PREPARING",
-      "createdAt": "2025-11-11T06:31:51.361Z"
-    },
-    {
-      "id": "1755",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": 3,
-          "qty": 1,
-          "price": 249,
-          "name": "Pasta Alfredo"
-        }
-      ],
-      "total": 249,
-      "status": "PENDING",
-      "createdAt": "2025-11-11T07:51:08.049Z"
-    },
-    {
-      "id": "45fa",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "tableNumber": "11",
-      "items": [
-        {
-          "menuItemId": 1,
-          "qty": 3,
-          "price": 299,
-          "name": "Margherita Pizza"
-        },
-        {
-          "menuItemId": 2,
-          "qty": 2,
-          "price": 149,
-          "name": "Veg Burger"
-        },
-        {
-          "menuItemId": 3,
-          "qty": 1,
-          "price": 249,
-          "name": "Pasta Alfredo"
-        }
-      ],
-      "total": 1444,
-      "status": "PENDING",
-      "createdAt": "2025-11-11T09:51:16.863Z"
-    },
-    {
-      "id": "dbb3",
+      "id": "f6b1",
       "customerName": "Walk-in Guest",
       "customerPhone": "0000000000",
       "address": "Restaurant",
@@ -635,57 +302,912 @@
           "name": "Veg Biryani (Full)"
         },
         {
-          "menuItemId": 27,
-          "qty": 1,
-          "price": 80,
-          "name": "Matar Pulao (Half)"
-        }
-      ],
-      "total": 230,
-      "status": "PENDING",
-      "createdAt": "2025-11-11T14:56:55.059Z"
-    },
-    {
-      "id": "9d79",
-      "customerName": "Walk-in Guest",
-      "customerPhone": "0000000000",
-      "address": "Restaurant",
-      "orderType": "DINE_IN",
-      "items": [
-        {
-          "menuItemId": "4",
+          "menuItemId": 39,
           "qty": 1,
           "price": 120,
-          "name": "Tiffin Veg Meal"
-        },
-        {
-          "menuItemId": "21",
-          "qty": 1,
-          "price": 50,
-          "name": "Plain Rice (Half)"
+          "name": "Special Thali"
         }
       ],
-      "total": 170,
-      "status": "CANCELLED",
-      "createdAt": "2025-11-12T04:25:57.090Z"
+      "total": 270,
+      "status": "PENDING",
+      "createdAt": "2025-11-12T14:28:12.588Z"
     },
     {
-      "id": "3139",
+      "id": "9662",
       "customerName": "Walk-in Guest",
       "customerPhone": "0000000000",
       "address": "Restaurant",
       "orderType": "DINE_IN",
       "items": [
         {
-          "menuItemId": "25",
+          "menuItemId": 22,
           "qty": 1,
           "price": 70,
-          "name": "Masala Rice (Half)"
+          "name": "Plain Rice (Full)"
         }
       ],
       "total": 70,
+      "status": "PENDING",
+      "createdAt": "2025-11-12T14:28:51.586Z"
+    },
+    {
+      "id": "750a",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "TAKEAWAY",
+      "items": [
+        {
+          "menuItemId": 29,
+          "qty": 1,
+          "price": 100,
+          "name": "Veg Biryani (Half)"
+        }
+      ],
+      "total": 100,
+      "status": "PENDING",
+      "createdAt": "2025-11-12T14:29:31.696Z"
+    },
+    {
+      "id": "81b1",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": 40,
+          "qty": 1,
+          "price": 90,
+          "name": "Deluxe Thali"
+        },
+        {
+          "menuItemId": 38,
+          "qty": 1,
+          "price": 75,
+          "name": "Lachha Paratha"
+        },
+        {
+          "menuItemId": 21,
+          "name": "Plain Rice (Half)",
+          "qty": 1,
+          "price": 50
+        }
+      ],
+      "total": 215,
+      "status": "PENDING",
+      "createdAt": "2025-11-12T14:55:03.296Z",
+      "updatedBy": "Admin User",
+      "updatedAt": "2025-11-12T15:33:00.864Z"
+    },
+    {
+      "id": "25d4",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5658962412",
+      "address": "Karond",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        }
+      ],
+      "total": 299,
+      "status": "PENDING",
+      "createdAt": "2025-11-12T15:35:30.367Z"
+    },
+    {
+      "id": "a26e",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5658962412",
+      "address": "Karond",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        }
+      ],
+      "total": 299,
+      "status": "PENDING",
+      "createdAt": "2025-11-12T15:36:03.240Z"
+    },
+    {
+      "id": "9bd9",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5658962412",
+      "address": "Karond",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        }
+      ],
+      "total": 299,
+      "status": "PENDING",
+      "createdAt": "2025-11-12T15:36:11.885Z"
+    },
+    {
+      "id": "4477",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5658962412",
+      "address": "Karond",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        }
+      ],
+      "total": 299,
+      "status": "PENDING",
+      "createdAt": "2025-11-12T15:36:13.033Z"
+    },
+    {
+      "id": "07c9",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "6267478954",
+      "address": "Kolar",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-12T15:36:54.613Z"
+    },
+    {
+      "id": "941d",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5566889944",
+      "address": "Lal Ghati",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T06:16:39.847Z"
+    },
+    {
+      "id": "d6c3",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5566889944",
+      "address": "Lal Ghati",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T06:16:41.080Z"
+    },
+    {
+      "id": "ce36",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5566889944",
+      "address": "Lal Ghati",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T06:16:41.756Z"
+    },
+    {
+      "id": "ead5",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5566889944",
+      "address": "Lal Ghati",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T06:16:41.958Z"
+    },
+    {
+      "id": "bc92",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5566889944",
+      "address": "Lal Ghati",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T06:18:34.768Z"
+    },
+    {
+      "id": "2b28",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "8558759545",
+      "address": "BHOPAL",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T07:07:53.022Z"
+    },
+    {
+      "id": "94bf",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "8558759545",
+      "address": "BHOPAL",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T07:07:59.993Z"
+    },
+    {
+      "id": "e591",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "8558759545",
+      "address": "BHOPAL",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T07:08:00.784Z"
+    },
+    {
+      "id": "eb95",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "8558759545",
+      "address": "BHOPAL",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T07:08:01.259Z"
+    },
+    {
+      "id": "5f1c",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "8558759545",
+      "address": "BHOPAL",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T07:08:14.834Z"
+    },
+    {
+      "id": "13af",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "8558759545",
+      "address": "BHOPAL",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T07:08:15.681Z"
+    },
+    {
+      "id": "04c0",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T07:08:51.368Z"
+    },
+    {
+      "id": "3838",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T07:09:12.257Z"
+    },
+    {
+      "id": "005c",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "CANCELLED",
+      "createdAt": "2025-11-13T07:09:14.718Z"
+    },
+    {
+      "id": "350e",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "CANCELLED",
+      "createdAt": "2025-11-13T07:09:17.353Z"
+    },
+    {
+      "id": "1372",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
       "status": "DELIVERED",
-      "createdAt": "2025-11-12T04:26:55.839Z"
+      "createdAt": "2025-11-13T07:09:17.864Z"
+    },
+    {
+      "id": "3726",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "DELIVERED",
+      "createdAt": "2025-11-13T07:09:18.077Z"
+    },
+    {
+      "id": "f0b9",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "OUT_FOR_DELIVERY",
+      "createdAt": "2025-11-13T07:09:18.726Z"
+    },
+    {
+      "id": "3961",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "CANCELLED",
+      "createdAt": "2025-11-13T07:09:18.881Z"
+    },
+    {
+      "id": "a4fd",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PENDING",
+      "createdAt": "2025-11-13T07:09:19.109Z"
+    },
+    {
+      "id": "e595",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "PREPARING",
+      "createdAt": "2025-11-13T07:12:16.496Z"
+    },
+    {
+      "id": "bcb7",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5565253245",
+      "address": "lpljh",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "OUT_FOR_DELIVERY",
+      "createdAt": "2025-11-13T07:12:21.024Z"
+    },
+    {
+      "id": "2a0d",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5588996645",
+      "address": "kjgfdvt jk",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "DELIVERED",
+      "createdAt": "2025-11-13T07:12:56.722Z"
+    },
+    {
+      "id": "06d6",
+      "customerName": "John Doe",
+      "customerEmail": "john@example.com",
+      "customerPhone": "5588996645",
+      "address": "kjgfdvt jk",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "menuItemId": 1,
+          "qty": 1,
+          "price": 299,
+          "name": "Margherita Pizza"
+        },
+        {
+          "menuItemId": 2,
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        }
+      ],
+      "total": 448,
+      "status": "DELIVERED",
+      "createdAt": "2025-11-13T07:13:37.940Z"
+    },
+    {
+      "id": "582e",
+      "customerName": "John Doe",
+      "customerPhone": "6569362541",
+      "customerEmail": "john@example.com",
+      "address": "gulmohar",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "id": 2,
+          "name": "Veg Burger",
+          "price": 149,
+          "qty": 1,
+          "category": "Burger",
+          "imageUrl": "assets/veg-burger.jpg"
+        },
+        {
+          "id": 3,
+          "name": "Pasta Alfredo",
+          "price": 249,
+          "qty": 1,
+          "category": "Pasta",
+          "imageUrl": "assets/pasta-alfredo.jpg"
+        }
+      ],
+      "total": 398,
+      "userId": "1",
+      "status": "DELIVERED",
+      "createdAt": "2025-11-13T08:23:06.705Z"
+    },
+    {
+      "id": "1afa",
+      "customerName": "John Doe",
+      "customerPhone": "6369584520",
+      "customerEmail": "john@example.com",
+      "address": "Area colony",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "id": 2,
+          "name": "Veg Burger",
+          "price": 149,
+          "qty": 1,
+          "category": "Burger",
+          "imageUrl": "assets/veg-burger.jpg"
+        },
+        {
+          "id": 3,
+          "name": "Pasta Alfredo",
+          "price": 249,
+          "qty": 1,
+          "category": "Pasta",
+          "imageUrl": "assets/pasta-alfredo.jpg"
+        }
+      ],
+      "total": 398,
+      "userId": "1",
+      "status": "PENDING",
+      "createdAt": "2025-11-13T08:49:31.816Z"
+    },
+    {
+      "id": "f90e",
+      "customerName": "John Doe",
+      "customerPhone": "8569324896",
+      "customerEmail": "john@example.com",
+      "address": "jhjhjadj",
+      "orderType": "DELIVERY",
+      "items": [
+        {
+          "id": 2,
+          "name": "Veg Burger",
+          "price": 149,
+          "qty": 1,
+          "category": "Burger",
+          "imageUrl": "assets/veg-burger.jpg"
+        },
+        {
+          "id": 3,
+          "name": "Pasta Alfredo",
+          "price": 249,
+          "qty": 1,
+          "category": "Pasta",
+          "imageUrl": "assets/pasta-alfredo.jpg"
+        }
+      ],
+      "total": 398,
+      "userId": "1",
+      "status": "PENDING",
+      "createdAt": "2025-11-13T09:50:34.226Z"
+    }
+  ],
+  "payments": [
+    {
+      "id": "PAY001",
+      "orderId": "ORD001",
+      "amount": 500,
+      "status": "success",
+      "paymentMethod": "qr_code",
+      "qrCodeUrl": "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi%3A%2F%2Fpay%3Fpa%3Drestaurant%40paytm%26pn%3DTasteTown%26am%3D500",
+      "upiId": "restaurant@paytm",
+      "customerName": "John Doe",
+      "customerPhone": "9999999999",
+      "customerEmail": "john@example.com",
+      "createdAt": "2025-11-12T10:30:00Z",
+      "approvedBy": "Admin",
+      "approvedAt": "2025-11-12T13:47:42.746Z"
+    },
+    {
+      "id": "PAY002",
+      "orderId": "ORD002",
+      "amount": 750,
+      "status": "success",
+      "paymentMethod": "qr_code",
+      "qrCodeUrl": "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi%3A%2F%2Fpay%3Fpa%3Drestaurant%40paytm%26pn%3DTasteTown%26am%3D750",
+      "upiId": "restaurant@paytm",
+      "customerName": "Jane Smith",
+      "customerPhone": "9988776655",
+      "customerEmail": "jane@example.com",
+      "createdAt": "2025-11-12T11:15:00Z",
+      "approvedAt": "2025-11-12T11:20:00Z",
+      "approvedBy": "Admin User"
+    },
+    {
+      "id": "6aa6",
+      "orderId": "f90e",
+      "amount": 398,
+      "paymentMethod": "QR_CODE"
     }
   ],
   "subscriptions": [
@@ -710,52 +1232,32 @@
       "createdAt": "2025-11-08T12:00:00Z"
     },
     {
-      "id": "5740",
-      "customerName": "DK",
-      "customerPhone": "1236547896",
-      "startDate": "2025-11-09",
-      "frequency": "DAILY",
+      "id": "d15c",
+      "customerName": "Dev",
+      "customerPhone": "8956236598",
+      "startDate": "2025-11-12",
+      "frequency": "MONTHLY",
       "durationMonths": 1,
       "menuPlan": [
         {
-          "menuItemId": 1,
-          "name": "Margherita Pizza",
+          "menuItemId": 39,
+          "name": "Special Thali",
           "qty": 1,
-          "price": 299
+          "price": 120
         }
       ],
-      "totalPerDelivery": 299,
+      "totalPerDelivery": 120,
       "status": "ACTIVE",
-      "createdBy": "Staff Member",
-      "createdAt": "2025-11-09T04:23:04.179Z"
+      "createdBy": "Admin User",
+      "createdAt": "2025-11-12T14:30:23.845Z"
     },
     {
-      "id": "1922",
-      "customerName": "Neeraj",
-      "customerPhone": "1231231236",
-      "startDate": "2025-11-11",
-      "frequency": "MONTHLY",
-      "durationMonths": 2,
-      "menuPlan": [
-        {
-          "menuItemId": 1,
-          "name": "Margherita Pizza",
-          "qty": 1,
-          "price": 299
-        }
-      ],
-      "totalPerDelivery": 299,
-      "status": "ACTIVE",
-      "createdBy": "Staff Member",
-      "createdAt": "2025-11-11T09:33:39.998Z"
-    },
-    {
-      "id": "9180",
-      "customerName": "PL",
-      "customerPhone": "9646253614",
-      "startDate": "2025-11-11",
+      "id": "0cde",
+      "customerName": "Shivendra",
+      "customerPhone": "6267259422",
+      "startDate": "2025-11-12",
       "frequency": "DAILY",
-      "durationMonths": 3,
+      "durationMonths": 1,
       "menuPlan": [
         {
           "menuItemId": 40,
@@ -766,35 +1268,28 @@
       ],
       "totalPerDelivery": 90,
       "status": "ACTIVE",
-      "createdBy": "Staff Member",
-      "createdAt": "2025-11-11T14:24:05.008Z"
-    }
-  ],
-  "payments": [
-    {
-      "id": "pay201",
-      "orderId": "ord101",
-      "amount": 598,
-      "method": "CASH",
-      "status": "PAID"
+      "createdBy": "Admin User",
+      "createdAt": "2025-11-12T15:30:36.766Z"
     },
     {
-      "id": "f92d",
-      "orderId": "d0e3",
-      "amount": 448,
-      "method": "UPI",
-      "status": "PENDING"
-    },
-    {
-      "id": "69d8",
-      "orderId": "632e",
-      "amount": 298,
-      "method": "UPI",
-      "status": "PENDING"
+      "id": "214b",
+      "customerName": "DP",
+      "customerPhone": "6569645866",
+      "startDate": "2025-11-12",
+      "frequency": "DAILY",
+      "durationMonths": 2,
+      "menuPlan": [
+        {
+          "menuItemId": 39,
+          "name": "Special Thali",
+          "qty": 1,
+          "price": 120
+        }
+      ],
+      "totalPerDelivery": 120,
+      "status": "ACTIVE",
+      "createdBy": "Admin User",
+      "createdAt": "2025-11-12T15:31:05.127Z"
     }
-  ],
-  "payments_config": {
-    "upiQrUrl": "assets/upi-qr.png",
-    "upiId": "your-upi@bank"
-  }
+  ]
 }
