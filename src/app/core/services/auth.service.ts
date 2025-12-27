@@ -2,8 +2,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
-import { Observable, of, BehaviorSubject } from 'rxjs';
+import { Observable, of, BehaviorSubject, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
+import { NetworkService } from './network.service';
 
 export interface User {
   id: number;
@@ -21,12 +22,15 @@ export class AuthService {
   private storageKey = 'rms_user';
   private tokenKey = 'rms_token';
   private sessionKey = 'rms_session_id';
-  
+
   // BehaviorSubject for reactive login state
   private currentUserSubject = new BehaviorSubject<User | null>(this.loadUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private networkService: NetworkService
+  ) {
     // On service initialization, validate session with backend
     this.validateSessionOnInit();
   }
@@ -48,6 +52,16 @@ export class AuthService {
    * In production, use proper JWT/OAuth
    */
   login(email: string, password: string): Observable<User | null> {
+    // Check network connectivity first
+    if (!this.networkService.isOnline) {
+      // If we encounter an offline situation, we check if there is a way to authenticate locally?
+      // Typically NO, unless we cached the hash. 
+      // For now, we return a specific error or null with console warning.
+      console.warn('Cannot login while offline');
+      // We can throw an error that the component can catch
+      return throwError(() => ({ message: 'Cannot login while offline. Please check your connection.' }));
+    }
+
     return this.http.get<User[]>(
       `${this.base}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
     ).pipe(
@@ -73,6 +87,10 @@ export class AuthService {
    * Register new user
    */
   register(name: string, email: string, password: string): Observable<User> {
+    if (!this.networkService.isOnline) {
+      return throwError(() => ({ message: 'Cannot register while offline. Please check your connection.' }));
+    }
+
     const newUser = { name, email, password, role: 'CUSTOMER' };
     return this.http.post<User>(`${this.base}`, newUser).pipe(
       tap(user => {
@@ -98,15 +116,15 @@ export class AuthService {
     sessionStorage.removeItem(this.storageKey);
     sessionStorage.removeItem(this.tokenKey);
     sessionStorage.removeItem(this.sessionKey);
-    
+
     // Also clear from localStorage as backup
     localStorage.removeItem(this.storageKey);
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.sessionKey);
-    
+
     // Update BehaviorSubject
     this.currentUserSubject.next(null);
-    
+
     console.log('✓ User logged out, session cleared');
   }
 
@@ -126,14 +144,14 @@ export class AuthService {
   private loadUserFromStorage(): User | null {
     // Try sessionStorage first
     let raw = sessionStorage.getItem(this.storageKey);
-    
+
     // Fallback to localStorage
     if (!raw) {
       raw = localStorage.getItem(this.storageKey);
     }
-    
+
     if (!raw) return null;
-    
+
     try {
       return JSON.parse(raw) as User;
     } catch (e) {
@@ -229,6 +247,26 @@ export class AuthService {
   updateUser(user: User): void {
     this.saveUser(user);
     this.currentUserSubject.next(user);
+  }
+
+  /**
+   * Initiate forgot password flow
+   */
+  forgotPassword(email: string): Observable<void> {
+    // Mock API call
+    return of(void 0).pipe(
+      tap(() => console.log('Forgot password requested for:', email))
+    );
+  }
+
+  /**
+   * Reset password with token
+   */
+  resetPassword(token: string, password: string): Observable<void> {
+    // Mock API call
+    return of(void 0).pipe(
+      tap(() => console.log('Password reset with token:', token))
+    );
   }
 
   /**

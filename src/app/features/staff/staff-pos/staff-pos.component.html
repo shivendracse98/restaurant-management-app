@@ -1,34 +1,24 @@
 <div class="staff-pos-container">
   <!-- Header -->
   <div class="header-row">
-    <h2>👨‍💼 Staff POS</h2>
+    <div style="display: flex; gap: 15px; align-items: center;">
+      <h2>👨‍💼 Staff POS</h2>
+      <a routerLink="/staff/kitchen" class="btn secondary-btn"
+        style="text-decoration: none; padding: 5px 10px; font-size: 0.9rem;">
+        👨‍🍳 Kitchen View
+      </a>
+    </div>
     <div class="tab-buttons">
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab === 'ORDER'" 
-        (click)="switchTab('ORDER')"
-      >
+      <button class="tab-btn" [class.active]="activeTab === 'ORDER'" (click)="switchTab('ORDER')">
         🛒 Take Order
       </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab === 'TIFFIN'" 
-        (click)="switchTab('TIFFIN')"
-      >
+      <button class="tab-btn" [class.active]="activeTab === 'TIFFIN'" (click)="switchTab('TIFFIN')">
         🍱 Tiffin
       </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab === 'ONGOING'" 
-        (click)="switchTab('ONGOING')"
-      >
+      <button class="tab-btn" [class.active]="activeTab === 'ONGOING'" (click)="switchTab('ONGOING')">
         ⏳ Ongoing
       </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab === 'REVENUE'" 
-        (click)="switchTab('REVENUE')"
-      >
+      <button class="tab-btn" [class.active]="activeTab === 'REVENUE'" (click)="switchTab('REVENUE')">
         📊 Revenue
       </button>
     </div>
@@ -42,12 +32,7 @@
     <!-- Left: Menu Items -->
     <div class="menu-section">
       <div class="search-bar">
-        <input 
-          type="text" 
-          [(ngModel)]="searchTerm" 
-          placeholder="🔍 Search menu or category..."
-          class="search-input"
-        />
+        <input type="text" [(ngModel)]="searchTerm" placeholder="🔍 Search menu or category..." class="search-input" />
       </div>
 
       <div class="menu-grid">
@@ -98,7 +83,7 @@
         <!-- Cart Items (Scrollable) -->
         <div class="cart-items">
           <h4 class="items-title">Items</h4>
-          
+
           <div *ngIf="cartItems.length === 0" class="empty-cart">
             👉 Add items from menu →
           </div>
@@ -119,14 +104,10 @@
             <div class="total-amount">₹{{ getTotal(cartItems) }}</div>
           </div>
 
-          <button 
-            class="btn place-order-btn" 
-            (click)="placeOrder()"
-            [disabled]="cartItems.length === 0 || isLoading"
-          >
+          <button class="btn place-order-btn" (click)="placeOrder()" [disabled]="cartItems.length === 0 || isLoading">
             {{ isLoading ? '⏳ Placing...' : '✓ Place Order' }}
           </button>
-          
+
           <button class="btn clear-btn" (click)="clearCart()">Clear Cart</button>
         </div>
       </div>
@@ -136,7 +117,7 @@
   <!-- ========== TIFFIN TAB ========== -->
   <div *ngIf="activeTab === 'TIFFIN'" class="tab-content">
     <h3>🍱 Tiffin Subscriptions</h3>
-    
+
     <!-- Quick Select Plans with Images -->
     <div class="tiffin-quick">
       <div class="plan" (click)="selectTiffinPlan('plain')">
@@ -223,7 +204,7 @@
   <!-- ========== ONGOING ORDERS TAB ========== -->
   <div *ngIf="activeTab === 'ONGOING'" class="tab-content">
     <h3>⏳ Ongoing Orders</h3>
-    
+
     <table class="orders-table" *ngIf="ongoingOrders.length > 0">
       <thead>
         <tr>
@@ -243,6 +224,10 @@
           <td>₹{{ o.total }}</td>
           <td><span class="badge">{{ o.status }}</span></td>
           <td>
+            <button class="btn share-btn" style="margin-right: 5px; background-color: #25D366; color: white;"
+              (click)="shareBill(o)" title="Share on WhatsApp">
+              <i class="fa fa-whatsapp"></i> Share
+            </button>
             <button class="btn primary-btn" (click)="openEdit(o)">Edit</button>
           </td>
         </tr>
@@ -255,7 +240,7 @@
   <!-- ========== REVENUE TAB ========== -->
   <div *ngIf="activeTab === 'REVENUE'" class="tab-content revenue-tab">
     <h3>📊 Today's Revenue</h3>
-    
+
     <div class="stats-row">
       <div class="stat-box">
         <div class="stat-label">Total Orders</div>
@@ -327,13 +312,13 @@
               <div class="edit-item-name">{{ item.name }}</div>
               <div class="edit-item-price">₹{{ item.price }}</div>
             </div>
-            
+
             <div class="qty-control">
               <button class="qty-btn" (click)="decreaseQty(item)">−</button>
               <span class="qty">{{ item.qty }}</span>
               <button class="qty-btn" (click)="increaseQty(item)">+</button>
             </div>
-            
+
             <button class="remove-btn" (click)="removeItemFromEdit(i)">Remove</button>
           </div>
         </div>

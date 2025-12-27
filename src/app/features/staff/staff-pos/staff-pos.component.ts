@@ -10,6 +10,7 @@ import { OrderService } from '../../../core/services/order.service';
 import { SubscriptionService } from '../../../core/services/subscription.service';
 import { MenuService } from '../../../core/services/menu.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { FoodItem } from '../../../models/food-item.model';
 import { Subscription as TiffinModel } from '../../../models/subscription.model';
 
@@ -92,8 +93,9 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     private subscriptionService: SubscriptionService,
     private menuService: MenuService,
     private auth: AuthService,
+    private notificationService: NotificationService,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadMenu();
@@ -389,11 +391,37 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ========== BILLING / NOTIFICATION ==========
+
+  shareBill(order: any): void {
+    if (!order) return;
+
+    // Fallback phone if missing
+    const phone = order.customerPhone || '0000000000';
+
+    // Construct simplified bill text
+    const itemsList = (order.items || [])
+      .map((i: any) => `${i.qty}x ${i.name} (₹${i.price})`)
+      .join('\n');
+
+    const message =
+      `🧾 *Bill for Order #${order.id}*\n\n` +
+      `Hello ${order.customerName || 'Guest'},\n\n` +
+      `Here is your order summary:\n` +
+      `${itemsList}\n\n` +
+      `*Total: ₹${order.total}*\n\n` +
+      `Thank you for dining with TasteTown! 🍽️`;
+
+    this.notificationService.shareViaWhatsApp(phone, message);
+    this.message = '🚀 Opening WhatsApp...';
+    setTimeout(() => this.message = '', 2000);
+  }
+
   // ========== CHART / REVENUE ==========
 
   prepareRevenueChart(): void {
     const days: Record<string, number> = {};
-    
+
     // Last 7 days
     for (let i = 6; i >= 0; i--) {
       const d = new Date();

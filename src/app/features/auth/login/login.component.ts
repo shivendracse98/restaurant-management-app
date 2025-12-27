@@ -27,7 +27,7 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private auth: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
@@ -37,20 +37,26 @@ export class LoginComponent implements OnInit {
     if (this.form.invalid) return;
     const { email, password } = this.form.value;
 
-    this.auth.login(email!, password!).subscribe(user => {
-      if (user) {
-        console.log('✅ Login successful');
-        if (user.role === 'ADMIN') {
-          this.router.navigateByUrl('/admin/dashboard');
-        } 
-        else if (user.role === 'STAFF') {
-        this.router.navigate(['/staff/pos'], { queryParams: { tab: 'order' } });
+    this.auth.login(email!, password!).subscribe({
+      next: (user) => {
+        if (user) {
+          console.log('✅ Login successful');
+          if (user.role === 'ADMIN') {
+            this.router.navigateByUrl('/admin/dashboard');
+          }
+          else if (user.role === 'STAFF') {
+            this.router.navigate(['/staff/pos'], { queryParams: { tab: 'order' } });
+          }
+          else {
+            this.router.navigateByUrl('/customer/dashboard');
+          }
+        } else {
+          this.errorMsg = 'Invalid email or password';
         }
-        else {
-          this.router.navigateByUrl('/customer/dashboard');
-        }
-      } else {
-        this.errorMsg = 'Invalid email or password';
+      },
+      error: (err) => {
+        console.error('Login failed', err);
+        this.errorMsg = err.message || 'Login failed. Please try again.';
       }
     });
   }

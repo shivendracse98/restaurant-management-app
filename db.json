@@ -249,7 +249,7 @@
         }
       ],
       "total": 598,
-      "status": "PENDING",
+      "status": "READY",
       "createdAt": "2025-11-12T10:30:00Z"
     },
     {
@@ -1003,7 +1003,7 @@
         }
       ],
       "total": 448,
-      "status": "PREPARING",
+      "status": "READY",
       "createdAt": "2025-11-13T07:12:16.496Z"
     },
     {
@@ -1170,6 +1170,84 @@
       "userId": "1",
       "status": "PENDING",
       "createdAt": "2025-11-13T09:50:34.226Z"
+    },
+    {
+      "id": "cc4b",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": "8e82",
+          "qty": 1,
+          "price": 120,
+          "name": "Special Thali"
+        }
+      ],
+      "total": 120,
+      "status": "DELIVERED",
+      "createdAt": "2025-12-27T15:57:56.642Z"
+    },
+    {
+      "id": "806e",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": "3",
+          "qty": 1,
+          "price": 249,
+          "name": "Pasta Alfredo"
+        }
+      ],
+      "total": 249,
+      "status": "PENDING",
+      "createdAt": "2025-12-27T17:28:33.184Z"
+    },
+    {
+      "id": "68a3",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": "2",
+          "qty": 1,
+          "price": 149,
+          "name": "Veg Burger"
+        },
+        {
+          "menuItemId": "22",
+          "qty": 1,
+          "price": 70,
+          "name": "Plain Rice (Full)"
+        }
+      ],
+      "total": 219,
+      "status": "PREPARING",
+      "createdAt": "2025-12-27T17:29:10.065Z"
+    },
+    {
+      "id": "1a31",
+      "customerName": "Walk-in Guest",
+      "customerPhone": "0000000000",
+      "address": "Restaurant",
+      "orderType": "DINE_IN",
+      "items": [
+        {
+          "menuItemId": "26",
+          "qty": 1,
+          "price": 100,
+          "name": "Masala Rice (Full)"
+        }
+      ],
+      "total": 100,
+      "status": "PREPARING",
+      "createdAt": "2025-12-27T17:30:06.926Z"
     }
   ],
   "payments": [
@@ -1207,7 +1285,10 @@
       "id": "6aa6",
       "orderId": "f90e",
       "amount": 398,
-      "paymentMethod": "QR_CODE"
+      "paymentMethod": "QR_CODE",
+      "status": "success",
+      "approvedBy": "Admin",
+      "approvedAt": "2025-12-27T15:58:55.015Z"
     }
   ],
   "subscriptions": [

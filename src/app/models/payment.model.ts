@@ -1,9 +1,12 @@
+import { PaymentMethod, PaymentStatus } from './enums';
+
 export interface Payment {
   id: string;
+  restaurantId?: string; // Multi-tenancy support
   orderId: string;
   amount: number;
-  status: 'pending' | 'success' | 'failed' | 'cancelled';
-  paymentMethod: 'qr_code' | 'upi';
+  status: PaymentStatus;
+  paymentMethod: PaymentMethod;
   qrCodeUrl?: string;
   upiId?: string;
   customerName: string;
@@ -13,6 +16,7 @@ export interface Payment {
   approvedAt?: Date;
   approvedBy?: string;
   notes?: string;
+  transactionId?: string; // External Reference from Razorpay/Bank
 }
 
 export interface PaymentStats {

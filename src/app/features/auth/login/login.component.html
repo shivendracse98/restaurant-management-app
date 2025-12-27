@@ -7,14 +7,11 @@
     <small *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')">Email is required.</small>
     <small *ngIf="form.get('email')?.hasError('email')">Enter a valid email.</small>
 
-   <div class="password-field">
+    <div class="password-field">
       <label>Password</label>
       <div class="password-wrapper">
-        <input
-          [type]="showPassword ? 'text' : 'password'"
-          formControlName="password"
-          placeholder="Enter your password"
-        />
+        <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
+          placeholder="Enter your password" />
         <span class="toggle-eye" (click)="togglePassword()">
           <i [class]="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
         </span>
@@ -22,6 +19,10 @@
       <small *ngIf="form.get('password')?.touched && form.get('password')?.hasError('required')">
         Password is required.
       </small>
+    </div>
+
+    <div class="forgot-password">
+      <a routerLink="/forgot-password">Forgot Password?</a>
     </div>
 
 

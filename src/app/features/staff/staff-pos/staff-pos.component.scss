@@ -31,6 +31,29 @@
     font-weight: 800;
     margin: 0;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .kitchen-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: #FFF1DE;
+    color: #E67E22;
+    border: 1.5px solid #E67E22;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #E67E22;
+      color: white;
+      transform: translateY(-2px);
+    }
   }
 
   .tab-buttons {
@@ -83,6 +106,7 @@
       opacity: 0;
       transform: translateY(-8px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -96,6 +120,21 @@
   grid-template-columns: 1fr 360px;
   gap: 1.25rem;
   min-height: calc(100vh - 180px);
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+
+    .menu-section {
+      max-height: 60vh;
+    }
+
+    .cart-section {
+      position: static;
+      height: auto;
+      max-height: 60vh;
+    }
+  }
 
   .menu-section {
     background: white;
@@ -136,8 +175,8 @@
 
     .menu-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-      gap: 0.95rem;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.25rem;
       overflow-y: auto;
       flex: 1;
       padding-right: 0.4rem;
@@ -184,7 +223,8 @@
 
         img {
           width: 100%;
-          height: 110px;
+          height: 140px;
+          /* Increased height for better ratio */
           object-fit: cover;
           display: block;
           flex-shrink: 0;

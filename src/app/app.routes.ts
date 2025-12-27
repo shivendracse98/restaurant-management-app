@@ -13,7 +13,7 @@ import { customerGuard } from './core/guards/customer.guard';
 import { StaffPosComponent } from './features/staff/staff-pos/staff-pos.component';
 import { staffGuard } from './core/guards/staff.guard';
 import { CustomerDashboardComponent } from './features/customer/customer-dashboard/customer-dashboard.component';
-import { StaffTodayOrdersComponent } from './features/staff/staff-today-orders/staff-today-orders.component'; 
+import { StaffTodayOrdersComponent } from './features/staff/staff-today-orders/staff-today-orders.component';
 import { MenuManagementComponent } from './features/admin/menu-management/menu-management.component';
 import { PendingPaymentsComponent } from './features/admin/payments/pending-payments.component';
 
@@ -80,9 +80,15 @@ export const routes: Routes = [
     path: 'staff/pos',
     loadComponent: () =>
       import('./features/staff/staff-pos/staff-pos.component').then(m => m.StaffPosComponent),
-    canActivate: [authGuard, staffGuard] // later we’ll add staffGuard
+    canActivate: [authGuard, staffGuard]
   },
-   {
+  {
+    path: 'staff/kitchen',
+    loadComponent: () =>
+      import('./features/staff/kitchen/kitchen.component').then(m => m.KitchenComponent),
+    canActivate: [authGuard, staffGuard]
+  },
+  {
     path: 'staff/today-orders',
     loadComponent: () => import('./features/staff/staff-today-orders/staff-today-orders.component')
       .then(m => m.StaffTodayOrdersComponent),
@@ -91,6 +97,8 @@ export const routes: Routes = [
   },
   { path: 'dashboard', component: CustomerDashboardComponent, canActivate: [authGuard, customerGuard] },
   { path: 'login', component: LoginComponent },
+  { path: 'forgot-password', loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
+  { path: 'reset-password', loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent) },
   { path: 'register', component: RegisterComponent },
   // ✅ Catch-all wildcard route (must be last)
   { path: '**', redirectTo: 'home' }

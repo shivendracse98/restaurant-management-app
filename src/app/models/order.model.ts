@@ -1,4 +1,4 @@
-export type OrderStatus = 'PENDING' | 'PREPARING' | 'READY' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED';
+import { OrderStatus, OrderType } from './enums';
 
 export interface OrderItem {
   menuItemId: number;
@@ -9,13 +9,17 @@ export interface OrderItem {
 
 export interface Order {
   id?: number;
+  restaurantId?: string; // Multi-tenancy support
   customerName: string;
   customerPhone: string;
   address: string;
-  orderType: 'DINE_IN' | 'PARCEL' | 'DELIVERY' | 'TIFFIN' | string;
+  orderType: OrderType;
   items: OrderItem[];
   total: number;
   status: OrderStatus;
   createdAt?: string;
   paymentId?: number;
+  updatedAt?: string;
+  updatedBy?: string;
+  tableNumber?: string;
 }
