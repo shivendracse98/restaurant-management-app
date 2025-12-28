@@ -30,11 +30,7 @@
       <ng-template #nonAdminLinks>
         <ng-container *ngIf="auth.isStaff(); else customerLinks">
           <!-- POS -->
-          <a
-            [routerLink]="['/staff/pos']"
-            [queryParams]="{ tab: 'order' }"
-            routerLinkActive="active"
-          >
+          <a [routerLink]="['/staff/pos']" [queryParams]="{ tab: 'order' }" routerLinkActive="active">
             POS
           </a>
 
@@ -47,7 +43,15 @@
 
         <!-- Customer -->
         <ng-template #customerLinks>
-          <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+
+          <!-- 📍 Location / Restaurant Picker -->
+          <div class="location-picker" *ngIf="currentTenantName">
+            <span class="loc-icon">📍</span>
+            <span class="loc-name">{{ currentTenantName }}</span>
+            <a routerLink="/home" class="loc-change">Change</a>
+          </div>
+
+          <a routerLink="/customer/dashboard" routerLinkActive="active">Dashboard</a>
           <a routerLink="/menu" routerLinkActive="active">Menu</a>
           <a routerLink="/cart" routerLinkActive="active" class="cart-link">
             🛒 Cart

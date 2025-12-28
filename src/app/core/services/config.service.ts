@@ -26,4 +26,23 @@ export class ConfigService {
             })
         );
     }
+
+    getAllTenants(): Observable<any[]> {
+        // TODO: Replace with real API call: this.http.get<any[]>(`${this.apiUrl}/tenants`)
+        // For now, return the mock/db list
+        return of([
+            {
+                tenantId: 'Maa-Ashtabhuja',
+                name: 'Maa Ashtabhuja Refreshments',
+                description: 'Best Tiffin & Thali in Town',
+                imageUrl: 'assets/images/logo.png' // Ensure this asset exists or use a placeholder
+            },
+            {
+                tenantId: 'pizza-hut',
+                name: 'Pizza Hut',
+                description: 'Tastiest Pizzas',
+                imageUrl: 'assets/images/logo.png'
+            }
+        ]);
+    }
 }

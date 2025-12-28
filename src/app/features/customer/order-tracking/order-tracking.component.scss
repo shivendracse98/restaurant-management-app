@@ -1,0 +1,159 @@
+.tracking-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 1rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h2 {
+        font-size: 1.5rem;
+        color: #333;
+        margin: 0;
+    }
+
+    .order-id {
+        color: #666;
+        font-size: 0.9rem;
+    }
+}
+
+.progress-track {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    position: relative;
+
+    &.cancelled {
+        opacity: 0.5;
+        filter: grayscale(100%);
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 1;
+        background: #fff;
+        padding: 0 5px;
+
+        .icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            filter: grayscale(100%);
+            transition: all 0.3s;
+        }
+
+        .label {
+            font-size: 0.75rem;
+            color: #999;
+            font-weight: 500;
+        }
+
+        &.active {
+            .icon {
+                filter: grayscale(0%);
+                transform: scale(1.2);
+            }
+
+            .label {
+                color: #2c3e50;
+                font-weight: 700;
+            }
+        }
+    }
+
+    .line {
+        flex: 1;
+        height: 3px;
+        background: #e0e0e0;
+        margin: 0 -10px;
+        z-index: 0;
+        margin-bottom: 20px;
+
+        &.filled {
+            background: #4caf50;
+        }
+    }
+}
+
+.details-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+
+    h3 {
+        margin-top: 0;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+
+    .item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        color: #555;
+    }
+
+    .total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+
+    button,
+    a {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+    }
+
+    .btn-refresh {
+        background: #2196f3;
+        color: white;
+
+        &:hover {
+            background: #1976d2;
+        }
+    }
+
+    .btn-back {
+        background: #f5f5f5;
+        color: #333;
+
+        &:hover {
+            background: #e0e0e0;
+        }
+    }
+}
+
+.cancelled-banner {
+    background: #ffebee;
+    color: #c62828;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+}

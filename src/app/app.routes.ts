@@ -27,14 +27,12 @@ export const routes: Routes = [
   { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
   { path: 'orders', component: OrdersComponent, canActivate: [authGuard] },
 
-  // // ✅ NEW: Order Tracking (for post-payment)
-  // {
-  //   path: 'order-tracking/:id',
-  //   loadComponent: () =>
-  //     import('./features/customer/order-tracking/order-tracking.component')
-  //       .then(m => m.OrderTrackingComponent),
-  //   canActivate: [authGuard, customerGuard]
-  // },
+  // ✅ NEW: Order Tracking (for post-payment)
+  {
+    path: 'order-tracking/:id',
+    loadComponent: () => import('./features/customer/order-tracking/order-tracking.component').then(m => m.OrderTrackingComponent),
+    canActivate: [authGuard, customerGuard]
+  },
 
   // // ✅ NEW: Order History
   // {

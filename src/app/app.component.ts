@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 
 import { CartService } from './core/services/cart.service';
 import { AuthService } from './core/services/auth.service';
+import { TenantService } from './core/services/tenant.service';
+import { ConfigService } from './core/services/config.service';
 
 @Component({
   selector: 'app-root',
@@ -20,13 +22,27 @@ export class AppComponent implements OnInit, OnDestroy {
   private sub?: Subscription;
   private routerSub?: Subscription;
 
+  currentTenantName = '';
+
   constructor(
     public cart: CartService,
     public auth: AuthService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private tenantService: TenantService,
+    private configService: ConfigService
+  ) { }
 
   ngOnInit(): void {
+    // Track tenant changes to update header
+    this.tenantService.tenantId$.subscribe(id => {
+      if (id) {
+        this.configService.getAllTenants().subscribe(tenants => {
+          const t = tenants.find(x => x.tenantId === id);
+          this.currentTenantName = t ? t.name : id;
+        });
+      }
+    });
+
     // Cart count listener
     this.sub = this.cart.items$.subscribe(items => {
       this.cartCount = items.reduce((s, it) => s + it.qty, 0);

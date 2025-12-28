@@ -48,7 +48,7 @@ export class LoginComponent implements OnInit {
             this.router.navigate(['/staff/pos'], { queryParams: { tab: 'order' } });
           }
           else {
-            this.router.navigateByUrl('/customer/dashboard');
+            this.router.navigateByUrl('/home');
           }
         } else {
           this.errorMsg = 'Invalid email or password';

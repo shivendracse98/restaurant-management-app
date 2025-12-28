@@ -1,0 +1,68 @@
+<div class="tracking-container">
+    <div class="header">
+        <h2>🚚 Order Tracking</h2>
+        <p class="order-id">Order #{{ order?.id }}</p>
+    </div>
+
+    <div *ngIf="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Locating your order...</p>
+    </div>
+
+    <div *ngIf="!loading && order" class="content">
+
+        <!-- Status Progress Bar -->
+        <div class="progress-track" [class.cancelled]="order.status === 'CANCELLED'">
+            <div class="step" [class.active]="isStepActive('PENDING')">
+                <div class="icon">📝</div>
+                <div class="label">Placed</div>
+            </div>
+            <div class="line" [class.filled]="isStepActive('PREPARING')"></div>
+
+            <div class="step" [class.active]="isStepActive('PREPARING')">
+                <div class="icon">👨‍🍳</div>
+                <div class="label">Preparing</div>
+            </div>
+            <div class="line" [class.filled]="isStepActive('OUT_FOR_DELIVERY')"></div>
+
+            <div class="step" [class.active]="isStepActive('OUT_FOR_DELIVERY')">
+                <div class="icon">🛵</div>
+                <div class="label">Out for Delivery</div>
+            </div>
+            <div class="line" [class.filled]="isStepActive('DELIVERED')"></div>
+
+            <div class="step" [class.active]="isStepActive('DELIVERED')">
+                <div class="icon">white_check_mark</div>
+                <div class="label">Delivered</div>
+            </div>
+        </div>
+
+        <div *ngIf="order.status === 'CANCELLED'" class="cancelled-banner">
+            ❌ This order has been cancelled.
+        </div>
+
+        <!-- Order Details -->
+        <div class="details-card">
+            <h3>Items</h3>
+            <div class="item" *ngFor="let item of order.items">
+                <span>{{ item.qty }}x {{ item.name }}</span>
+                <span>₹{{ item.price * item.qty }}</span>
+            </div>
+            <div class="total">
+                <span>Total</span>
+                <span>₹{{ order.total }}</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn-refresh" (click)="loadOrder()">🔄 Refresh Status</button>
+            <a routerLink="/orders" class="btn-back">⬅ Back to Orders</a>
+        </div>
+    </div>
+
+    <div *ngIf="!loading && !order" class="error">
+        <p>❌ Order not found.</p>
+        <a routerLink="/orders">Back to My Orders</a>
+    </div>
+</div>

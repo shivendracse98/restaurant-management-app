@@ -25,6 +25,7 @@
     <div class="order-footer">
       <div class="total">💰 Total: ₹{{ order.total }}</div>
       <div class="actions">
+        <a [routerLink]="['/order-tracking', order.id]" class="btn small track">📍 Track</a>
         <button class="btn small secondary" (click)="reorder(order)">Reorder</button>
         <button class="btn small danger" (click)="cancel(order)">Cancel</button>
       </div>

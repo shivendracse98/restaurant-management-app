@@ -1,36 +1,23 @@
-<section class="hero">
-  <div class="overlay"></div>
-  <div class="hero-content">
-    <h1>Welcome to <span>TasteTown Restaurant</span></h1>
-    <p>Delicious food delivered to your doorstep — fresh, fast, and flavorful!</p>
-    <div class="hero-buttons">
-      <a routerLink="/menu" class="btn primary">🍔 Explore Menu</a>
-      <a routerLink="/login" class="btn secondary">🔐 Login</a>
-      <a routerLink="/register" class="btn outline">🧾 Register</a>
+<div class="home-container">
+  <div class="hero">
+    <h1>Welcome to TasteTown 🍔</h1>
+    <p>Select a restaurant to start ordering</p>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading restaurants...</p>
+  </div>
+
+  <div class="restaurant-grid" *ngIf="!loading">
+    <div class="restaurant-card" *ngFor="let tenant of tenants" (click)="selectTenant(tenant.tenantId)">
+      <div class="card-img"
+        [style.background-image]="'url(' + (tenant.imageUrl || 'assets/default-restaurant.jpg') + ')'"></div>
+      <div class="card-content">
+        <h3>{{ tenant.name }}</h3>
+        <p>{{ tenant.description }}</p>
+        <button class="btn-enter">View Menu ➔</button>
+      </div>
     </div>
   </div>
-</section>
-
-<section class="features">
-  <div class="feature">
-    <img src="assets/icons/fresh.png" alt="Fresh Ingredients" />
-    <h3>Fresh Ingredients</h3>
-    <p>We use only the best and freshest ingredients in every dish.</p>
-  </div>
-  <div class="feature">
-    <img src="assets/icons/chef.png" alt="Expert Chefs" />
-    <h3>Expert Chefs</h3>
-    <p>Our skilled chefs prepare meals with passion and care.</p>
-  </div>
-  <div class="feature">
-    <img src="assets/icons/delivery.jpg" alt="Quick Delivery" />
-    <h3>Quick Delivery</h3>
-    <p>Hot and fresh food delivered right to your doorstep.</p>
-  </div>
-</section>
-
-<section class="cta">
-  <h2>Order Now & Taste Happiness 😋</h2>
-  <p>Join thousands of happy customers enjoying the TasteTown experience!</p>
-  <a routerLink="/menu" class="btn large primary">Start Ordering</a>
-</section>
+</div>

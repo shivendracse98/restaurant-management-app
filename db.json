@@ -1372,5 +1372,12 @@
       "createdBy": "Admin User",
       "createdAt": "2025-11-12T15:31:05.127Z"
     }
-  ]
+  ],
+  "tenant_config": {
+    "payment": {
+      "upiId": "merchant@okicici",
+      "qrImageUrl": "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=merchant@okicici&pn=TasteTown&am=0",
+      "defaultMode": "UPI"
+    }
+  }
 }

@@ -5,6 +5,7 @@ import { FoodItem } from '../../../models/food-item.model';
 import { RouterModule } from '@angular/router';
 import { CartService } from '../../../core/services/cart.service';
 import { AppComponent } from 'src/app/app.component';
+import { TenantService } from '../../../core/services/tenant.service';
 
 export type MenuViewMode = 'customer' | 'admin';
 
@@ -23,15 +24,18 @@ export class MenuListComponent implements OnInit {
   constructor(
     private menuService: MenuService,
     private cart: CartService,
-    private app: AppComponent
-  ) {}
+    private app: AppComponent,
+    private tenantService: TenantService
+  ) { }
 
   ngOnInit(): void {
-    this.loadMenu();
+    this.tenantService.tenantId$.subscribe(tenantId => {
+      this.loadMenu(tenantId || undefined);
+    });
   }
 
-  loadMenu(): void {
-    this.menuService.getMenu().subscribe({
+  loadMenu(tenantId?: string): void {
+    this.menuService.getMenu(tenantId).subscribe({
       next: (data) => {
         console.log('✅ Menu Loaded:', data);
         this.foodItems = data;
@@ -67,7 +71,7 @@ export class MenuListComponent implements OnInit {
       // For now, just remove from local array
       this.foodItems = this.foodItems.filter((i) => i.id !== item.id);
       this.app.showToast('Item deleted successfully');
-      
+
       // TODO: When backend is ready, uncomment:
       // this.menuService.deleteMenuItem(item.id).subscribe({
       //   next: () => {

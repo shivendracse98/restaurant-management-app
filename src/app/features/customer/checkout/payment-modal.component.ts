@@ -13,6 +13,7 @@ import { takeUntil } from 'rxjs/operators';
 
 
 import { PaymentService } from 'src/app/core/services/payment.service';
+import { ConfigService } from 'src/app/core/services/config.service';
 
 export interface CheckoutData {
   orderId: string | number;
@@ -68,6 +69,7 @@ export class PaymentModalComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: CheckoutData,
     public dialogRef: MatDialogRef<PaymentModalComponent>,
     private paymentService: PaymentService,
+    private configService: ConfigService, // ✅ Injected
     private toastr: ToastrService
   ) {
     console.log(`${this.LOG} Constructor called with data:`, data);
@@ -75,21 +77,49 @@ export class PaymentModalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log(`${this.LOG} ngOnInit called`);
-    this.generateQRCode();
+    this.loadPaymentConfig();
   }
 
   /**
-   * Generate UPI QR Code
+   * Load Tenant Payment Config (UPI ID, QR)
+   */
+  private loadPaymentConfig(): void {
+    this.configService.getPaymentConfig().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (config) => {
+        if (config) {
+          console.log(`${this.LOG} ✅ Loaded Tenant Config:`, config);
+          if (config.upiId) this.upiId = config.upiId;
+          // Use config QR if available, else generate from ID
+          if (config.qrImageUrl) {
+            this.qrCodeUrl = config.qrImageUrl;
+            this.upiDeepLink = `upi://pay?pa=${this.upiId}&pn=TasteTown&tn=Order${this.data.orderId}&am=${this.data.amount}&cu=INR`;
+          } else {
+            this.generateQRCode();
+          }
+        } else {
+          console.warn(`${this.LOG} ⚠️ No config found, using defaults`);
+          this.generateQRCode();
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load payment config', err);
+        this.generateQRCode(); // Fallback
+      }
+    });
+  }
+
+  /**
+   * Generate UPI QR Code (Fallback/Dynamic)
    */
   private generateQRCode(): void {
     console.log(`${this.LOG} Generating QR code for amount: ${this.data.amount}`);
     const upiString = `upi://pay?pa=${this.upiId}&pn=TasteTown&tn=Order${this.data.orderId}&tr=${this.data.orderId}&am=${this.data.amount}&cu=INR`;
-    
+
     console.log(`${this.LOG} UPI string:`, upiString);
 
     // Generate QR code using free API
     this.qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
-    
+
     console.log(`${this.LOG} QR code URL:`, this.qrCodeUrl);
 
     // Create deep link for UPI apps
@@ -137,7 +167,7 @@ export class PaymentModalComponent implements OnInit, OnDestroy {
    */
   private processQRCodeVerification(): void {
     console.log(`${this.LOG} Processing QR code verification...`);
-    
+
     const verificationData = {
       orderId: this.data.orderId,
       amount: this.data.amount,
@@ -214,7 +244,7 @@ export class PaymentModalComponent implements OnInit, OnDestroy {
    */
   private processUPIPayment(): void {
     console.log(`${this.LOG} Processing UPI payment...`);
-    
+
     const paymentData = {
       orderId: this.data.orderId,
       amount: this.data.amount,
@@ -295,7 +325,7 @@ export class PaymentModalComponent implements OnInit, OnDestroy {
    */
   private processCardPayment(): void {
     console.log(`${this.LOG} Processing card payment...`);
-    
+
     const paymentData = {
       orderId: this.data.orderId,
       amount: this.data.amount,

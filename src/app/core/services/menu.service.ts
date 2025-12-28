@@ -31,7 +31,21 @@ export class MenuService {
    * ✅ LEGACY: Local mock menu (kept for compatibility)
    * Used when no backend connection or older components still use it.
    */
-  getMenu(): Observable<FoodItem[]> {
+  getMenu(tenantId?: string): Observable<FoodItem[]> {
+    let url = this.apiUrl;
+    if (tenantId) {
+      url += `?tenant_id=${tenantId}`;
+    }
+    return this.http.get<FoodItem[]>(url).pipe(
+      tap((data: any) => console.log(`🍽️ Menu Data for ${tenantId || 'all'}:`, data)),
+      catchError(err => {
+        console.error('❌ API fetch failed.', err);
+        return of([]);
+      })
+    );
+  }
+
+  getMockMenu(): Observable<FoodItem[]> {
     const items: FoodItem[] = [
       {
         id: 1,

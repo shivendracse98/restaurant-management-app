@@ -1,155 +1,89 @@
-/* HERO SECTION */
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+}
+
 .hero {
-  position: relative;
-  background: url('/assets/images/restaurant-bg.jpg') center/cover no-repeat;
-  min-height: 80vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   text-align: center;
-  color: white;
-  overflow: hidden;
+  margin-bottom: 3rem;
 
-  .overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-  }
-
-  .hero-content {
-    position: relative;
-    max-width: 800px;
-    padding: 0 1rem;
-
-    h1 {
-      font-size: 3rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-
-      span {
-        color: #ffb703;
-      }
-    }
-
-    p {
-      font-size: 1.2rem;
-      color: #f0f0f0;
-      margin-bottom: 2rem;
-    }
-
-    .hero-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-
-      .btn {
-        padding: 0.8rem 1.8rem;
-        border-radius: 8px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.3s ease;
-
-        &.primary {
-          background: #ff6b4a;
-          color: white;
-          &:hover { background: #ff835f; }
-        }
-
-        &.secondary {
-          background: #333;
-          color: white;
-          &:hover { background: #555; }
-        }
-
-        &.outline {
-          border: 2px solid white;
-          color: white;
-          background: transparent;
-          &:hover { background: white; color: #ff6b4a; }
-        }
-      }
-    }
-  }
-}
-
-/* FEATURES SECTION */
-.features {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 2rem;
-  padding: 4rem 2rem;
-  background: #fffaf5;
-
-  .feature {
-    background: #fff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    text-align: center;
-    width: 300px;
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: translateY(-6px);
-    }
-
-    img {
-      width: 80px;
-      height: 80px;
-      object-fit: contain;
-      margin-bottom: 1rem;
-    }
-
-    h3 {
-      color: #ff6b4a;
-      margin-bottom: 0.5rem;
-    }
-
-    p {
-      color: #555;
-      font-size: 0.95rem;
-    }
-  }
-}
-
-/* CTA SECTION */
-.cta {
-  background: linear-gradient(to right, #ff6b4a, #f06595);
-  color: #fff;
-  text-align: center;
-  padding: 3rem 1.5rem;
-
-  h2 {
-    font-size: 2rem;
+  h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
     margin-bottom: 0.5rem;
   }
 
   p {
+    color: #666;
     font-size: 1.1rem;
-    margin-bottom: 1.5rem;
   }
+}
 
-  .btn.large {
-    background: #fff;
-    color: #ff6b4a;
-    font-weight: 700;
-    padding: 1rem 2.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: all 0.3s ease;
+.restaurant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
 
-    &:hover {
-      background: #ffeae2;
+.restaurant-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  border: 1px solid #eee;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+
+    .btn-enter {
+      background: #e65100;
     }
   }
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .hero-content h1 { font-size: 2.2rem; }
-  .features { padding: 3rem 1rem; }
-  .feature { width: 90%; }
+.card-img {
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  background-color: #f5f5f5;
+}
+
+.card-content {
+  padding: 1.5rem;
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.25rem;
+  }
+
+  p {
+    color: #777;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+  }
+}
+
+.btn-enter {
+  width: 100%;
+  padding: 0.75rem;
+  background: #ff6f00; // TasteTown Orange
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #888;
 }
