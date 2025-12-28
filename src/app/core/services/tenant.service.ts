@@ -14,10 +14,13 @@ export class TenantService {
 
     constructor() {
         this.identifyTenantFromUrl();
+        if (!this.getTenantId()) {
+            this.setTenantId('Maa-Ashtabhuja'); // Default for development
+        }
     }
 
     /**
-     * identifying tenant from subdomain (e.g. pizza-hut.app.com)
+     * identifying tenant from subdomain (e.g. Maa-Ashtabhuja.app.com)
      * For now, we'll just mock it or load from storage
      */
     private identifyTenantFromUrl(): void {

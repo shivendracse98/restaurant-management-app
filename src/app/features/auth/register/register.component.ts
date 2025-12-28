@@ -15,13 +15,20 @@ export class RegisterComponent {
   name = '';
   email = '';
   password = '';
+  phoneNumber = '';
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router) { }
 
   submit() {
-    this.auth.register(this.name, this.email, this.password).subscribe(user => {
-    alert(`🎉 Welcome ${user.name}! A welcome email has been sent to ${user.email}.`);
-    this.router.navigate(['/login']);
-  });
+    this.auth.register(this.name, this.email, this.password, this.phoneNumber).subscribe({
+      next: (user) => {
+        alert(`🎉 Welcome ${user.name}! A welcome email has been sent to ${user.email}.`);
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        console.error('Registration failed', err);
+        alert('Registration failed: ' + (err.error?.message || err.message));
+      }
+    });
   }
 }

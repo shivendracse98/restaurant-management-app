@@ -25,6 +25,10 @@ export const coreInterceptor: HttpInterceptorFn = (req, next) => {
         }
     });
 
+    if (req.url.includes('/menu')) {
+        console.log(`📡 Interceptor: Sending Request to ${req.url} with TenantID: '${tenantId}'`);
+    }
+
     return next(clonedReq).pipe(
         catchError((error) => {
             // Handle 401 Unauthorized globally

@@ -15,6 +15,12 @@
       </div>
 
       <div class="form-group">
+        <label>PhoneNumber</label>
+        <input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" required pattern="[0-9]{10}"
+          placeholder="10-digit mobile number" />
+      </div>
+
+      <div class="form-group">
         <label>Password</label>
         <input type="password" [(ngModel)]="password" name="password" required />
       </div>

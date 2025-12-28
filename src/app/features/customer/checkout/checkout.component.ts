@@ -29,7 +29,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   // Data
   cart = {
     items: [] as CartItem[],
-    getCount: function() { return this.items.length; }
+    getCount: function () { return this.items.length; }
   };
   total: number = 0;
   currentUser: any = null;
@@ -89,7 +89,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.authService.getCurrentUser()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (user) => {
+        next: (user: any) => {
           console.log(`${this.LOG} User loaded:`, user);
           this.currentUser = user;
           if (user) {
@@ -103,7 +103,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           }
           this.loading = false;
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error(`${this.LOG} Error loading user:`, err);
           this.loading = false;
         }
@@ -193,7 +193,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           console.log(`${this.LOG} ✓ Order created successfully:`, createdOrder);
           console.log(`${this.LOG} Order ID:`, createdOrder.id);
           console.log(`${this.LOG} Order Total:`, createdOrder.total);
-          
+
           // Step 2: Show payment modal
           this.openPaymentModal(createdOrder);
         },
@@ -202,7 +202,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           console.error(`${this.LOG} Error status:`, error.status);
           console.error(`${this.LOG} Error message:`, error.message);
           console.error(`${this.LOG} Full error:`, error);
-          
+
           this.submitting = false;
           this.toastr.error('Failed to create order. Please try again.');
         }
@@ -294,7 +294,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         error: (error: any) => {
           console.error(`${this.LOG} ✗ Order update failed:`, error);
           console.error(`${this.LOG} Error details:`, error);
-          
+
           this.submitting = false;
           this.toastr.error('Order confirmation failed');
         }

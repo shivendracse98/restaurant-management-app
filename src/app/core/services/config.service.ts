@@ -1,0 +1,29 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { catchError } from 'rxjs/operators';
+
+export interface PaymentConfig {
+    upiId: string;
+    qrImageUrl: string;
+    defaultMode: string;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class ConfigService {
+    private apiUrl = `${environment.apiBaseUrl}/config`;
+
+    constructor(private http: HttpClient) { }
+
+    getPaymentConfig(): Observable<PaymentConfig | null> {
+        return this.http.get<PaymentConfig>(`${this.apiUrl}/payment`).pipe(
+            catchError(err => {
+                console.error('Failed to load payment config', err);
+                return of(null);
+            })
+        );
+    }
+}

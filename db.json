@@ -249,7 +249,7 @@
         }
       ],
       "total": 598,
-      "status": "READY",
+      "status": "DELIVERED",
       "createdAt": "2025-11-12T10:30:00Z"
     },
     {
@@ -285,7 +285,7 @@
         }
       ],
       "total": 405,
-      "status": "PENDING",
+      "status": "DELIVERED",
       "createdAt": "2025-11-12T13:46:46.357Z"
     },
     {
@@ -309,7 +309,7 @@
         }
       ],
       "total": 270,
-      "status": "PENDING",
+      "status": "DELIVERED",
       "createdAt": "2025-11-12T14:28:12.588Z"
     },
     {
@@ -327,7 +327,7 @@
         }
       ],
       "total": 70,
-      "status": "PENDING",
+      "status": "DELIVERED",
       "createdAt": "2025-11-12T14:28:51.586Z"
     },
     {
@@ -415,7 +415,7 @@
         }
       ],
       "total": 299,
-      "status": "PENDING",
+      "status": "DELIVERED",
       "createdAt": "2025-11-12T15:36:03.240Z"
     },
     {
@@ -553,7 +553,7 @@
         }
       ],
       "total": 448,
-      "status": "PENDING",
+      "status": "DELIVERED",
       "createdAt": "2025-11-13T06:16:41.756Z"
     },
     {
@@ -578,7 +578,7 @@
         }
       ],
       "total": 448,
-      "status": "PENDING",
+      "status": "DELIVERED",
       "createdAt": "2025-11-13T06:16:41.958Z"
     },
     {
@@ -603,7 +603,7 @@
         }
       ],
       "total": 448,
-      "status": "PENDING",
+      "status": "DELIVERED",
       "createdAt": "2025-11-13T06:18:34.768Z"
     },
     {
@@ -628,7 +628,7 @@
         }
       ],
       "total": 448,
-      "status": "PENDING",
+      "status": "OUT_FOR_DELIVERY",
       "createdAt": "2025-11-13T07:07:53.022Z"
     },
     {
@@ -653,7 +653,7 @@
         }
       ],
       "total": 448,
-      "status": "PENDING",
+      "status": "DELIVERED",
       "createdAt": "2025-11-13T07:07:59.993Z"
     },
     {

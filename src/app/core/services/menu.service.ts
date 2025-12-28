@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { FoodItem } from '../../models/food-item.model';
 import { environment } from '../../../environments/environment';
 
@@ -11,16 +11,18 @@ import { environment } from '../../../environments/environment';
 export class MenuService {
   private readonly apiUrl = `${environment.apiBaseUrl}/menu`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * ✅ NEW: Fetch all menu items from backend (db.json / API)
    */
   getAllMenuItems(): Observable<FoodItem[]> {
     return this.http.get<FoodItem[]>(this.apiUrl).pipe(
+      tap((data: any) => console.log('🍽️ Raw Menu Data from API:', data)),
       catchError(err => {
-        console.warn('⚠️ API fetch failed, falling back to static menu:', err);
-        return this.getMenu(); // fallback to local mock if API fails
+        console.error('❌ API fetch failed. Showing empty menu to indicate DB disconnection.', err);
+        return of([]); // Return empty to prove we are NOT using static data
+        // return this.getMenu(); // fallback DISABLED to ensure DB testing
       })
     );
   }

@@ -48,37 +48,28 @@ export class AuthService {
   }
 
   /**
-   * Login - Query backend for user (development)
-   * In production, use proper JWT/OAuth
+   * Login - Query backend for user
    */
   login(email: string, password: string): Observable<User | null> {
-    // Check network connectivity first
     if (!this.networkService.isOnline) {
-      // If we encounter an offline situation, we check if there is a way to authenticate locally?
-      // Typically NO, unless we cached the hash. 
-      // For now, we return a specific error or null with console warning.
       console.warn('Cannot login while offline');
-      // We can throw an error that the component can catch
       return throwError(() => ({ message: 'Cannot login while offline. Please check your connection.' }));
     }
 
-    return this.http.get<User[]>(
-      `${this.base}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
-    ).pipe(
-      map(users => users.length ? users[0] : null),
-      tap(user => {
-        if (user) {
+    return this.http.post<any>(`${environment.apiBaseUrl}/auth/login`, { email, password }).pipe(
+      map(response => {
+        if (response && response.token) {
+          const user = response.user;
           this.saveUser(user);
-          // Generate a session ID
-          const sessionId = this.generateSessionId();
-          this.setSessionId(sessionId);
-          // Update BehaviorSubject
+          this.setToken(response.token);
           this.currentUserSubject.next(user);
+          return user;
         }
+        return null;
       }),
       catchError(error => {
         console.error('Login error:', error);
-        return of(null);
+        return throwError(() => error);
       })
     );
   }
@@ -86,19 +77,19 @@ export class AuthService {
   /**
    * Register new user
    */
-  register(name: string, email: string, password: string): Observable<User> {
+  register(name: string, email: string, password: string, phoneNumber: string): Observable<User> {
     if (!this.networkService.isOnline) {
       return throwError(() => ({ message: 'Cannot register while offline. Please check your connection.' }));
     }
 
-    const newUser = { name, email, password, role: 'CUSTOMER' };
-    return this.http.post<User>(`${this.base}`, newUser).pipe(
-      tap(user => {
-        // Auto-login after registration
+    const payload = { name, email, password, phoneNumber, role: 'CUSTOMER' }; // Default role
+    return this.http.post<any>(`${environment.apiBaseUrl}/auth/register`, payload).pipe(
+      map(response => {
+        const user = response.user;
         this.saveUser(user);
-        const sessionId = this.generateSessionId();
-        this.setSessionId(sessionId);
+        this.setToken(response.token);
         this.currentUserSubject.next(user);
+        return user;
       }),
       catchError(error => {
         console.error('Registration error:', error);
@@ -108,171 +99,76 @@ export class AuthService {
   }
 
   /**
-   * Logout - Clear all session data
-   * Use sessionStorage so it clears when browser closes
+   * Logout
    */
   logout(): void {
-    // Clear from sessionStorage
     sessionStorage.removeItem(this.storageKey);
     sessionStorage.removeItem(this.tokenKey);
     sessionStorage.removeItem(this.sessionKey);
-
-    // Also clear from localStorage as backup
     localStorage.removeItem(this.storageKey);
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.sessionKey);
-
-    // Update BehaviorSubject
     this.currentUserSubject.next(null);
-
-    console.log('✓ User logged out, session cleared');
   }
 
-  /**
-   * Save user to sessionStorage (clears on browser close)
-   * Use localStorage only if "Remember me" is selected
-   */
   private saveUser(user: User, rememberMe: boolean = false): void {
     const storage = rememberMe ? localStorage : sessionStorage;
     storage.setItem(this.storageKey, JSON.stringify(user));
-    this.currentUserSubject.next(user);
   }
 
-  /**
-   * Load user from storage (try sessionStorage first, then localStorage)
-   */
   private loadUserFromStorage(): User | null {
-    // Try sessionStorage first
     let raw = sessionStorage.getItem(this.storageKey);
-
-    // Fallback to localStorage
-    if (!raw) {
-      raw = localStorage.getItem(this.storageKey);
-    }
-
+    if (!raw) raw = localStorage.getItem(this.storageKey);
     if (!raw) return null;
-
     try {
       return JSON.parse(raw) as User;
     } catch (e) {
-      console.error('Failed to parse user from storage:', e);
       return null;
     }
   }
 
-  /**
-   * Get current user synchronously
-   */
   currentUser(): User | null {
     return this.currentUserSubject.value;
   }
 
-  /**
-   * Get current user as Observable
-   */
   getCurrentUser(): Observable<User | null> {
     return this.currentUser$;
   }
 
-  /**
-   * Check if user is logged in
-   */
   isLoggedIn(): boolean {
     return !!this.currentUser();
   }
 
-  /**
-   * Check if user is admin
-   */
-  isAdmin(): boolean {
-    const user = this.currentUser();
-    return !!user && user.role === 'ADMIN';
-  }
-
-  /**
-   * Check if user is staff
-   */
-  isStaff(): boolean {
-    const user = this.currentUser();
-    return !!user && (user.role === 'STAFF' || user.role === 'ADMIN');
-  }
-
-  /**
-   * Check if user is customer
-   */
   isCustomer(): boolean {
     const user = this.currentUser();
     return !!user && user.role === 'CUSTOMER';
   }
 
-  /**
-   * Get user token (if using JWT)
-   */
+  isAdmin(): boolean {
+    const user = this.currentUser();
+    return !!user && user.role === 'ADMIN';
+  }
+
+  isStaff(): boolean {
+    const user = this.currentUser();
+    return !!user && (user.role === 'STAFF' || user.role === 'ADMIN');
+  }
+
   getToken(): string | null {
     return sessionStorage.getItem(this.tokenKey) || localStorage.getItem(this.tokenKey);
   }
 
-  /**
-   * Set user token
-   */
   setToken(token: string, rememberMe: boolean = false): void {
     const storage = rememberMe ? localStorage : sessionStorage;
     storage.setItem(this.tokenKey, token);
   }
 
-  /**
-   * Set session ID
-   */
-  private setSessionId(sessionId: string): void {
-    sessionStorage.setItem(this.sessionKey, sessionId);
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${environment.apiBaseUrl}/auth/forgot-password`, { email });
   }
 
-  /**
-   * Get session ID
-   */
-  getSessionId(): string | null {
-    return sessionStorage.getItem(this.sessionKey);
-  }
-
-  /**
-   * Generate unique session ID
-   */
-  private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  /**
-   * Update current user
-   */
-  updateUser(user: User): void {
-    this.saveUser(user);
-    this.currentUserSubject.next(user);
-  }
-
-  /**
-   * Initiate forgot password flow
-   */
-  forgotPassword(email: string): Observable<void> {
-    // Mock API call
-    return of(void 0).pipe(
-      tap(() => console.log('Forgot password requested for:', email))
-    );
-  }
-
-  /**
-   * Reset password with token
-   */
-  resetPassword(token: string, password: string): Observable<void> {
-    // Mock API call
-    return of(void 0).pipe(
-      tap(() => console.log('Password reset with token:', token))
-    );
-  }
-
-  /**
-   * Clear all auth data (comprehensive logout)
-   */
-  clearAuthData(): void {
-    this.logout();
+  resetPassword(token: string, password: string): Observable<any> {
+    // Note: API expects confirmPassword as well
+    return this.http.post(`${environment.apiBaseUrl}/auth/reset-password`, { token, newPassword: password, confirmPassword: password });
   }
 }

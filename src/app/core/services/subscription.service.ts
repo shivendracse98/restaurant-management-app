@@ -10,7 +10,7 @@ import { Subscription } from '../../models/subscription.model';
 export class SubscriptionService {
   private base = `${environment.apiBaseUrl}/subscriptions`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   list(): Observable<Subscription[]> {
     return this.http.get<Subscription[]>(this.base);
@@ -26,5 +26,9 @@ export class SubscriptionService {
 
   update(id: string, data: Partial<Subscription>): Observable<Subscription> {
     return this.http.patch<Subscription>(`${this.base}/${id}`, data);
+  }
+
+  updateStatus(id: string, data: any): Observable<Subscription> {
+    return this.http.patch<Subscription>(`${this.base}/${id}/status`, data);
   }
 }

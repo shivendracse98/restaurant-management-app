@@ -11,6 +11,7 @@ import { SubscriptionService } from '../../../core/services/subscription.service
 import { MenuService } from '../../../core/services/menu.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ConfigService, PaymentConfig } from '../../../core/services/config.service';
 import { FoodItem } from '../../../models/food-item.model';
 import { Subscription as TiffinModel } from '../../../models/subscription.model';
 
@@ -33,6 +34,9 @@ export class StaffPosComponent implements OnInit, OnDestroy {
   subscriptionsList: TiffinModel[] = [];
   todayOrders: any[] = [];
   ongoingOrders: any[] = [];
+  paymentConfig: PaymentConfig | null = null;
+  paymentMode: string = 'CASH';
+  pendingTiffinPayload: TiffinModel | null = null;
 
   // UI state
   message = '';
@@ -58,6 +62,9 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     customerPhone: ['', Validators.required],
     frequency: ['DAILY', Validators.required],
     durationMonths: [1, Validators.required],
+    type: ['LUNCH', Validators.required],
+    address: ['', Validators.required],
+    pricePerMeal: [100, [Validators.required, Validators.min(1)]],
     menuItemId: [null, Validators.required]
   });
 
@@ -94,6 +101,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     private menuService: MenuService,
     private auth: AuthService,
     private notificationService: NotificationService,
+    private configService: ConfigService,
     private route: ActivatedRoute
   ) { }
 
@@ -110,6 +118,16 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       else if (qp['tab'] === 'ongoing') this.activeTab = 'ONGOING';
       else this.activeTab = 'ORDER';
     });
+
+    // Load Payment Config
+    this.configService.getPaymentConfig().subscribe(config => {
+      if (config) {
+        this.paymentConfig = config;
+        if (config.defaultMode === 'UPI') {
+          this.paymentMode = 'UPI';
+        }
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -123,6 +141,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     this.menuService.getAllMenuItems().pipe(takeUntil(this.destroy$)).subscribe({
       next: (data: any) => {
         this.menuItems = data || [];
+        this.filterTiffinMenu(); // Separate Tiffin items
       },
       error: (err: any) => console.error('Menu load error', err)
     });
@@ -158,7 +177,8 @@ export class StaffPosComponent implements OnInit, OnDestroy {
         const arr = Array.isArray(all) ? all : [];
         this.ongoingOrders = arr.filter((o: any) => {
           const status = o.status || 'PENDING';
-          return status !== 'DELIVERED' && status !== 'CANCELLED';
+          // Filter out CANCELLED and COMPLETED/PAID (if exists), but keep DELIVERED (Served)
+          return status !== 'CANCELLED' && status !== 'COMPLETED' && status !== 'PAID';
         });
       },
       error: (err: any) => {
@@ -227,7 +247,9 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     }
 
     const mapped = items.map((i: FoodItem) => ({
-      menuItemId: i.id,
+      // If 'i' has 'id' (from menu selection), use that as menuItemId.
+      id: i.id, // IMPORTANT: cart item must have 'id' so OrderService can map it to 'menuItemId'
+      menuItemId: i.id, // Also keeping this for safety if logic changes
       qty: 1,
       price: i.price,
       name: i.name
@@ -238,6 +260,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       customerPhone: this.orderForm.value.customerPhone || '0000000000',
       address: this.orderForm.value.address || 'Restaurant',
       orderType: this.orderForm.value.orderType || 'DINE_IN',
+      tableNumber: this.orderForm.value.tableNumber || '', // Added tableNumber
       items: mapped,
       total: mapped.reduce((s: number, m: any) => s + (m.price || 0) * (m.qty || 1), 0),
       status: 'PENDING',
@@ -270,15 +293,36 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   // ========== TIFFIN MANAGEMENT ==========
 
-  selectTiffinPlan(plan: 'plain' | 'deluxe' | 'special'): void {
-    const key = plan === 'plain' ? 'plain' : plan === 'deluxe' ? 'deluxe' : 'special';
-    const found = this.menuItems.find((m: FoodItem) => (m.name || '').toLowerCase().includes(key));
-    if (found) {
-      this.tiffinForm.patchValue({ menuItemId: found.id as any });
-    } else if (this.menuItems.length) {
-      this.tiffinForm.patchValue({ menuItemId: this.menuItems[0].id as any });
-    }
-    this.tiffinForm.patchValue({ frequency: 'DAILY', durationMonths: 1 });
+  tiffinMenuItems: FoodItem[] = [];
+
+  // Recalculate Tiffin list when menu loads
+  private filterTiffinMenu(): void {
+    this.tiffinMenuItems = this.menuItems.filter(m => (m.category || '').toUpperCase() === 'TIFFIN');
+  }
+
+  // Dynamic Price Calculation
+  get tiffinCalculation(): any {
+    const months = this.tiffinForm.value.durationMonths || 1;
+    const menuId = this.tiffinForm.value.menuItemId;
+    const selected = this.menuItems.find(m => m.id == Number(menuId));
+
+    if (!selected) return null;
+
+    const dailyPrice = selected.price || 0;
+    const standardDays = 30 * months;
+    const billedDays = 28 * months; // 2 Days Free per month
+
+    const standardTotal = dailyPrice * standardDays;
+    const finalPrice = dailyPrice * billedDays;
+    const saved = standardTotal - finalPrice;
+
+    return {
+      dailyPrice,
+      months,
+      billedDays,
+      finalPrice,
+      saved
+    };
   }
 
   createTiffin(): void {
@@ -287,43 +331,121 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const menuId = Number(this.tiffinForm.value.menuItemId);
-    const selected = this.menuItems.find((m: FoodItem) => m.id === menuId);
-    if (!selected) {
-      this.message = '⚠️ Pick valid tiffin menu';
+    const calc = this.tiffinCalculation;
+    if (!calc) {
+      this.message = '⚠️ Invalid Menu Selection';
       return;
     }
 
-    const payload: any = {
-      customerName: this.tiffinForm.value.customerName,
-      customerPhone: this.tiffinForm.value.customerPhone,
-      startDate: new Date().toISOString().split('T')[0],
-      frequency: this.tiffinForm.value.frequency,
-      durationMonths: Number(this.tiffinForm.value.durationMonths),
-      menuPlan: [
-        { menuItemId: selected.id, name: selected.name, qty: 1, price: selected.price }
-      ],
-      totalPerDelivery: selected.price,
+    const today = new Date();
+    const startDate = today.toISOString().split('T')[0];
+
+    // Logic: 30 days per month
+    const totalDays = 30 * calc.months;
+    const endDateObj = new Date(today);
+    endDateObj.setDate(today.getDate() + totalDays);
+
+    // Max Extension: 5 days per month
+    const maxDays = totalDays + (5 * calc.months);
+    const maxEndDateObj = new Date(today);
+    maxEndDateObj.setDate(today.getDate() + maxDays);
+
+    const payload: TiffinModel = {
+      customerName: this.tiffinForm.value.customerName || '',
+      customerPhone: this.tiffinForm.value.customerPhone || '',
+      address: this.tiffinForm.value.address || '',
+
+      startDate: startDate,
+      endDate: endDateObj.toISOString().split('T')[0],
+      maxEndDate: maxEndDateObj.toISOString().split('T')[0],
+
+      frequency: 'DAILY',
+      durationMonths: calc.months,
+      menuItemId: Number(this.tiffinForm.value.menuItemId) || 0,
+      menuItemName: this.menuItems.find(m => m.id == Number(this.tiffinForm.value.menuItemId))?.name || 'Tiffin',
+
+      pricePerDay: calc.dailyPrice,
+      billedDays: calc.billedDays,
+      discountAmount: calc.saved,
+      finalAmount: calc.finalPrice,
+
       status: 'ACTIVE',
-      createdBy: this.auth.currentUser()?.name || 'Staff',
-      createdAt: new Date().toISOString()
+      totalPausedDays: 0
     };
 
-    this.isLoading = true;
+    this.pendingTiffinPayload = payload;
 
-    this.subscriptionService.create(payload).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        this.message = '✅ Tiffin created successfully';
-        this.isLoading = false;
-        this.tiffinForm.reset({ frequency: 'DAILY', durationMonths: 1 });
-        this.loadSubscriptions();
-      },
-      error: (err: any) => {
-        console.error('Tiffin create failed', err);
-        this.message = '❌ Failed to create tiffin';
-        this.isLoading = false;
-      }
+    // Open Payment Modal with mapped fields
+    this.openPayment({
+      id: 'NEW-SUB',
+      customerName: payload.customerName,
+      total: payload.finalAmount,
+      // Metadata for display if needed
     });
+    this.message = '💰 Proceeding to Payment...';
+  }
+
+  // Action: Pause (Start Pause) or Resume (End Pause)
+  toggleSubscriptionStatus(sub: TiffinModel): void {
+    if (sub.status === 'ACTIVE') {
+      // PAUSE: Send FULL object to ensure backend validation passes
+      const payload: any = {
+        ...sub, // Clone all existing fields
+        status: 'PAUSED',
+        pausedAt: new Date().toISOString(),
+        endDate: sub.endDate,
+        totalPausedDays: sub.totalPausedDays
+      };
+
+      this.subscriptionService.updateStatus(sub.id!, payload).subscribe({
+        next: () => {
+          this.message = '⏸ Subscription Paused';
+          this.loadSubscriptions();
+        },
+        error: (err: any) => {
+          console.error('Pause failed', err);
+          this.loadSubscriptions(); // Reload to revert UI state if failed
+          this.message = '❌ Failed to pause subscription';
+        }
+      });
+    } else if (sub.status === 'PAUSED' && sub.pausedAt) {
+      // RESUME logic
+      const pausedDate = new Date(sub.pausedAt);
+      const now = new Date();
+      // Diff in days
+      const diffTime = Math.abs(now.getTime() - pausedDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      const newTotalPaused = (sub.totalPausedDays || 0) + diffDays;
+
+      // Calculate new End Date
+      const currentEnd = new Date(sub.endDate);
+      currentEnd.setDate(currentEnd.getDate() + diffDays);
+
+      // Check Max Limit
+      const maxEnd = new Date(sub.maxEndDate);
+      const finalEnd = currentEnd > maxEnd ? maxEnd : currentEnd;
+
+      const payload: any = {
+        ...sub, // Clone all existing fields
+        status: 'ACTIVE',
+        pausedAt: null, // Send null to clear on backend
+        totalPausedDays: newTotalPaused,
+        endDate: finalEnd.toISOString().split('T')[0]
+      };
+
+      this.subscriptionService.updateStatus(sub.id!, payload).subscribe({
+        next: () => {
+          this.message = `✅ Resumed! Extended by ${diffDays} days.`;
+          this.loadSubscriptions();
+        },
+        error: (err: any) => {
+          console.error('Resume failed', err);
+          this.loadSubscriptions();
+          this.message = '❌ Failed to resume subscription';
+        }
+      });
+    }
   }
 
   // ========== ONGOING ORDERS (EDIT/MARK PAID) ==========
@@ -461,6 +583,94 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     this.message = '';
     if (tab === 'REVENUE') this.loadTodayOrders();
     if (tab === 'ONGOING') this.loadOngoingOrders();
+  }
+
+  markAsServed(order: any): void {
+    if (!order || !order.id) return;
+    this.orderService.updateOrderStatus(order.id, 'DELIVERED').pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.message = '✅ Order marked as SERVED';
+        this.loadOngoingOrders();
+      },
+      error: (err: any) => {
+        console.error('Update status failed', err);
+        this.message = '❌ Failed to update status';
+      }
+    });
+  }
+
+  // ========== PAYMENT CONFIRMATION ==========
+  showPaymentModal = false;
+  payOrder: any = null;
+
+  openPayment(order: any): void {
+    this.payOrder = order;
+    this.paymentMode = 'CASH';
+    this.showPaymentModal = true;
+  }
+
+  closePayment(): void {
+    this.showPaymentModal = false;
+    this.payOrder = null;
+  }
+
+  confirmPayment(): void {
+    // 1. Handle Tiffin Subscription Payment
+    if (this.pendingTiffinPayload) {
+      this.isLoading = true;
+      // In a real app, you might record the payment transaction separately here.
+      // For now, we assume creation implies paid/active status as per current schema.
+
+      this.subscriptionService.create(this.pendingTiffinPayload).subscribe({
+        next: () => {
+          this.message = `✅ Subscription Active! Paid via ${this.paymentMode}`;
+          this.isLoading = false;
+          this.pendingTiffinPayload = null;
+          this.closePayment();
+
+          // Reset Form
+          this.tiffinForm.reset({
+            durationMonths: 1,
+            frequency: 'DAILY',
+            pricePerMeal: 100
+          });
+          this.loadSubscriptions();
+        },
+        error: (err: any) => {
+          console.error('Subscription creation failed', err);
+          this.message = '❌ Failed to create subscription';
+          this.isLoading = false;
+        }
+      });
+      return;
+    }
+
+    // 2. Handle Regular Order Payment
+    if (!this.payOrder) return;
+
+    // Call new Pay endpoint
+    this.orderService.payOrder(this.payOrder.id, this.paymentMode, this.payOrder.totalAmount || this.payOrder.total).subscribe({
+      next: () => {
+        this.message = `💰 Payment Confirmed (${this.paymentMode})`;
+        this.closePayment();
+        this.loadOngoingOrders(); // Refresh to remove 'PAID' order
+        this.loadTodayOrders(); // Refresh revenue
+      },
+      error: (err: any) => {
+        console.error('Payment failed', err);
+        this.message = '❌ Payment failed';
+      }
+    });
+  }
+
+  // Helper to parse notes
+  private extractMetadata(notes: string): any {
+    try {
+      if (notes && notes.startsWith('{')) {
+        return JSON.parse(notes);
+      }
+    } catch (e) { }
+    return { originalNotes: notes };
   }
 
   trackByItem(_index: number, item: FoodItem): number {
