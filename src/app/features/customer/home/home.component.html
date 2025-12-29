@@ -1,23 +1,104 @@
 <div class="home-container">
+
+  <!-- HERO SECTION -->
   <div class="hero">
-    <h1>Welcome to TasteTown 🍔</h1>
-    <p>Select a restaurant to start ordering</p>
+    <h1>Welcome to <span class="brand-accent">TasteTown</span> 🍔</h1>
+    <p>Discover the best local flavors, delivered straight to your table or doorstep. Select a restaurant below to start
+      your culinary journey.</p>
   </div>
 
+  <!-- LOADER -->
   <div *ngIf="loading" class="loading">
     <div class="spinner"></div>
-    <p>Loading restaurants...</p>
+    <p>Loading our partner kitchens...</p>
   </div>
 
-  <div class="restaurant-grid" *ngIf="!loading">
-    <div class="restaurant-card" *ngFor="let tenant of tenants" (click)="selectTenant(tenant.tenantId)">
-      <div class="card-img"
-        [style.background-image]="'url(' + (tenant.imageUrl || 'assets/default-restaurant.jpg') + ')'"></div>
-      <div class="card-content">
-        <h3>{{ tenant.name }}</h3>
-        <p>{{ tenant.description }}</p>
-        <button class="btn-enter">View Menu ➔</button>
+  <!-- RESTAURANTS GRID (FLIP CARDS) -->
+  <div class="restaurants-section" *ngIf="!loading">
+    <div class="restaurant-grid">
+      <div class="restaurant-card" *ngFor="let tenant of tenants" (click)="selectTenant(tenant.tenantId)">
+        <div class="flip-inner">
+
+          <!-- FRONT FACE -->
+          <div class="flip-front">
+            <div class="img-wrapper">
+              <div class="card-img"
+                [style.background-image]="'url(' + (tenant.imageUrl || 'assets/default-restaurant.jpg') + ')'"></div>
+            </div>
+            <div class="card-content">
+              <h3>{{ tenant.name }}</h3>
+              <p>{{ tenant.description }}</p>
+            </div>
+          </div>
+
+          <!-- BACK FACE -->
+          <div class="flip-back">
+            <h3>{{ tenant.name }}</h3>
+            <p>{{ tenant.detailedDescription || tenant.description }}</p>
+            <button class="btn-enter">View Menu ➔</button>
+          </div>
+
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- MEET THE DEVELOPER SECTION -->
+  <section class="developer-section">
+    <h2>Meet the Developer</h2>
+    <div class="dev-card-container">
+      <div class="dev-inner">
+        <!-- Front -->
+        <div class="dev-front">
+          <div class="avatar">👨‍💻</div>
+          <h3>Shivendra</h3>
+          <span class="role">Software Engineer</span>
+        </div>
+        <!-- Back -->
+        <div class="dev-back">
+          <h3>Shivendra</h3>
+          <p>Software engineer having 5 years of industry experience. Worked for product-based companies like Manhattan
+            Associates, TCS, and Papa John's.</p>
+          <div class="contact-info">
+            <div>📞 +91 62675 26722</div>
+            <div>✉️ shivendra.cse.98&#64;gmail.com</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-content">
+
+      <!-- About -->
+      <div class="footer-col">
+        <h4>About TasteTown</h4>
+        <p>Your one-stop destination for multi-cuisine delights. Whether you crave a homely Tiffin or a gourmet Feast,
+          we connect you with the best kitchens in town.</p>
+      </div>
+
+      <!-- Address -->
+      <div class="footer-col">
+        <h4>Visit Us</h4>
+        <p>Shop No 12, Fortune Pride<br>
+          Trilanga, Bhopal<br>
+          Madhya Pradesh 462039</p>
+      </div>
+
+      <!-- Contact -->
+      <div class="footer-col">
+        <h4>Get in Touch</h4>
+        <p>Email: <a href="mailto:shivendra.cse.98@gmail.com">shivendra.cse.98&#64;gmail.com</a></p>
+        <p>Phone: +91 62675 26722</p>
+      </div>
+
+    </div>
+
+    <div class="copyright">
+      &copy; 2025 TasteTown. All rights reserved. Made with ❤️ in Bhopal.
+    </div>
+  </footer>
+
 </div>

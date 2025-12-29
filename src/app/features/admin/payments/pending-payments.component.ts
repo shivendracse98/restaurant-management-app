@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { PaymentService, Payment, PaymentStats } from '../../../core/services/payment.service';
+import { OrderService } from '../../../core/services/order.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-pending-payments',
@@ -21,65 +22,80 @@ export class PendingPaymentsComponent implements OnInit {
     'date',
     'actions'
   ];
-  pendingPayments: Payment[] = [];
-  stats: PaymentStats | null = null;
+  pendingPayments: any[] = []; // Now storing Orders
   loading = false;
 
-  constructor(private paymentService: PaymentService) {}
+  // Statistics (Optional: Calculate from list or fetch separate)
+  stats = {
+    pendingApprovals: 0,
+    totalRevenue: 0, // Maybe hide or calc
+    successfulTransactions: 0,
+    failedTransactions: 0
+  };
+
+  constructor(
+    private orderService: OrderService,
+    private toastr: ToastrService
+  ) { }
 
   ngOnInit(): void {
     this.loadPendingPayments();
-    this.paymentService.stats$.subscribe((stats) => {
-      this.stats = stats;
-    });
   }
 
   loadPendingPayments(): void {
     this.loading = true;
-    this.paymentService.getPendingPayments().subscribe({
-      next: (payments) => {
-        this.pendingPayments = payments;
+    this.orderService.getOrders().subscribe({
+      next: (orders) => {
+        // Filter for Verification Pending OR Pay at Counter (Pending)
+        this.pendingPayments = orders.filter(o => {
+          const needsVerify = o.paymentStatus === 'VERIFICATION_PENDING';
+          const payAtCounter = o.paymentMode === 'CASH' && o.status === 'PENDING';
+          // Only show if NOT cancelled
+          return (needsVerify || payAtCounter) && o.status !== 'CANCELLED';
+        });
+
+        this.stats.pendingApprovals = this.pendingPayments.length;
         this.loading = false;
       },
       error: (err) => {
-        console.error('Error loading payments:', err);
+        console.error('Error loading orders:', err);
         this.loading = false;
       }
     });
   }
 
-  approvePayment(payment: Payment): void {
-    if (confirm(`Approve payment of ₹${payment.amount}?`)) {
-      this.paymentService.approvePayment(payment.id, 'Admin').subscribe({
+  approvePayment(order: any): void {
+    if (confirm(`Verify & Confirm Order #${order.id}?`)) {
+      this.orderService.verifyPayment(order.id).subscribe({
         next: () => {
-          alert('Payment approved');
+          this.toastr.success('✅ Payment Verified! Order Confirmed.');
           this.loadPendingPayments();
         },
         error: (err) => {
-          console.error('Error approving payment:', err);
-          alert('Failed to approve payment');
+          console.error('Error verifying order:', err);
+          this.toastr.error('Failed to verify payment');
         }
       });
     }
   }
 
-  rejectPayment(payment: Payment): void {
-    const reason = prompt('Reason for rejection:');
+  rejectPayment(order: any): void {
+    const reason = prompt('Reason for rejection (Cancels Order):');
     if (!reason) return;
 
-    this.paymentService.rejectPayment(payment.id, reason).subscribe({
+    this.orderService.updateOrderStatus(order.id, 'CANCELLED').subscribe({
       next: () => {
-        alert('Payment rejected');
+        this.toastr.info('❌ Order Cancelled/Rejected.');
         this.loadPendingPayments();
       },
       error: (err) => {
-        console.error('Error rejecting payment:', err);
-        alert('Failed to reject payment');
+        console.error('Error rejecting order:', err);
+        this.toastr.error('Failed to reject order');
       }
     });
   }
 
-  trackByPaymentId(_index: number, payment: Payment): string {
-    return payment.id;
+  trackByPaymentId(_index: number, item: any): string {
+    return item.id;
   }
 }

@@ -1,93 +1,257 @@
-/* ==== ADMIN DASHBOARD ==== */
+/* ==== ADMIN DASHBOARD: PREMIUM GLASSMORPHISM ==== */
 
 .admin-dashboard {
-  max-width: 1040px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2.1rem 1rem 0 1rem;
-  background: linear-gradient(120deg, #FFF8E7 0, #FFF1DE 90%, #FDB86B 120%);
-  border-radius: 18px;
-  box-shadow: 0 3px 24px rgba(230,126,34,0.09);
+  padding: 2.5rem 1.5rem;
+  // Animated Mesh Gradient Background
+  background:
+    radial-gradient(at 0% 0%, hsla(25, 95%, 63%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(145, 63%, 42%, 0.1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(38, 90%, 55%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(25, 95%, 63%, 0.1) 0px, transparent 50%),
+    #FFFBF5; // Soft Cream Base
+
+  border-radius: 24px;
+  min-height: 85vh;
+}
+
+// ==== HEADER SECTION ====
+header {
+  margin-bottom: 2.5rem;
 
   h2 {
-    color: #E67E22;
-    font-size: 2.1rem;
+    color: #2D3436;
+    font-size: 2.4rem;
     font-weight: 800;
-    margin-bottom: 1.6rem;
-    letter-spacing: 0.03em;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
     display: flex;
     align-items: center;
-    gap: .6rem;
+    gap: 0.8rem;
+
+    mat-icon {
+      font-size: 2.4rem;
+      width: 2.4rem;
+      height: 2.4rem;
+      color: var(--primary);
+    }
   }
 }
 
-.cards {
+// ==== STATS ROW (LIVE METRICS) ====
+.stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2.1rem;
-  margin-top: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.75); // Glass Layer
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 1.5rem;
+    border-radius: 20px;
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.02),
+      0 12px 16px rgba(230, 126, 34, 0.04);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow:
+        0 8px 12px rgba(0, 0, 0, 0.03),
+        0 18px 24px rgba(230, 126, 34, 0.08);
+
+      .icon-box {
+        transform: rotate(10deg) scale(1.1);
+      }
+    }
+
+    .stat-content {
+      display: flex;
+      flex-direction: column;
+
+      .label {
+        font-size: 0.9rem;
+        color: #636E72;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.4rem;
+      }
+
+      .value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        line-height: 1.1;
+      }
+
+      .sub-text {
+        font-size: 0.8rem;
+        color: #27AE60; // Growth Green
+        margin-top: 0.4rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+      }
+    }
+
+    .icon-box {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.4s ease;
+
+      mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+
+      &.revenue {
+        background: rgba(230, 126, 34, 0.12);
+        color: var(--primary);
+      }
+
+      &.orders {
+        background: rgba(52, 152, 219, 0.12);
+        color: var(--info);
+      }
+
+      &.pending {
+        background: rgba(241, 196, 15, 0.15); // Warmer yellow bg
+        color: #F39C12;
+      }
+    }
+  }
 }
 
-.cards .card {
-  cursor: pointer;
-  background: linear-gradient(110deg, #FFF8E7 90%, #FEDAAB 110%);
-  border-radius: 18px;
-  box-shadow: 0 7px 26px rgba(230,126,34,0.11);
-  padding: 1.6rem 1.3rem 1.3rem 1.3rem;
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  transition: box-shadow 0.16s, transform 0.17s, border 0.19s;
-  border: 2.1px solid #FFF1DE;
-  min-width: 180px;
-  position: relative;
-
+// ==== MAIN NAVIGATION GRID ====
+.nav-section {
   h3 {
-    font-size: 1.28rem;
-    color: #E67E22;
+    font-size: 1.4rem;
+    color: #2D3436;
+    margin-bottom: 1.5rem;
     font-weight: 700;
-    margin-bottom: 0.9rem;
-    letter-spacing: 0.03em;
+  }
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.8rem;
+}
+
+.nav-card {
+  position: relative;
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 1.8rem;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.015);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+
+  // Hover State
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.06);
+    border-color: rgba(230, 126, 34, 0.2);
+
+    .card-icon {
+      background: var(--primary);
+      color: #FFF;
+      transform: scale(1.05);
+    }
+
+    h4 {
+      color: var(--primary);
+    }
+  }
+
+  .card-header {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: none; // Override global
+    padding-bottom: 0;
+  }
+
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--bg-secondary);
+    color: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+
+    mat-icon {
+      font-size: 26px;
+      width: 26px;
+      height: 26px;
+    }
+  }
+
+  h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2D3436;
+    margin: 0;
+    transition: color 0.3s ease;
   }
 
   p {
-    color: #27AE60;
-    font-size: 1.02rem;
-    font-weight: 500;
-    margin-bottom: 0;
+    color: #636E72;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
   }
 
-  &:hover,
-  &:focus-visible {
-    border-color: #27AE60;
-    background: linear-gradient(109deg, #FFF8E7 75%, #CEF6C1 130%);
-    box-shadow: 0 13px 44px rgba(39,174,96,0.14);
-    transform: translateY(-7px) scale(1.04);
+  // Decorative arrow
+  &::after {
+    content: '→';
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    font-size: 1.2rem;
+    color: var(--primary);
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+  }
+
+  &:hover::after {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
-@media (max-width: 800px) {
+// ==== RESPONSIVE ====
+@media (max-width: 768px) {
   .admin-dashboard {
-    padding: 1.1rem 0.11rem 0 0.11rem;
-    border-radius: 13px;
+    padding: 1.5rem 1rem;
   }
-  .cards {
-    grid-template-columns: 1fr;
-    gap: 1.1rem;
-  }
-}
 
-/* For great scrolling visuals with food dashboards */
-::-webkit-scrollbar {
-  width: 8px;
-  background: #FFF1DE;
-}
-::-webkit-scrollbar-thumb {
-  background: #E67E22;
-  border-radius: 5px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #27AE60;
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
 }

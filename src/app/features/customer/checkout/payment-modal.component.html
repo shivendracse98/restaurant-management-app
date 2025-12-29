@@ -10,121 +10,66 @@
   <!-- Payment Methods Tab -->
   <div *ngIf="!paymentSubmitted" class="payment-methods">
     <div class="method-tabs">
-      <button [class.active]="paymentMethod === 'QR_CODE'" 
-              (click)="paymentMethod = 'QR_CODE'"
-              class="method-tab">
+      <button [class.active]="paymentMethod === 'QR_CODE'" (click)="paymentMethod = 'QR_CODE'" class="method-tab">
         📲 QR Code
       </button>
-      <button [class.active]="paymentMethod === 'UPI'" 
-              (click)="paymentMethod = 'UPI'"
-              class="method-tab">
-        📱 UPI
+      <button [class.active]="paymentMethod === 'UPI'" (click)="paymentMethod = 'UPI'" class="method-tab">
+        📱 UPI Ref
       </button>
-      <button [class.active]="paymentMethod === 'RAZORPAY'" 
-              (click)="paymentMethod = 'RAZORPAY'"
-              class="method-tab">
-        💳 Card
+      <button [class.active]="paymentMethod === 'CASH'" (click)="paymentMethod = 'CASH'" class="method-tab at-counter">
+        🏪 Pay at Counter
       </button>
     </div>
   </div>
 
   <!-- Content -->
   <div class="modal-content">
+
+    <!-- Platform Fee Waiver Banner -->
+    <div *ngIf="paymentMethod !== 'CASH' && !paymentSubmitted" class="fee-waiver-banner">
+      <mat-icon>verified_user</mat-icon>
+      <span>Upload Payment Proof to <strong>WAIVE ₹10 Platform Fee!</strong></span>
+    </div>
+
     <!-- QR CODE Method -->
     <div *ngIf="paymentMethod === 'QR_CODE' && !paymentSubmitted" class="payment-section qr-section">
       <h3>Scan QR Code</h3>
-
       <div class="qr-container">
         <img [src]="qrCodeUrl" alt="Payment QR Code" class="qr-code" loading="lazy" />
         <p class="qr-instruction">Scan this QR with any UPI app</p>
       </div>
 
-      <div class="instructions">
-        <h4>How to pay:</h4>
-        <ol>
-          <li>Open Google Pay, PhonePe, or Paytm</li>
-          <li>Tap "Scan QR Code"</li>
-          <li>Scan the QR above</li>
-          <li>Complete payment with your PIN</li>
-          <li>Click "Verify Payment" when done</li>
-        </ol>
+      <!-- Proof Input -->
+      <div class="proof-input-group">
+        <label>Enter UTR / Transaction ID (Required):</label>
+        <input type="text" [(ngModel)]="paymentProof" placeholder="e.g. 123456789012" class="form-control">
+        <small class="hint">Found in your UPI app after payment.</small>
       </div>
     </div>
 
     <!-- UPI Method -->
     <div *ngIf="paymentMethod === 'UPI' && !paymentSubmitted" class="payment-section upi-section">
-      <h3>Pay via UPI</h3>
-
+      <h3>Pay via UPI ID</h3>
       <div class="upi-manual">
-        <h4>UPI ID</h4>
-        <div class="upi-input-group">
-          <input type="text" 
-                 [value]="upiId" 
-                 readonly 
-                 class="upi-id-input" />
-          <button (click)="copyUpiId()" type="button" class="btn-copy">
-            📋 Copy
-          </button>
-        </div>
+        <h4>UPI ID: <span class="highlight">{{ upiId }}</span></h4>
+        <button (click)="copyUpiId()" type="button" class="btn-copy">📋 Copy</button>
       </div>
 
-      <div class="instructions">
-        <h4>How to pay:</h4>
-        <ol>
-          <li>Copy the UPI ID above</li>
-          <li>Open your UPI app</li>
-          <li>Paste UPI ID or enter manually</li>
-          <li>Enter amount: ₹{{ data.amount }}</li>
-          <li>Complete payment with your PIN</li>
-        </ol>
+      <!-- Proof Input -->
+      <div class="proof-input-group">
+        <label>Enter UTR / Transaction ID (Required):</label>
+        <input type="text" [(ngModel)]="paymentProof" placeholder="e.g. 123456789012" class="form-control">
       </div>
     </div>
 
-    <!-- RAZORPAY Card Method -->
-    <div *ngIf="paymentMethod === 'RAZORPAY' && !paymentSubmitted" class="payment-section card-section">
-      <h3>Card Payment</h3>
-
-      <form class="card-form">
-        <div class="form-group">
-          <label>Card Number</label>
-          <input type="text" 
-                 [(ngModel)]="cardNumber" 
-                 name="cardNumber"
-                 (input)="formatCardNumber()"
-                 placeholder="1234 5678 9012 3456"
-                 maxlength="19"
-                 class="form-control" />
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Expiry Date</label>
-            <input type="text" 
-                   [(ngModel)]="expiryDate" 
-                   name="expiryDate"
-                   (input)="formatExpiryDate()"
-                   placeholder="MM/YY"
-                   maxlength="5"
-                   class="form-control" />
-          </div>
-
-          <div class="form-group">
-            <label>CVV</label>
-            <input type="text" 
-                   [(ngModel)]="cvv" 
-                   name="cvv"
-                   (input)="formatCVV()"
-                   placeholder="123"
-                   maxlength="3"
-                   class="form-control" />
-          </div>
-        </div>
-      </form>
-
-      <div class="test-info">
-        <p><strong>Test Card:</strong> 4111 1111 1111 1111</p>
-        <p><strong>Any future date & any 3-digit CVV</strong></p>
+    <!-- PAY AT COUNTER Method -->
+    <div *ngIf="paymentMethod === 'CASH' && !paymentSubmitted" class="payment-section cash-section">
+      <div class="counter-pay-icon">
+        <mat-icon>store</mat-icon>
       </div>
+      <h3>Pay at Counter</h3>
+      <p>Proceed to the counter and pay via Cash or Soundbox QR.</p>
+      <p class="highlight-text">Your order will be placed as <strong>PENDING</strong> until staff marks it paid.</p>
     </div>
 
     <!-- Payment Status -->
@@ -137,65 +82,42 @@
 
       <div class="status-text">
         <h3>{{ paymentMessage }}</h3>
-        <p *ngIf="paymentStatus === 'PENDING'">Processing your payment...</p>
-        <p *ngIf="paymentStatus === 'SUCCESS'">Your order will be confirmed shortly</p>
-        <p *ngIf="paymentStatus === 'FAILED'">Please try again or use another payment method</p>
+        <p *ngIf="paymentStatus === 'PENDING'">Processing...</p>
+        <p *ngIf="paymentStatus === 'SUCCESS'">Verification Submitted!</p>
+        <p *ngIf="paymentStatus === 'FAILED'">{{ paymentMessage }}</p>
       </div>
     </div>
   </div>
 
   <!-- Actions -->
   <div class="modal-actions">
-    <button *ngIf="!paymentSubmitted"
-            (click)="cancelPayment()" 
-            type="button"
-            [disabled]="processing"
-            class="btn btn-secondary">
+    <button *ngIf="!paymentSubmitted" (click)="cancelPayment()" type="button" [disabled]="processing"
+      class="btn btn-secondary">
       Cancel
     </button>
 
-    <!-- QR Code Submit -->
-    <button *ngIf="paymentMethod === 'QR_CODE' && !paymentSubmitted"
-            (click)="submitQRCodePayment()"
-            type="button"
-            [disabled]="processing"
-            class="btn btn-primary">
-      <span *ngIf="!processing">✓ Verify Payment</span>
+    <!-- QR/UPI Submit (Requires Proof) -->
+    <button *ngIf="(paymentMethod === 'QR_CODE' || paymentMethod === 'UPI') && !paymentSubmitted"
+      (click)="submitProofPayment()" type="button" [disabled]="processing || !paymentProof || paymentProof.length < 4"
+      class="btn btn-primary" style="background: #27AE60;"> <!-- Green for Verified -->
+      <span *ngIf="!processing">✓ Submit Proof</span>
       <span *ngIf="processing">⏳ Verifying...</span>
     </button>
 
-    <!-- UPI Submit -->
-    <button *ngIf="paymentMethod === 'UPI' && !paymentSubmitted"
-            (click)="submitUPIPayment()"
-            type="button"
-            [disabled]="processing"
-            class="btn btn-primary">
-      <span *ngIf="!processing">✓ Confirm Payment</span>
+    <!-- Pay at Counter Submit -->
+    <button *ngIf="paymentMethod === 'CASH' && !paymentSubmitted" (click)="submitCounterPayment()" type="button"
+      [disabled]="processing" class="btn btn-primary" style="background: #E67E22;"> <!-- Orange for Pending -->
+      <span *ngIf="!processing">Place Order (Pay Later)</span>
       <span *ngIf="processing">⏳ Processing...</span>
     </button>
 
-    <!-- Card Submit -->
-    <button *ngIf="paymentMethod === 'RAZORPAY' && !paymentSubmitted"
-            (click)="submitCardPayment()"
-            type="button"
-            [disabled]="processing || !cardNumber || !expiryDate || !cvv"
-            class="btn btn-primary">
-      <span *ngIf="!processing">Pay ₹{{ data.amount }}</span>
-      <span *ngIf="processing">⏳ Processing...</span>
+    <!-- Status Actions (Retry/Done) -->
+    <button *ngIf="paymentStatus === 'FAILED'" (click)="retryPayment()" type="button" class="btn btn-primary">
+      Retry
     </button>
 
-    <!-- Status Actions -->
-    <button *ngIf="paymentStatus === 'FAILED'"
-            (click)="retryPayment()"
-            type="button"
-            class="btn btn-primary">
-      Retry Payment
-    </button>
-
-    <button *ngIf="paymentStatus === 'SUCCESS'"
-            (click)="dialogRef.close()"
-            type="button"
-            class="btn btn-primary">
+    <button *ngIf="paymentStatus === 'SUCCESS'" (click)="dialogRef.close({success: true})" type="button"
+      class="btn btn-primary">
       Done
     </button>
   </div>

@@ -1,0 +1,44 @@
+<div class="analytics-container">
+
+    <div class="header">
+        <h2>
+            Analytics & Reports
+        </h2>
+
+        <div class="period-selector">
+            <button *ngFor="let p of periods" [class.active]="currentPeriod === p" (click)="setPeriod(p)">
+                {{ p }}
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CHART CARD -->
+    <div class="chart-container" *ngIf="!loading && data.length > 0">
+        <div class="chart">
+            <div class="bar-group" *ngFor="let point of data">
+
+                <!-- Bar height is calculated as style percentage -->
+                <div class="bar" [style.height]="getBarHeight(point.revenue)">
+
+                    <div class="tooltip">
+                        {{ point.revenue | currency:'INR' }}
+                        <span class="orders-count">{{ point.orderCount }} Orders</span>
+                    </div>
+
+                </div>
+
+                <div class="label">{{ point.label }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div class="loading" *ngIf="loading">
+        <p>Crunching the numbers...</p>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty" *ngIf="!loading && data.length === 0">
+        <p>No sales data available for this {{ currentPeriod | lowercase }}.</p>
+    </div>
+</div>

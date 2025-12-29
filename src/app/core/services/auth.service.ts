@@ -14,6 +14,9 @@ export interface User {
   role?: 'ADMIN' | 'CUSTOMER' | 'STAFF' | string;
   phone?: string;
   address?: string;
+  restaurantId?: string;
+  restaurantName?: string;
+  logoUrl?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -77,18 +80,23 @@ export class AuthService {
   /**
    * Register new user
    */
-  register(name: string, email: string, password: string, phoneNumber: string): Observable<User> {
+  register(name: string, email: string, password: string, phoneNumber: string, role: string = 'CUSTOMER', autoLogin: boolean = true, restaurantId?: string): Observable<User> {
     if (!this.networkService.isOnline) {
       return throwError(() => ({ message: 'Cannot register while offline. Please check your connection.' }));
     }
 
-    const payload = { name, email, password, phoneNumber, role: 'CUSTOMER' }; // Default role
+    const payload = { name, email, password, phoneNumber, role, restaurantId };
     return this.http.post<any>(`${environment.apiBaseUrl}/auth/register`, payload).pipe(
       map(response => {
         const user = response.user;
-        this.saveUser(user);
-        this.setToken(response.token);
-        this.currentUserSubject.next(user);
+
+        // Only login automatically if requested (default behavior)
+        if (autoLogin) {
+          this.saveUser(user);
+          this.setToken(response.token);
+          this.currentUserSubject.next(user);
+        }
+
         return user;
       }),
       catchError(error => {

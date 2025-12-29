@@ -108,6 +108,12 @@
               background: #fff3cd;
               color: #856404;
             }
+
+            &.verifying {
+              background: #ffecb3;
+              color: #e65100;
+              border: 1px solid #ffcc80;
+            }
           }
         }
       }

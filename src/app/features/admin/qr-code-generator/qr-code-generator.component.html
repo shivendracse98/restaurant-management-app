@@ -1,0 +1,35 @@
+<div class="qr-container">
+    <div class="header no-print">
+        <h2>📱 Table QR Generator</h2>
+        <p>Generate unique QR codes for your tables. Customers can scan to view the menu and order.</p>
+    </div>
+
+    <div class="controls no-print">
+        <div class="input-group">
+            <label>Table Number</label>
+            <input type="number" [(ngModel)]="tableNumber" placeholder="e.g. 5" (keyup.enter)="generate()">
+        </div>
+        <button class="btn primary-btn" (click)="generate()" [disabled]="!tableNumber">Generate QR</button>
+    </div>
+
+    <div class="preview-area" *ngIf="qrData">
+        <div class="print-card">
+            <div class="print-header">
+                <h3>SCAN TO ORDER</h3>
+                <p>Menu & Ordering</p>
+            </div>
+
+            <qrcode [qrdata]="qrData" [width]="256" [errorCorrectionLevel]="'M'">
+            </qrcode>
+
+            <div class="print-footer">
+                <h3>Expected Table: {{ tableNumber }}</h3>
+                <p>TasteTown</p>
+            </div>
+        </div>
+
+        <div class="actions no-print">
+            <button class="btn secondary-btn" (click)="print()">🖨️ Print Card</button>
+        </div>
+    </div>
+</div>

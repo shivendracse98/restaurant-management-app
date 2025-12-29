@@ -10,8 +10,10 @@ export interface OrderItem {
 export interface Order {
   id?: number;
   restaurantId?: string; // Multi-tenancy support
+  customerId?: number;
   customerName: string;
   customerPhone: string;
+  customerEmail?: string;
   address: string;
   orderType: OrderType;
   items: OrderItem[];
@@ -25,4 +27,6 @@ export interface Order {
   tableNumber?: string;
   paymentMode?: string;
   paidAt?: string;
+  paymentStatus?: string; // or PaymentStatus enum
+  paymentProof?: string;
 }

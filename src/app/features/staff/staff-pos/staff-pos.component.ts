@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, timer } from 'rxjs';
+import { takeUntil, switchMap } from 'rxjs/operators';
+import { ToastrService } from 'ngx-toastr';
 
 import { OrderService } from '../../../core/services/order.service';
 import { SubscriptionService } from '../../../core/services/subscription.service';
@@ -27,13 +28,14 @@ import { ChartConfiguration } from 'chart.js';
 })
 export class StaffPosComponent implements OnInit, OnDestroy {
   // Tabs
-  activeTab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' = 'ORDER';
+  activeTab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' = 'ORDER';
 
   // Data
   menuItems: FoodItem[] = [];
   subscriptionsList: TiffinModel[] = [];
   todayOrders: any[] = [];
   ongoingOrders: any[] = [];
+  onlineOrders: any[] = []; // 🔔 New: For Verification
   paymentConfig: PaymentConfig | null = null;
   paymentMode: string = 'CASH';
   pendingTiffinPayload: TiffinModel | null = null;
@@ -46,6 +48,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   // search
   searchTerm = '';
+  ongoingSortOption: string = 'newest';
 
   // forms
   orderForm = this.fb.group({
@@ -56,6 +59,16 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     tableNumber: [''],
     items: [[] as FoodItem[]]
   });
+
+  getCashOrdersCount(): number {
+    return this.todayOrders ? this.todayOrders.filter(o => o.paymentMode === 'CASH').length : 0;
+  }
+
+  getOnlineOrdersCount(): number {
+    return this.todayOrders ? this.todayOrders.filter(o =>
+      ['UPI', 'CARD', 'NETBANKING'].includes(o.paymentMode)
+    ).length : 0;
+  }
 
   tiffinForm = this.fb.group({
     customerName: ['', Validators.required],
@@ -102,14 +115,25 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     private auth: AuthService,
     private notificationService: NotificationService,
     private configService: ConfigService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastr: ToastrService
   ) { }
 
   ngOnInit(): void {
     this.loadMenu();
     this.loadSubscriptions();
-    this.loadTodayOrders();
-    this.loadOngoingOrders();
+
+    // ✅ Reactively update lists whenever Orders change
+    this.orderService.orders$.pipe(takeUntil(this.destroy$)).subscribe(orders => {
+      this.processOrders(orders);
+    });
+
+    // ✅ Active Polling: Fetch new data every 5s (Near Real-time)
+    timer(0, 5000)
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(() => this.orderService.refreshOrders())
+      ).subscribe();
 
     // query param driven tab selection
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((qp: any) => {
@@ -156,34 +180,64 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadTodayOrders(): void {
+  // Unified Handler for Order Updates
+  processOrders(all: any[]): void {
+    const arr = Array.isArray(all) ? all : [];
     const today = new Date().toISOString().split('T')[0];
-    this.orderService.getOrders().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (all: any) => {
-        const arr = Array.isArray(all) ? all : [];
-        this.todayOrders = arr.filter((o: any) => (o.createdAt || '').startsWith(today));
-        this.prepareRevenueChart();
-      },
-      error: (err: any) => {
-        console.error('Failed to load today orders', err);
-        this.todayOrders = [];
-      }
+
+    // 1. Filter Today's Orders
+    this.todayOrders = arr.filter((o: any) => (o.createdAt || '').startsWith(today));
+    this.prepareRevenueChart();
+
+    // 2. Filter Online / Verification Pending Orders
+    this.onlineOrders = arr.filter((o: any) => {
+      const status = o.status || 'PENDING';
+      const paymentStatus = o.paymentStatus || 'PENDING';
+
+      // Show if Waiting for Verification OR (Pay at Counter & Pending)
+      const needsVerification = paymentStatus === 'VERIFICATION_PENDING';
+      const payAtCounter = o.paymentMode === 'CASH' && status === 'PENDING';
+
+      return needsVerification || payAtCounter;
+    });
+
+    // 3. Filter Ongoing Orders (Kitchen View / Active)
+    this.ongoingOrders = arr.filter((o: any) => {
+      const status = o.status || 'PENDING';
+      const paymentStatus = o.paymentStatus || 'PENDING';
+
+      // Ongoing should ONLY show Confirmed/Preparing/Ready
+      // Must NOT show Cancelled, Delivered(Completed), or Unverified
+      const isUnverified = paymentStatus === 'VERIFICATION_PENDING' || (o.paymentMode === 'CASH' && status === 'PENDING');
+
+      return !isUnverified &&
+        status !== 'CANCELLED' &&
+        status !== 'COMPLETED' &&
+        status !== 'DELIVERED' && // Once delivered, show in Shift Summary only? Or keep in ongoing until paid?
+        // Actually, usually Delivered = Done.
+        status !== 'PAID';
+      // Note: If delivered but NOT paid, it might stay? 
+      // Ideally: Ongoing = Confirmed -> Delivered. 
+      // If Delivered, it goes to History/Summary.
     });
   }
 
-  loadOngoingOrders(): void {
-    this.orderService.getOrders().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (all: any) => {
-        const arr = Array.isArray(all) ? all : [];
-        this.ongoingOrders = arr.filter((o: any) => {
-          const status = o.status || 'PENDING';
-          // Filter out CANCELLED and COMPLETED/PAID (if exists), but keep DELIVERED (Served)
-          return status !== 'CANCELLED' && status !== 'COMPLETED' && status !== 'PAID';
-        });
+  // Wrappers to keep template happy if it calls them (though we removed calls)
+  loadTodayOrders() { this.orderService.refreshOrders().subscribe(); }
+  loadOngoingOrders() { this.orderService.refreshOrders().subscribe(); }
+
+  // ✅ Verify Payment (Staff)
+  verifyPayment(order: any): void {
+    if (!confirm(`Verify payment for Order #${order.id}?`)) return;
+
+    this.orderService.verifyPayment(order.id).subscribe({
+      next: () => {
+        this.toastr.success('✅ Payment Verified! Order moved to Ongoing.');
+        this.loadOngoingOrders();
       },
-      error: (err: any) => {
-        console.error('Failed to load ongoing orders', err);
-        this.ongoingOrders = [];
+      error: (err) => {
+        console.error('❌ Verification failed', err);
+        this.toastr.error('Verification failed.');
       }
     });
   }
@@ -192,6 +246,22 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   get cartItems(): FoodItem[] {
     return (this.orderForm.value.items as FoodItem[]) || [];
+  }
+
+  get sortedOngoingOrders(): any[] {
+    const sorted = [...this.ongoingOrders];
+    switch (this.ongoingSortOption) {
+      case 'newest':
+        return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      case 'oldest':
+        return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      case 'customer_asc':
+        return sorted.sort((a, b) => (a.customerName || '').localeCompare(b.customerName || ''));
+      case 'customer_desc':
+        return sorted.sort((a, b) => (b.customerName || '').localeCompare(a.customerName || ''));
+      default:
+        return sorted;
+    }
   }
 
   get filteredMenu(): FoodItem[] {
@@ -578,7 +648,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   // ========== SWITCH TAB ==========
 
-  switchTab(tab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE'): void {
+  switchTab(tab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE'): void {
     this.activeTab = tab;
     this.message = '';
     if (tab === 'REVENUE') this.loadTodayOrders();

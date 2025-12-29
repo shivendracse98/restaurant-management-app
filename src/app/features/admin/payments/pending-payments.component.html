@@ -44,24 +44,31 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let payment of pendingPayments; trackBy: trackByPaymentId">
-          <td>{{ payment.orderId }}</td>
+        <tr *ngFor="let order of pendingPayments; trackBy: trackByPaymentId">
+          <td>#{{ order.id }}</td>
           <td>
-            <strong>{{ payment.customerName }}</strong>
+            <strong>{{ order.customerName || 'Guest' }}</strong>
             <br />
-            <small>{{ payment.customerPhone }}</small>
+            <small>{{ order.customerPhone }}</small>
           </td>
-          <td>₹{{ payment.amount }}</td>
+          <td>₹{{ order.totalAmount || order.total }}</td>
           <td>
-            <span class="badge pending">{{ payment.status | uppercase }}</span>
+            <!-- Dynamic Status Badge -->
+            <span class="badge"
+              [ngClass]="{'pending': true, 'verifying': order.paymentStatus === 'VERIFICATION_PENDING'}">
+              {{ order.paymentStatus === 'VERIFICATION_PENDING' ? 'VERIFYING' : (order.status) }}
+            </span>
+            <div *ngIf="order.paymentProof" style="font-size: 0.75rem; margin-top: 2px;">
+              Reference: {{ order.paymentProof }}
+            </div>
           </td>
-          <td>{{ payment.createdAt | date: 'short' }}</td>
+          <td>{{ order.createdAt | date: 'short' }}</td>
           <td class="actions">
-            <button class="btn approve" (click)="approvePayment(payment)">
-              ✓ Approve
+            <button class="btn approve" (click)="approvePayment(order)">
+              ✓ Verify
             </button>
-            <button class="btn reject" (click)="rejectPayment(payment)">
-              ✕ Reject
+            <button class="btn reject" (click)="rejectPayment(order)">
+              ✕ Cancel
             </button>
           </td>
         </tr>

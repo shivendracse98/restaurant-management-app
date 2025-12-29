@@ -45,36 +45,7 @@ export class MenuService {
     );
   }
 
-  getMockMenu(): Observable<FoodItem[]> {
-    const items: FoodItem[] = [
-      {
-        id: 1,
-        name: 'Margherita Pizza',
-        description: 'Classic delight with 100% real mozzarella cheese.',
-        price: 299,
-        imageUrl: 'assets/pizza-margherita.jpg',
-        category: 'Pizza'
-      },
-      {
-        id: 2,
-        name: 'Veg Burger',
-        description: 'Crispy veg patty with fresh veggies and tangy sauce.',
-        price: 149,
-        imageUrl: 'assets/veg-burger.jpg',
-        category: 'Burger'
-      },
-      {
-        id: 3,
-        name: 'Pasta Alfredo',
-        description: 'Creamy Alfredo sauce with perfectly cooked pasta.',
-        price: 249,
-        imageUrl: 'assets/pasta-alfredo.jpg',
-        category: 'Pasta'
-      }
-    ];
 
-    return of(items);
-  }
 
   /**
    * ✅ Fetch a single item by ID

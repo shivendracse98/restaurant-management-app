@@ -3,7 +3,15 @@
 ============================ -->
 <nav class="navbar">
   <div class="nav-left">
-    <a class="logo" (click)="goHome()">🍴 TasteTown</a>
+    <a class="logo" (click)="goHome()">
+      <ng-container
+        *ngIf="auth.isLoggedIn() && (auth.isAdmin() || auth.isStaff()) && auth.currentUser()?.restaurantName; else defaultLogo">
+        {{ auth.currentUser()?.restaurantName }}
+      </ng-container>
+      <ng-template #defaultLogo>
+        🍴 TasteTown
+      </ng-template>
+    </a>
   </div>
 
   <div class="nav-links">

@@ -18,8 +18,11 @@
       <button class="tab-btn" [class.active]="activeTab === 'ONGOING'" (click)="switchTab('ONGOING')">
         ⏳ Ongoing
       </button>
+      <button class="tab-btn" [class.active]="activeTab === 'ONLINE'" (click)="switchTab('ONLINE')">
+        🔔 Online Orders <span *ngIf="onlineOrders.length > 0" class="badge-count">{{ onlineOrders.length }}</span>
+      </button>
       <button class="tab-btn" [class.active]="activeTab === 'REVENUE'" (click)="switchTab('REVENUE')">
-        📊 Revenue
+        📝 Shift Summary
       </button>
     </div>
   </div>
@@ -29,7 +32,9 @@
 
   <!-- ========== TAKE ORDER TAB ========== -->
   <div *ngIf="activeTab === 'ORDER'" class="pos-layout">
-    <!-- Left: Menu Items -->
+    <!-- ... content ... -->
+    <!-- (Using existing structure indirectly by not replacing it, just ensuring context match) -->
+    <!-- Wait, replacing larger block for safety -->
     <div class="menu-section">
       <div class="search-bar">
         <input type="text" [(ngModel)]="searchTerm" placeholder="🔍 Search menu or category..." class="search-input" />
@@ -50,21 +55,19 @@
 
     <!-- Right: Order Form & Cart (Sticky) -->
     <div class="cart-section">
+      <!-- ... (Cart omitted for brevity in replace, but context is critical) ... -->
       <div class="cart-wrapper">
         <h3 class="cart-title">📋 Current Order</h3>
-
-        <!-- Order Details Form -->
         <form [formGroup]="orderForm" class="order-form">
+          <!-- Form fields -->
           <div class="form-row">
             <label>Customer Name</label>
             <input type="text" formControlName="customerName" placeholder="Walk-in Guest" />
           </div>
-
           <div class="form-row">
             <label>Phone</label>
             <input type="tel" formControlName="customerPhone" placeholder="0000000000" />
           </div>
-
           <div class="form-row">
             <label>Order Type</label>
             <select formControlName="orderType">
@@ -73,17 +76,14 @@
               <option value="DELIVERY">Delivery</option>
             </select>
           </div>
-
           <div class="form-row">
             <label>Table #</label>
             <input type="text" formControlName="tableNumber" placeholder="Optional" />
           </div>
         </form>
 
-        <!-- Cart Items (Scrollable) -->
         <div class="cart-items">
-          <h4 class="items-title">Items</h4>
-
+          <!-- Items -->
           <div *ngIf="cartItems.length === 0" class="empty-cart">
             👉 Add items from menu →
           </div>
@@ -96,8 +96,6 @@
             <button class="remove-btn" (click)="removeItemFromOrder(i)">✕</button>
           </div>
         </div>
-
-        <!-- Total & Action Buttons -->
         <div class="cart-footer">
           <div class="total-section">
             <div class="total-label">Total</div>
@@ -112,6 +110,82 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- ========== ONLINE ORDERS (VERIFICATION) TAB ========== -->
+  <div *ngIf="activeTab === 'ONLINE'" class="tab-content">
+    <h3>🔔 Online Verification Queue</h3>
+    <table class="orders-table" *ngIf="onlineOrders.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of onlineOrders">
+          <td>#{{ o.id }}</td>
+          <td>{{ o.customerName || 'Guest' }}<br><small>{{ o.customerPhone }}</small></td>
+          <td>{{ o.items?.length }} items</td>
+          <td>₹{{ o.total }}</td>
+          <td>
+            <div *ngIf="o.paymentStatus === 'VERIFICATION_PENDING'" style="color:orange; font-weight:bold;">⚠ Proof
+              Uploaded</div>
+            <div *ngIf="o.paymentMode === 'CASH' && o.status === 'PENDING'" style="color:blue; font-weight:bold;">💵 Pay
+              at Counter</div>
+            <div *ngIf="o.paymentProof" style="font-size:0.8em;">Ref: {{ o.paymentProof }}</div>
+          </td>
+          <td>
+            <button class="btn primary-btn" style="background-color: #27AE60;" (click)="verifyPayment(o)">
+              ✅ Verify & Accept
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="onlineOrders.length === 0" class="no-data">No pending online orders! 🎉</p>
+  </div>
+
+  <!-- ========== ONLINE ORDERS (VERIFICATION) TAB ========== -->
+  <div *ngIf="activeTab === 'ONLINE'" class="tab-content">
+    <h3>🔔 Online Verification Queue</h3>
+    <table class="orders-table" *ngIf="onlineOrders.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of onlineOrders">
+          <td>#{{ o.id }}</td>
+          <td>{{ o.customerName || 'Guest' }}<br><small>{{ o.customerPhone }}</small></td>
+          <td>{{ o.items?.length }} items</td>
+          <td>₹{{ o.total }}</td>
+          <td>
+            <div *ngIf="o.paymentStatus === 'VERIFICATION_PENDING'" style="color:orange; font-weight:bold;">⚠ Proof
+              Uploaded</div>
+            <div *ngIf="o.paymentMode === 'CASH' && o.status === 'PENDING'" style="color:blue; font-weight:bold;">💵 Pay
+              at Counter</div>
+            <div *ngIf="o.paymentProof" style="font-size:0.8em;">Ref: {{ o.paymentProof }}</div>
+          </td>
+          <td>
+            <button class="btn primary-btn" style="background-color: #27AE60;" (click)="verifyPayment(o)">
+              ✅ Verify & Accept
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="onlineOrders.length === 0" class="no-data">No pending online orders! 🎉</p>
   </div>
 
   <!-- ========== TIFFIN TAB ========== -->
@@ -250,9 +324,17 @@
 
   <!-- ========== ONGOING ORDERS TAB ========== -->
   <div *ngIf="activeTab === 'ONGOING'" class="tab-content">
-    <h3>⏳ Ongoing Orders</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h3>⏳ Ongoing Orders</h3>
+      <select [(ngModel)]="ongoingSortOption" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+        <option value="newest">📅 Newest First</option>
+        <option value="oldest">📅 Oldest First</option>
+        <option value="customer_asc">👤 Customer (A-Z)</option>
+        <option value="customer_desc">👤 Customer (Z-A)</option>
+      </select>
+    </div>
 
-    <table class="orders-table" *ngIf="ongoingOrders.length > 0">
+    <table class="orders-table" *ngIf="sortedOngoingOrders.length > 0">
       <thead>
         <tr>
           <th>ID</th>
@@ -264,7 +346,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let o of ongoingOrders">
+        <tr *ngFor="let o of sortedOngoingOrders">
           <td>#{{ o.id }}</td>
           <td>
             <span *ngIf="o.tableNumber" class="badge table-badge">Table {{ o.tableNumber }}</span>
@@ -311,28 +393,30 @@
     <p *ngIf="ongoingOrders.length === 0" class="no-data">No ongoing orders right now</p>
   </div>
 
-  <!-- ========== REVENUE TAB ========== -->
+  <!-- ========== SHIFT SUMMARY TAB ========== -->
   <div *ngIf="activeTab === 'REVENUE'" class="tab-content revenue-tab">
-    <h3>📊 Today's Revenue</h3>
+    <h3>📝 Shift Summary (Today)</h3>
 
     <div class="stats-row">
       <div class="stat-box">
         <div class="stat-label">Total Orders</div>
         <div class="stat-value">{{ todayOrders.length }}</div>
       </div>
+      <!-- Modified for Staff Privacy: Count only, no Revenue Amount -->
       <div class="stat-box">
-        <div class="stat-label">Total Revenue</div>
-        <div class="stat-value">₹{{ getTodayRevenueTotal() }}</div>
+        <div class="stat-label">Cash Orders</div>
+        <div class="stat-value">{{ getCashOrdersCount() }}</div>
       </div>
       <div class="stat-box">
-        <div class="stat-label">Active Subscriptions</div>
-        <div class="stat-value">{{ subscriptionsCount }}</div>
+        <div class="stat-label">Online/UPI Orders</div>
+        <div class="stat-value">{{ getOnlineOrdersCount() }}</div>
       </div>
     </div>
 
-    <div class="chart-container" *ngIf="revenueChartData && revenueChartOptions">
+    <!-- Chart hidden for Staff as per privacy policy -->
+    <!-- <div class="chart-container" *ngIf="revenueChartData && revenueChartOptions">
       <canvas baseChart [data]="revenueChartData" [options]="revenueChartOptions" type="bar"></canvas>
-    </div>
+    </div> -->
 
     <table class="orders-table">
       <thead>

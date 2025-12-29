@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 
 import { CartService } from './core/services/cart.service';
 import { AuthService } from './core/services/auth.service';
+import { NetworkService } from './core/services/network.service';
 import { TenantService } from './core/services/tenant.service';
 import { ConfigService } from './core/services/config.service';
 
@@ -29,10 +30,11 @@ export class AppComponent implements OnInit, OnDestroy {
     public auth: AuthService,
     private router: Router,
     private tenantService: TenantService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private networkService: NetworkService // Added NetworkService to constructor
   ) { }
 
-  ngOnInit(): void {
+  ngOnInit() {
     // Track tenant changes to update header
     this.tenantService.tenantId$.subscribe(id => {
       if (id) {
@@ -48,7 +50,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.cartCount = items.reduce((s, it) => s + it.qty, 0);
     });
 
-    // ✅ Router event logging to debug redirects
+    // Router event logging
     this.routerSub = this.router.events.subscribe(evt => {
       if (evt instanceof NavigationStart) {
         console.log('[Router] Start ->', evt.url);

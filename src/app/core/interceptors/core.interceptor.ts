@@ -31,13 +31,39 @@ export const coreInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(clonedReq).pipe(
         catchError((error) => {
-            // Handle 401 Unauthorized globally
+            // 1. Handle 401 Unauthorized globally
             if (error.status === 401) {
                 toastr.error('Session expired. Please login again.');
                 authService.logout();
+                return throwError(() => error); // Stop further processing
             }
 
-            // Pass the error along to specific handlers
+            // 2. Handle 0 / Network Error
+            if (error.status === 0) {
+                toastr.error('Server unreachable. Please check your internet connection.', 'Network Error');
+                return throwError(() => error);
+            }
+
+            // 3. Extract Meaningful Message
+            let message = 'An unexpected error occurred';
+
+            // Backend Custom Error JSON: { "message": "Order not found", ... }
+            if (error.error && typeof error.error === 'object') {
+                if (error.error.message) {
+                    message = error.error.message;
+                } else if (error.error.error) { // sometimes nested
+                    message = error.error.error;
+                }
+            } else if (error.message) {
+                // Flashback only if no backend body (client-side error)
+                // NOTE: HttpErrorResponse.message is usually generic "Http failure..." so we prefer backend body
+                if (!error.error) message = error.message;
+            }
+
+            // 4. Show Toast Immediately
+            toastr.error(message, `Error (${error.status})`);
+
+            // Pass error along, but we've handled the UI notification
             return throwError(() => error);
         })
     );

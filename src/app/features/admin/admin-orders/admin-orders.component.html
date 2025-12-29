@@ -1,59 +1,119 @@
 <div class="admin-orders-container" *ngIf="!loading">
-  <h2>📋 Manage Orders</h2>
+
+  <h2>
+    📋 Manage Orders
+  </h2>
 
   <div *ngIf="errorMsg" class="error-msg">{{ errorMsg }}</div>
 
-  <table *ngIf="orders.length > 0; else noOrders" class="orders-table">
-    <thead>
-      <tr>
-        <th>Order ID</th>
-        <th>Customer</th>
-        <th>Email</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th>Date</th>
-        <th>Items</th>
-        <th>Action</th>
-      </tr>
-    </thead>
+  <!-- CONTROL CARD -->
+  <div class="controls-card">
+    <div class="refresh-indicator">
+      <div class="pulse-dot"></div>
+      Live Sync Active (5s)
+    </div>
 
-    <tbody>
-      <tr *ngFor="let order of orders">
-        <td>#{{ order.id }}</td>
-        <td>{{ order.customerName }}</td>
-        <td>{{ order.customerEmail }}</td>
-        <td>₹{{ order.total }}</td>
-        <td>
-          <span class="status" [ngClass]="order.status.toLowerCase()">
-            {{ order.status }}
-          </span>
-        </td>
-        <td>{{ formatDate(order.createdAt) }}</td>
-        <td>
-          <ul>
-            <li *ngFor="let item of order.items">
-              {{ item.qty }} × {{ item.name }}
-            </li>
-          </ul>
-        </td>
-        <td>
-          <select [value]="order.status" (change)="onStatusChange(order, $event)">
-            <option value="PENDING">Pending</option>
-            <option value="PREPARING">Preparing</option>
-            <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
-            <option value="DELIVERED">Delivered</option>
-            <option value="CANCELLED">Cancelled</option>
+    <div class="sort-controls">
+      <!-- Date Filter -->
+      <div class="date-filter">
+        <label>Filter Date:</label>
+        <input type="date" [(ngModel)]="selectedDate">
+        <button *ngIf="selectedDate" (click)="clearDateFilter()" class="clear-btn" title="Clear Date">
+          ✖
+        </button>
+      </div>
+
+      <div class="sorting-group">
+        <label>Sort by:</label>
+        <select [(ngModel)]="sortOption">
+          <option value="newest">📅 Date (Newest First)</option>
+          <option value="oldest">📅 Date (Oldest First)</option>
+          <option value="customer_asc">👤 Customer Name (A-Z)</option>
+          <option value="customer_desc">👤 Customer Name (Z-A)</option>
         </select>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE WRAPPER (SCROLLABLE) -->
+  <div class="table-wrapper" *ngIf="sortedOrders.length > 0; else noOrders">
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Items</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let order of sortedOrders">
+          <td><span class="order-id">#{{ order.id }}</span></td>
+          <td>
+            <div>{{ order.customerName }}</div>
+            <div style="font-size: 0.8em; color: #999;">{{ order.customerEmail }}</div>
+          </td>
+          <td style="font-weight: 700; color: #2D3436;">{{ order.total | currency:'INR' }}</td>
+          <td>
+          <td>
+            <!-- Status Badge -->
+            <span class="status-badge" [ngClass]="order.status.toLowerCase()">
+              {{ order.status.replace('_', ' ') }}
+            </span>
+            <!-- Logic: If Verification Pending or (PayAtCounter + Pending), show warning -->
+            <div *ngIf="order.paymentStatus === 'VERIFICATION_PENDING'"
+              style="font-size: 0.8em; color: orange; margin-top: 4px;">
+              ⚠ Needs Approval
+            </div>
+            <div *ngIf="order.paymentProof" style="font-size: 0.8em; margin-top: 4px;">
+              <span style="font-weight: bold;">Proof:</span> {{ order.paymentProof }}
+            </div>
+          </td>
+          <td>{{ formatDate(order.createdAt) }}</td>
+          <td>
+            <ul class="items-list">
+              <li *ngFor="let item of order.items">
+                <span class="qty">{{ item.qty }}x</span> {{ item.name }}
+              </li>
+            </ul>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <!-- Verify Button (Only for Pending/Verification Pending) -->
+              <button
+                *ngIf="order.paymentStatus === 'VERIFICATION_PENDING' || (order.paymentMode === 'CASH' && order.status === 'PENDING')"
+                class="btn-verify" (click)="verifyPayment(order)" title="Verify Payment & Confirm Order">
+                ✅ Verify
+              </button>
+
+              <select class="status-select" [value]="order.status" (change)="onStatusChange(order, $event)">
+                <option value="PENDING">Pending</option>
+                <option value="CONFIRMED">Confirmed</option>
+                <option value="PREPARING">Preparing</option>
+                <option value="READY">Ready</option>
+                <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+                <option value="DELIVERED">Delivered</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <ng-template #noOrders>
-    <p class="no-orders">No orders found 😋</p>
+    <div class="empty-state">
+      <p>No orders found yet! 🍔</p>
+    </div>
   </ng-template>
+
 </div>
 
 <div *ngIf="loading" class="loader">
-  <p>⏳ Loading orders...</p>
+  <p>Processing orders...</p>
 </div>

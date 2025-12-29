@@ -1,20 +1,167 @@
 <div class="admin-dashboard">
-  <h2>📊 Admin Dashboard</h2>
 
-  <div class="cards">
-    <div class="card" routerLink="/admin/orders">
-      <h3>📦 Manage Orders</h3>
-      <p>View and update order statuses</p>
+  <header>
+    <h2>
+      <mat-icon>dashboard</mat-icon>
+      Admin Dashboard
+    </h2>
+    <p class="subtitle">Overview for {{ auth.currentUser()?.name }}</p>
+  </header>
+
+  <!-- LIVE STATS ROW -->
+  <div class="stats-row" *ngIf="stats">
+
+    <!-- Revenue Card -->
+    <div class="stat-card">
+      <div class="stat-content">
+        <span class="label">Today's Revenue</span>
+        <span class="value">{{ stats.todayRevenue | currency:'INR' }}</span>
+        <span class="sub-text">
+          <mat-icon inline>trending_up</mat-icon> Live
+        </span>
+      </div>
+      <div class="icon-box revenue">
+        <mat-icon>payments</mat-icon>
+      </div>
     </div>
 
-    <div class="card" routerLink="/admin/menu">
-      <h3>🍽️ Manage Menu</h3>
-      <p>Add, edit or remove dishes</p>
+    <!-- Pending Orders Card -->
+    <div class="stat-card" routerLink="/admin/orders" style="cursor: pointer;">
+      <div class="stat-content">
+        <span class="label">Pending Orders</span>
+        <span class="value">{{ stats.pendingOrders }}</span>
+        <span class="sub-text" style="color: #F39C12;">
+          Needs Attention
+        </span>
+      </div>
+      <div class="icon-box pending">
+        <mat-icon>notifications_active</mat-icon>
+      </div>
     </div>
 
-    <div class="card" routerLink="/admin/payments">
-      <h3>💳 Payments</h3>
-      <p>View all recent transactions</p>
+    <!-- Total Orders Card -->
+    <div class="stat-card" routerLink="/admin/orders" style="cursor: pointer;">
+      <div class="stat-content">
+        <span class="label">Today's Orders</span>
+        <span class="value">{{ stats.todayOrders }}</span>
+        <span class="sub-text">
+          <mat-icon inline>insights</mat-icon> All Sources
+        </span>
+      </div>
+      <div class="icon-box orders">
+        <mat-icon>inventory_2</mat-icon>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NAVIGATION SECTION -->
+  <section class="nav-section">
+    <h3>Quick Actions</h3>
+
+    <div class="cards-grid">
+
+      <!-- Analytics -->
+      <div class="nav-card" routerLink="/admin/analytics">
+        <div class="card-header">
+          <div class="card-icon">
+            <mat-icon>analytics</mat-icon>
+          </div>
+          <h4>Analytics</h4>
+        </div>
+        <p>View daily, weekly, and monthly performance trends.</p>
+      </div>
+
+      <!-- Manage Orders -->
+      <div class="nav-card" routerLink="/admin/orders">
+        <div class="card-header">
+          <div class="card-icon">
+            <mat-icon>restaurant</mat-icon>
+          </div>
+          <h4>Manage Orders</h4>
+        </div>
+        <p>View live orders, update status, and track kitchen.</p>
+      </div>
+
+      <!-- Manage Menu -->
+      <div class="nav-card" routerLink="/admin/menu">
+        <div class="card-header">
+          <div class="card-icon">
+            <mat-icon>menu_book</mat-icon>
+          </div>
+          <h4>Manage Menu</h4>
+        </div>
+        <p>Add new dishes, update prices, and organize categories.</p>
+      </div>
+
+      <!-- Payments -->
+      <div class="nav-card" routerLink="/admin/payments">
+        <div class="card-header">
+          <div class="card-icon">
+            <mat-icon>credit_card</mat-icon>
+          </div>
+          <h4>Payments</h4>
+        </div>
+        <p>Track transactions and settlements securely.</p>
+      </div>
+
+      <!-- Staff Management -->
+      <div class="nav-card" (click)="openManageStaff()">
+        <div class="card-header">
+          <div class="card-icon">
+            <mat-icon>groups</mat-icon>
+          </div>
+          <h4>Manage Staff</h4>
+        </div>
+        <p>Add or remove staff and manage permissions.</p>
+      </div>
+
+      <!-- Table QR -->
+      <div class="nav-card" routerLink="/admin/qr-codes">
+        <div class="card-header">
+          <div class="card-icon">
+            <mat-icon>qr_code_2</mat-icon>
+          </div>
+          <h4>Table QR</h4>
+        </div>
+        <p>Generate scan codes for table ordering.</p>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+<!-- Add Staff Modal -->
+<div class="modal-backdrop" *ngIf="showStaffModal" (click)="closeStaffModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>👤 Add New Staff Member</h3>
+      <button class="close-btn" (click)="closeStaffModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="registerStaff()">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" [(ngModel)]="newStaff.name" name="name" required placeholder="John Doe">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="newStaff.email" name="email" required placeholder="staff@example.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" [(ngModel)]="newStaff.password" name="password" required placeholder="******">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" [(ngModel)]="newStaff.phoneNumber" name="phone" placeholder="9876543210">
+        </div>
+
+        <div class="form-actions" style="margin-top: 20px; display: flex; justify-content: flex-end;">
+          <button type="button" class="btn" (click)="closeStaffModal()" style="margin-right: 10px;">Cancel</button>
+          <button type="submit" class="btn primary-btn">Create Account</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

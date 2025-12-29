@@ -25,7 +25,11 @@ export const routes: Routes = [
   { path: 'menu/:id', component: FoodDetailComponent },
   { path: 'cart', component: CartComponent, canActivate: [authGuard] },
   { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
-  { path: 'orders', component: OrdersComponent, canActivate: [authGuard] },
+  {
+    path: 'orders',
+    loadComponent: () => import('./features/customer/order-history/order-history.component').then(m => m.OrderHistoryComponent),
+    canActivate: [authGuard]
+  },
 
   // ✅ NEW: Order Tracking (for post-payment)
   {
@@ -34,14 +38,7 @@ export const routes: Routes = [
     canActivate: [authGuard, customerGuard]
   },
 
-  // // ✅ NEW: Order History
-  // {
-  //   path: 'order-history',
-  //   loadComponent: () =>
-  //     import('./features/customer/order-history/order-history.component')
-  //       .then(m => m.OrderHistoryComponent),
-  //   canActivate: [authGuard, customerGuard]
-  // },
+
   {
     path: 'customer/dashboard',
     loadComponent: () =>
@@ -72,6 +69,20 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/admin/admin-orders/admin-orders.component')
         .then(m => m.AdminOrdersComponent),
+    canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'admin/qr-codes',
+    loadComponent: () =>
+      import('./features/admin/qr-code-generator/qr-code-generator.component')
+        .then(m => m.QrCodeGeneratorComponent),
+    canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'admin/analytics',
+    loadComponent: () =>
+      import('./features/admin/analytics/analytics.component')
+        .then(m => m.AnalyticsComponent),
     canActivate: [authGuard, adminGuard],
   },
   {

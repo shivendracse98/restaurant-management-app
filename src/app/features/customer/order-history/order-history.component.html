@@ -1,0 +1,44 @@
+<div class="history-container">
+    <h2>📜 My Order History</h2>
+
+    <div *ngIf="loading" class="loading-state">
+        <p>Loading your orders...</p>
+    </div>
+
+    <ng-container *ngIf="orders$ | async as orders">
+        <div *ngIf="!loading && orders.length === 0" class="empty-state">
+            <p>No orders found.</p>
+            <a routerLink="/menu" class="btn btn-primary">Start Ordering</a>
+        </div>
+
+        <div class="orders-list" *ngIf="orders.length > 0">
+            <div *ngFor="let order of orders" class="order-card">
+                <div class="card-header">
+                    <span class="order-id">Order #{{ order.id }}</span>
+                    <span class="order-date">{{ order.createdAt | date:'medium' }}</span>
+                </div>
+
+                <div class="card-body">
+                    <div class="items">
+                        <div *ngFor="let item of order.items" class="item-row">
+                            {{ item.qty }}x {{ item.name }}
+                        </div>
+                    </div>
+                    <div class="total-section">
+                        <span class="total-label">Total:</span>
+                        <span class="total-amount">₹{{ order.total }}</span>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <span class="badge" [ngClass]="getStatusClass(order.status)">
+                        {{ order.status }}
+                    </span>
+                    <a [routerLink]="['/order-tracking', order.id]" class="btn btn-sm btn-outline">
+                        Track Order ➡️
+                    </a>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

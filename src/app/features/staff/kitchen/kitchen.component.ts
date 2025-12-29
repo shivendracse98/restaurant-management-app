@@ -237,11 +237,11 @@ export class KitchenComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    // Poll every 15 seconds
-    timer(0, 15000)
+    // Poll every 5 seconds
+    timer(0, 5000)
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(() => this.orderService.getOrders()) // Re-fetch orders
+        switchMap(() => this.orderService.refreshOrders()) // Re-fetch orders
       )
       .subscribe({
         next: (orders) => {
@@ -258,7 +258,10 @@ export class KitchenComponent implements OnInit, OnDestroy {
     // Filter out served/cancelled
     const active = allOrders.filter(o => o.status !== 'CANCELLED' && o.status !== 'DELIVERED');
 
-    this.pendingOrders = active.filter(o => o.status === 'PENDING' || !o.status);
+    // Kitchen should ONLY see orders that are CONFIRMED by staff (Payment Verified)
+    // PENDING orders (Online/Counter) are waiting for verification and should NOT be in kitchen yet.
+    this.pendingOrders = active.filter(o => (o.status as any) === 'CONFIRMED');
+
     this.preparingOrders = active.filter(o => o.status === 'PREPARING');
     this.readyOrders = active.filter(o => o.status === 'READY');
   }

@@ -20,7 +20,7 @@ export class StaffTodayOrdersComponent implements OnInit {
   loading = true;
   todayDate = new Date().toLocaleDateString();
 
-  constructor(private orderService: OrderService) {}
+  constructor(private orderService: OrderService) { }
 
   ngOnInit(): void {
     this.fetchTodayOrders();
@@ -45,6 +45,23 @@ export class StaffTodayOrdersComponent implements OnInit {
     return this.todayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
   }
 
+  /** ✅ Verify Payment (New) */
+  verifyPayment(order: any): void {
+    if (!confirm(`Verify payment for Order #${order.id}?`)) return;
+
+    this.orderService.verifyPayment(order.id).subscribe({
+      next: () => {
+        alert('✅ Payment Verified! Order Confirmed.');
+        // Refresh needed as this is a simple list
+        this.fetchTodayOrders();
+      },
+      error: (err) => {
+        console.error('❌ Verification failed', err);
+        alert('Verification failed.');
+      }
+    });
+  }
+
   getStatusClass(status: string): string {
     switch (status) {
       case 'DELIVERED':
@@ -53,6 +70,7 @@ export class StaffTodayOrdersComponent implements OnInit {
       case 'PENDING':
       case 'ONGOING':
         return 'status-ongoing';
+      case 'CONFIRMED': return 'status-confirmed';
       default:
         return 'status-other';
     }

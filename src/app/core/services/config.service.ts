@@ -35,12 +35,14 @@ export class ConfigService {
                 tenantId: 'Maa-Ashtabhuja',
                 name: 'Maa Ashtabhuja Refreshments',
                 description: 'Best Tiffin & Thali in Town',
-                imageUrl: 'assets/images/logo.png' // Ensure this asset exists or use a placeholder
+                detailedDescription: 'Pure Veg. We provide superb tiffin services and delicious meals that fit right within your budget.',
+                imageUrl: 'assets/images/maa-ashtabhuja-log.png'
             },
             {
                 tenantId: 'pizza-hut',
                 name: 'Pizza Hut',
                 description: 'Tastiest Pizzas',
+                detailedDescription: 'Experience the cheesiest pizzas in town with our signature pan crusts and fresh toppings.',
                 imageUrl: 'assets/images/logo.png'
             }
         ]);

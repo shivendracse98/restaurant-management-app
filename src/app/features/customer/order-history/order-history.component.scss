@@ -1,0 +1,157 @@
+.history-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Inter', sans-serif;
+}
+
+h2 {
+    margin-bottom: 2rem;
+    color: #333;
+    text-align: center;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    color: #666;
+
+    a {
+        margin-top: 1rem;
+    }
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.order-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.card-header {
+    background: #f8f9fa;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+
+    .order-id {
+        font-weight: 700;
+        color: #333;
+    }
+
+    .order-date {
+        color: #666;
+        font-size: 0.9rem;
+    }
+}
+
+.card-body {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.item-row {
+    color: #555;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.total-section {
+    text-align: right;
+
+    .total-label {
+        color: #888;
+        font-size: 0.85rem;
+        display: block;
+    }
+
+    .total-amount {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #ff6f00;
+    }
+}
+
+.card-footer {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #eee;
+}
+
+/* Badges */
+.badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* Preparing */
+.badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* Ready */
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Cancelled */
+.badge-secondary {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Pending */
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+.btn-outline {
+    border: 1px solid #ff6f00;
+    color: #ff6f00;
+    background: transparent;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+        background: #fff3e0;
+    }
+}

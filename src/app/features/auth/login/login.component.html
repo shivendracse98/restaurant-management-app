@@ -1,12 +1,15 @@
 <div class="login-container">
-  <form [formGroup]="form" (ngSubmit)="submit()">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="card login-card">
     <h2>Login</h2>
-    <label>Email</label>
-    <input type="email" formControlName="email" placeholder="Enter your email" />
-    <small *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')">Email is required.</small>
-    <small *ngIf="form.get('email')?.hasError('email')">Enter a valid email.</small>
 
-    <div class="password-field">
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" formControlName="email" placeholder="Enter your email" />
+      <small *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')">Email is required.</small>
+      <small *ngIf="form.get('email')?.hasError('email')">Enter a valid email.</small>
+    </div>
+
+    <div class="form-group password-field">
       <label>Password</label>
       <div class="password-wrapper">
         <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
@@ -24,8 +27,7 @@
       <a routerLink="/forgot-password">Forgot Password?</a>
     </div>
 
-
-    <button class="btn primary" type="submit" [disabled]="form.invalid">Login</button>
+    <button class="btn btn-primary full-width" type="submit" [disabled]="form.invalid">Login</button>
 
     <p class="error" *ngIf="errorMsg">{{ errorMsg }}</p>
 

@@ -7,22 +7,11 @@ export class GlobalErrorHandler implements ErrorHandler {
     constructor(private injector: Injector) { }
 
     handleError(error: any): void {
-        const toastr = this.injector.get(ToastrService);
-
         // Log the error to console for debugging
         console.error('🔥 Global Error Caught:', error);
 
-        // Extract message
-        let message = 'An unexpected error occurred';
-        if (error.error && error.error.message) {
-            message = error.error.message;
-        } else if (error.message) {
-            message = error.message;
-        }
-
-        // Show toast
-        toastr.error(message, 'Error');
-
-        // Optional: Send to logging service (Sentry, etc.)
+        // NOTE: We do NOT show toasts here anymore for HTTP errors,
+        // because the 'core.interceptor.ts' handles them with better context.
+        // This handler is now a fallback for pure Runtime/Client-side JS errors.
     }
 }

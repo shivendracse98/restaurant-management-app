@@ -15,6 +15,7 @@
         <th>Items</th>
         <th>Total (₹)</th>
         <th>Status</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody>
@@ -27,7 +28,17 @@
           </ul>
         </td>
         <td>{{ order.total }}</td>
-        <td>{{ order.status }}</td>
+        <td>
+          {{ order.status }}
+          <div *ngIf="order.paymentStatus === 'VERIFICATION_PENDING'" style="color:red; font-size: 0.8em">⚠ Check Proof
+          </div>
+          <div *ngIf="order.paymentProof" style="font-size: 0.8em">Proof: {{ order.paymentProof }}</div>
+        </td>
+        <td>
+          <button
+            *ngIf="order.paymentStatus === 'VERIFICATION_PENDING' || (order.paymentMode === 'CASH' && order.status === 'PENDING')"
+            (click)="verifyPayment(order)" class="btn-verify">✅ Verify</button>
+        </td>
       </tr>
     </tbody>
   </table>

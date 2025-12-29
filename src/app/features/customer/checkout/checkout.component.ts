@@ -10,7 +10,7 @@ import { OrderService } from 'src/app/core/services/order.service';
 import { PaymentService } from 'src/app/core/services/payment.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { PaymentModalComponent } from './payment-modal.component';
-
+import { TenantService } from 'src/app/core/services/tenant.service'; // Added
 import { ToastrModule, ToastrService } from 'ngx-toastr';  // ✅ Import both
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -52,7 +52,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private dialog: MatDialog,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private tenantService: TenantService // Added
   ) {
     console.log(`${this.LOG} Constructor called`);
     this.initializeForm();
@@ -178,6 +179,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       items: orderItems,
       total: this.cartService.getTotal(),
       userId: this.currentUser?.id,
+      restaurantId: this.tenantService.getTenantId() || 'Maa-Ashtabhuja', // ✅ Explicitly include Tenant ID
+      tableNumber: sessionStorage.getItem('rms_table_id') || '', // ✅ Include Table Number from QR
       status: 'PENDING' as any,
       createdAt: new Date().toISOString()
     };
@@ -288,7 +291,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           // Redirect to order tracking
           console.log(`${this.LOG} Redirecting to order tracking for order:`, order.id);
           setTimeout(() => {
-            this.router.navigate(['/customer/order-tracking', order.id]);
+            this.router.navigate(['/order-tracking', order.id]);
           }, 2000);
         },
         error: (error: any) => {
