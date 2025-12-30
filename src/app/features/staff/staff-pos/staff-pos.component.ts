@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+// Re-trigger compile
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { Subject, timer } from 'rxjs';
+import { Subject, timer, forkJoin } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 
@@ -12,10 +13,10 @@ import { SubscriptionService } from '../../../core/services/subscription.service
 import { MenuService } from '../../../core/services/menu.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { LeaveService, LeaveResponse } from '../../../core/services/leave.service';
 import { ConfigService, PaymentConfig } from '../../../core/services/config.service';
 import { FoodItem } from '../../../models/food-item.model';
 import { Subscription as TiffinModel } from '../../../models/subscription.model';
-
 import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 
@@ -28,14 +29,16 @@ import { ChartConfiguration } from 'chart.js';
 })
 export class StaffPosComponent implements OnInit, OnDestroy {
   // Tabs
-  activeTab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' = 'ORDER';
+  activeTab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' | 'LEAVES' = 'ORDER';
 
   // Data
   menuItems: FoodItem[] = [];
   subscriptionsList: TiffinModel[] = [];
   todayOrders: any[] = [];
   ongoingOrders: any[] = [];
-  onlineOrders: any[] = []; // 🔔 New: For Verification
+  onlineOrders: any[] = [];
+  myLeaves: LeaveResponse[] = []; // New
+
   paymentConfig: PaymentConfig | null = null;
   paymentMode: string = 'CASH';
   pendingTiffinPayload: TiffinModel | null = null;
@@ -44,8 +47,11 @@ export class StaffPosComponent implements OnInit, OnDestroy {
   message = '';
   isLoading = false;
   showEditModal = false;
+  showLeaveModal = false; // New
   editOrder: any = null;
+  isManageMode = false; // Toggle for stock management
 
+  // forms
   // search
   searchTerm = '';
   ongoingSortOption: string = 'newest';
@@ -60,15 +66,13 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     items: [[] as FoodItem[]]
   });
 
-  getCashOrdersCount(): number {
-    return this.todayOrders ? this.todayOrders.filter(o => o.paymentMode === 'CASH').length : 0;
-  }
+  leaveForm = this.fb.group({
+    startDate: ['', Validators.required],
+    endDate: ['', Validators.required],
+    reason: ['', Validators.required]
+  });
 
-  getOnlineOrdersCount(): number {
-    return this.todayOrders ? this.todayOrders.filter(o =>
-      ['UPI', 'CARD', 'NETBANKING'].includes(o.paymentMode)
-    ).length : 0;
-  }
+  // ... (rest of vars)
 
   tiffinForm = this.fb.group({
     customerName: ['', Validators.required],
@@ -116,7 +120,8 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private configService: ConfigService,
     private route: ActivatedRoute,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private leaveService: LeaveService // New
   ) { }
 
   ngOnInit(): void {
@@ -132,8 +137,20 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     timer(0, 5000)
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(() => this.orderService.refreshOrders())
-      ).subscribe();
+        switchMap(() => {
+          const tasks: import('rxjs').Observable<any>[] = [this.orderService.refreshOrders()];
+          if (this.activeTab === 'LEAVES') {
+            tasks.push(this.leaveService.getMyLeaves());
+          }
+          return forkJoin(tasks);
+        })
+      ).subscribe((results: any[]) => {
+        // results[0] is always orders (handled by refreshOrders side-effect or strictly void if changed, but refreshOrders returns Observable<Order[]>)
+        // results[1] would be leaves if activeTab was LEAVES
+        if (results.length > 1 && results[1]) {
+          this.myLeaves = results[1];
+        }
+      });
 
     // query param driven tab selection
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((qp: any) => {
@@ -280,6 +297,21 @@ export class StaffPosComponent implements OnInit, OnDestroy {
   // ========== POS ACTIONS ==========
 
   addItem(item: FoodItem): void {
+    if (this.isManageMode) {
+      // Toggle Availability Logic
+      const newStatus = !item.isAvailable; // Toggle
+      this.menuService.updateAvailability(item.id, newStatus).subscribe({
+        next: (updated) => {
+          // Update local list
+          const idx = this.menuItems.findIndex(m => m.id === updated.id);
+          if (idx !== -1) this.menuItems[idx] = updated;
+          this.toastr.success(`${updated.name} is now ${updated.isAvailable ? 'In Stock' : 'Out of Stock'}`);
+        },
+        error: () => this.toastr.error('Failed to update stock status')
+      });
+      return;
+    }
+
     const current = this.orderForm.value.items || [];
     this.orderForm.patchValue({ items: [...current, item] });
     this.message = `✓ ${item.name} added`;
@@ -333,7 +365,9 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       tableNumber: this.orderForm.value.tableNumber || '', // Added tableNumber
       items: mapped,
       total: mapped.reduce((s: number, m: any) => s + (m.price || 0) * (m.qty || 1), 0),
-      status: 'PENDING',
+      // FIX: Set status to 'CONFIRMED' so Kitchen View sees it immediately.
+      // POS orders are trusted and don't need 'Online Verification'.
+      status: 'CONFIRMED',
       createdAt: new Date().toISOString()
     };
 
@@ -585,28 +619,52 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   // ========== BILLING / NOTIFICATION ==========
 
-  shareBill(order: any): void {
-    if (!order) return;
+  // ========== BILLING / NOTIFICATION ==========
+  showBillModal = false;
+  viewBillOrder: any = null;
 
-    // Fallback phone if missing
+  shareBill(order: any): void {
+    // Renamed from shareBill to openBillModal logic broadly, keeping method name 'shareBill' for template compatibility if needed, 
+    // but effectively this now opens the modal.
+    this.viewBillOrder = order;
+    this.showBillModal = true;
+  }
+
+  closeBillModal(): void {
+    this.showBillModal = false;
+    this.viewBillOrder = null;
+  }
+
+  confirmShare(mode: 'WHATSAPP' | 'SMS'): void {
+    if (!this.viewBillOrder) return;
+
+    const order = this.viewBillOrder;
     const phone = order.customerPhone || '0000000000';
 
-    // Construct simplified bill text
     const itemsList = (order.items || [])
       .map((i: any) => `${i.qty}x ${i.name} (₹${i.price})`)
       .join('\n');
 
+    // Construct bill text
     const message =
-      `🧾 *Bill for Order #${order.id}*\n\n` +
-      `Hello ${order.customerName || 'Guest'},\n\n` +
-      `Here is your order summary:\n` +
-      `${itemsList}\n\n` +
-      `*Total: ₹${order.total}*\n\n` +
+      `🧾 *Bill for Order #${order.id}*\n` +
+      `--------------------------------\n` +
+      `Hello ${order.customerName || 'Guest'},\n` +
+      `Here is your order summary:\n\n` +
+      `${itemsList}\n` +
+      `--------------------------------\n` +
+      `*Total: ₹${order.total}*\n` +
+      `--------------------------------\n` +
       `Thank you for dining with TasteTown! 🍽️`;
 
-    this.notificationService.shareViaWhatsApp(phone, message);
-    this.message = '🚀 Opening WhatsApp...';
-    setTimeout(() => this.message = '', 2000);
+    if (mode === 'WHATSAPP') {
+      this.notificationService.shareViaWhatsApp(phone, message);
+    } else {
+      this.notificationService.shareViaSMS(phone, message);
+    }
+
+    this.message = `🚀 Opening ${mode}...`;
+    this.closeBillModal();
   }
 
   // ========== CHART / REVENUE ==========
@@ -646,13 +704,22 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     return (this.todayOrders || []).reduce((s: number, o: any) => s + (Number(o.total) || 0), 0);
   }
 
+  getCashOrdersCount(): number {
+    return (this.todayOrders || []).filter((o: any) => o.paymentMode === 'CASH').length;
+  }
+
+  getOnlineOrdersCount(): number {
+    return (this.todayOrders || []).filter((o: any) => o.paymentMode !== 'CASH').length;
+  }
+
   // ========== SWITCH TAB ==========
 
-  switchTab(tab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE'): void {
+  switchTab(tab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' | 'LEAVES'): void {
     this.activeTab = tab;
     this.message = '';
     if (tab === 'REVENUE') this.loadTodayOrders();
     if (tab === 'ONGOING') this.loadOngoingOrders();
+    if (tab === 'LEAVES') this.loadMyLeaves();
   }
 
   markAsServed(order: any): void {
@@ -745,5 +812,58 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   trackByItem(_index: number, item: FoodItem): number {
     return item.id;
+  }
+
+  // ========== LEAVE MANAGEMENT ==========
+
+  loadMyLeaves(): void {
+    this.leaveService.getMyLeaves().subscribe({
+      next: (leaves: LeaveResponse[]) => this.myLeaves = leaves,
+      error: () => this.toastr.error('Failed to load leave history')
+    });
+  }
+
+  openLeaveModal(): void {
+    this.showLeaveModal = true;
+  }
+
+  getLeaveDuration(start: string, end: string): number {
+    const s = new Date(start);
+    const e = new Date(end);
+    const diffTime = Math.abs(e.getTime() - s.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Include start date
+  }
+
+  closeLeaveModal(): void {
+    this.showLeaveModal = false;
+    this.leaveForm.reset();
+  }
+
+  applyForLeave(): void {
+    if (this.leaveForm.invalid) return;
+
+    this.isLoading = true;
+    const val = this.leaveForm.value;
+
+    // Ensure dates are strings for API (YYYY-MM-DD)
+    const payload = {
+      startDate: val.startDate!,
+      endDate: val.endDate!,
+      reason: val.reason!
+    };
+
+    this.leaveService.apply(payload).subscribe({
+      next: () => {
+        this.toastr.success('Leave application submitted');
+        this.closeLeaveModal();
+        this.loadMyLeaves();
+        this.isLoading = false;
+      },
+      error: (err: any) => {
+        console.error('Leave Apply Error:', err);
+        this.toastr.error(err.error?.message || 'Failed to apply for leave');
+        this.isLoading = false;
+      }
+    });
   }
 }

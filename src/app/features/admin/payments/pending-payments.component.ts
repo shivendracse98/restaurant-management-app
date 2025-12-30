@@ -22,13 +22,16 @@ export class PendingPaymentsComponent implements OnInit {
     'date',
     'actions'
   ];
-  pendingPayments: any[] = []; // Now storing Orders
+  pendingPayments: any[] = [];
   loading = false;
 
-  // Statistics (Optional: Calculate from list or fetch separate)
+  // 1. New filter logic
+  currentFilter: 'PENDING' | 'APPROVED' | 'REJECTED' | 'ALL' = 'PENDING';
+  allOrdersCache: any[] = [];
+
   stats = {
     pendingApprovals: 0,
-    totalRevenue: 0, // Maybe hide or calc
+    totalRevenue: 0,
     successfulTransactions: 0,
     failedTransactions: 0
   };
@@ -42,19 +45,18 @@ export class PendingPaymentsComponent implements OnInit {
     this.loadPendingPayments();
   }
 
+  setFilter(filter: 'PENDING' | 'APPROVED' | 'REJECTED'): void {
+    this.currentFilter = filter;
+    this.applyFilter();
+  }
+
   loadPendingPayments(): void {
     this.loading = true;
     this.orderService.getOrders().subscribe({
       next: (orders) => {
-        // Filter for Verification Pending OR Pay at Counter (Pending)
-        this.pendingPayments = orders.filter(o => {
-          const needsVerify = o.paymentStatus === 'VERIFICATION_PENDING';
-          const payAtCounter = o.paymentMode === 'CASH' && o.status === 'PENDING';
-          // Only show if NOT cancelled
-          return (needsVerify || payAtCounter) && o.status !== 'CANCELLED';
-        });
-
-        this.stats.pendingApprovals = this.pendingPayments.length;
+        this.allOrdersCache = orders || [];
+        this.calculateStats();
+        this.applyFilter();
         this.loading = false;
       },
       error: (err) => {
@@ -62,6 +64,36 @@ export class PendingPaymentsComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  calculateStats(): void {
+    this.stats.successfulTransactions = this.allOrdersCache.filter(o =>
+      o.paymentStatus === 'PAID' || o.paymentStatus === 'COMPLETED' || o.status === 'CONFIRMED' || o.status === 'DELIVERED').length;
+    this.stats.failedTransactions = this.allOrdersCache.filter(o => o.status === 'CANCELLED').length;
+    this.stats.totalRevenue = this.allOrdersCache.filter(o => o.status !== 'CANCELLED')
+      .reduce((sum, o) => sum + (Number(o.totalAmount || o.total) || 0), 0);
+
+    // Pending count
+    this.stats.pendingApprovals = this.allOrdersCache.filter(o => {
+      const needsVerify = o.paymentStatus === 'VERIFICATION_PENDING';
+      const payAtCounter = o.paymentMode === 'CASH' && o.status === 'PENDING';
+      return (needsVerify || payAtCounter) && o.status !== 'CANCELLED';
+    }).length;
+  }
+
+  applyFilter(): void {
+    if (this.currentFilter === 'PENDING') {
+      this.pendingPayments = this.allOrdersCache.filter(o => {
+        const needsVerify = o.paymentStatus === 'VERIFICATION_PENDING';
+        const payAtCounter = o.paymentMode === 'CASH' && o.status === 'PENDING';
+        return (needsVerify || payAtCounter) && o.status !== 'CANCELLED';
+      });
+    } else if (this.currentFilter === 'APPROVED') {
+      this.pendingPayments = this.allOrdersCache.filter(o =>
+        (o.paymentStatus === 'PAID' || o.paymentStatus === 'COMPLETED' || o.status === 'CONFIRMED') && o.status !== 'CANCELLED');
+    } else if (this.currentFilter === 'REJECTED') {
+      this.pendingPayments = this.allOrdersCache.filter(o => o.status === 'CANCELLED');
+    }
   }
 
   approvePayment(order: any): void {

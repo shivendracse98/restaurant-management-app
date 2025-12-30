@@ -1,7 +1,9 @@
 <div class="pending-payments-container">
   <!-- Statistics -->
+  <!-- Statistics -->
   <div class="stats-section" *ngIf="stats">
-    <div class="stat-card">
+    <div class="stat-card" (click)="setFilter('PENDING')" [class.active]="currentFilter === 'PENDING'"
+      style="cursor: pointer;">
       <div class="stat-value">{{ stats.pendingApprovals }}</div>
       <div class="stat-label">Pending Approvals</div>
     </div>
@@ -11,12 +13,14 @@
       <div class="stat-label">Total Revenue</div>
     </div>
 
-    <div class="stat-card">
+    <div class="stat-card" (click)="setFilter('APPROVED')" [class.active]="currentFilter === 'APPROVED'"
+      style="cursor: pointer;">
       <div class="stat-value">{{ stats.successfulTransactions }}</div>
       <div class="stat-label">Approved</div>
     </div>
 
-    <div class="stat-card">
+    <div class="stat-card" (click)="setFilter('REJECTED')" [class.active]="currentFilter === 'REJECTED'"
+      style="cursor: pointer;">
       <div class="stat-value">{{ stats.failedTransactions }}</div>
       <div class="stat-label">Rejected</div>
     </div>
@@ -32,48 +36,54 @@
 
   <!-- Table -->
   <div class="table-section" *ngIf="!loading">
-    <table class="payments-table" *ngIf="pendingPayments.length > 0">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Customer</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Date</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let order of pendingPayments; trackBy: trackByPaymentId">
-          <td>#{{ order.id }}</td>
-          <td>
-            <strong>{{ order.customerName || 'Guest' }}</strong>
-            <br />
-            <small>{{ order.customerPhone }}</small>
-          </td>
-          <td>₹{{ order.totalAmount || order.total }}</td>
-          <td>
-            <!-- Dynamic Status Badge -->
-            <span class="badge"
-              [ngClass]="{'pending': true, 'verifying': order.paymentStatus === 'VERIFICATION_PENDING'}">
-              {{ order.paymentStatus === 'VERIFICATION_PENDING' ? 'VERIFYING' : (order.status) }}
-            </span>
-            <div *ngIf="order.paymentProof" style="font-size: 0.75rem; margin-top: 2px;">
-              Reference: {{ order.paymentProof }}
-            </div>
-          </td>
-          <td>{{ order.createdAt | date: 'short' }}</td>
-          <td class="actions">
-            <button class="btn approve" (click)="approvePayment(order)">
-              ✓ Verify
-            </button>
-            <button class="btn reject" (click)="rejectPayment(order)">
-              ✕ Cancel
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-wrapper">
+      <table class="payments-table" *ngIf="pendingPayments.length > 0">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of pendingPayments; trackBy: trackByPaymentId">
+            <td>#{{ order.id }}</td>
+            <td>
+              <strong>{{ order.customerName || 'Guest' }}</strong>
+              <br />
+              <small>{{ order.customerPhone }}</small>
+            </td>
+            <td>₹{{ order.totalAmount || order.total }}</td>
+            <td>
+              <!-- Dynamic Status Badge -->
+              <span class="badge"
+                [ngClass]="{'pending': true, 'verifying': order.paymentStatus === 'VERIFICATION_PENDING'}">
+                {{ order.paymentStatus === 'VERIFICATION_PENDING' ? 'VERIFYING' : (order.status) }}
+              </span>
+              <div *ngIf="order.paymentProof" style="font-size: 0.75rem; margin-top: 2px;">
+                Reference: {{ order.paymentProof }}
+              </div>
+              <div *ngIf="order.verifiedBy" style="font-size: 0.75rem; margin-top: 2px; color: #27AE60;">
+                Verified by: {{ order.verifiedBy }}<br>
+                <span style="font-size: 0.9em; color: #7f8c8d;">{{ order.verifiedAt | date:'short' }}</span>
+              </div>
+            </td>
+            <td>{{ order.createdAt | date: 'short' }}</td>
+            <td class="actions">
+              <button class="btn approve" (click)="approvePayment(order)">
+                ✓ Verify
+              </button>
+              <button class="btn reject" (click)="rejectPayment(order)">
+                ✕ Cancel
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div *ngIf="pendingPayments.length === 0" class="empty">
       <p>✓ No pending payments - All caught up!</p>

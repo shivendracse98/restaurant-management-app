@@ -15,7 +15,7 @@ export class TenantService {
     constructor() {
         this.identifyTenantFromUrl();
         if (!this.getTenantId()) {
-            this.setTenantId('Maa-Ashtabhuja'); // Default for development
+            this.setTenantId('maa-ashtabhuja'); // Default for development
         }
     }
 

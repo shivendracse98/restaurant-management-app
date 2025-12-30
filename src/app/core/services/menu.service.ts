@@ -72,4 +72,8 @@ export class MenuService {
   deleteMenuItem(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  updateAvailability(id: number, isAvailable: boolean): Observable<FoodItem> {
+    return this.http.patch<FoodItem>(`${this.apiUrl}/${id}/availability?isAvailable=${isAvailable}`, {});
+  }
 }

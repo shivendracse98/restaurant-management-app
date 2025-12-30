@@ -64,6 +64,22 @@ export class MenuListComponent implements OnInit {
     });
   }
 
+  // Filter Logic
+  filterType: 'ALL' | 'VEG' | 'NON_VEG' = 'ALL';
+
+  get filteredFoodItems(): FoodItem[] {
+    if (this.filterType === 'ALL') return this.foodItems;
+    // Veg = True or Undefined/Null (Standard default)
+    if (this.filterType === 'VEG') return this.foodItems.filter(item => item.isVeg !== false);
+    // Non-Veg = Explicitly False
+    if (this.filterType === 'NON_VEG') return this.foodItems.filter(item => item.isVeg === false);
+    return this.foodItems;
+  }
+
+  setFilter(type: 'ALL' | 'VEG' | 'NON_VEG'): void {
+    this.filterType = type;
+  }
+
   addToCart(item: FoodItem): void {
     if (this.viewMode !== 'customer') return;
 

@@ -24,6 +24,15 @@ export class AppComponent implements OnInit, OnDestroy {
   private routerSub?: Subscription;
 
   currentTenantName = '';
+  isMobileMenuOpen = false;
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
+  }
 
   constructor(
     public cart: CartService,

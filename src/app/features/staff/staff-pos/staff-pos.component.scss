@@ -200,6 +200,8 @@
       }
 
       .menu-item {
+        position: relative;
+        /* Constrain absolute overlay */
         background: white;
         border-radius: 10px;
         overflow: hidden;

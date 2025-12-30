@@ -7,41 +7,44 @@
     No orders yet today 😋
   </div>
 
-  <table *ngIf="!loading && todayOrders.length > 0">
-    <thead>
-      <tr>
-        <th>Order ID</th>
-        <th>Customer</th>
-        <th>Items</th>
-        <th>Total (₹)</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let order of todayOrders" [ngClass]="getStatusClass(order.status)">
-        <td>#{{ order.id }}</td>
-        <td>{{ order.customerName || 'Walk-in' }}</td>
-        <td>
-          <ul>
-            <li *ngFor="let item of order.items">{{ item.name }} × {{ item.qty }}</li>
-          </ul>
-        </td>
-        <td>{{ order.total }}</td>
-        <td>
-          {{ order.status }}
-          <div *ngIf="order.paymentStatus === 'VERIFICATION_PENDING'" style="color:red; font-size: 0.8em">⚠ Check Proof
-          </div>
-          <div *ngIf="order.paymentProof" style="font-size: 0.8em">Proof: {{ order.paymentProof }}</div>
-        </td>
-        <td>
-          <button
-            *ngIf="order.paymentStatus === 'VERIFICATION_PENDING' || (order.paymentMode === 'CASH' && order.status === 'PENDING')"
-            (click)="verifyPayment(order)" class="btn-verify">✅ Verify</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-wrapper">
+    <table *ngIf="!loading && todayOrders.length > 0">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total (₹)</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of todayOrders" [ngClass]="getStatusClass(order.status)">
+          <td>#{{ order.id }}</td>
+          <td>{{ order.customerName || 'Walk-in' }}</td>
+          <td>
+            <ul>
+              <li *ngFor="let item of order.items">{{ item.name }} × {{ item.qty }}</li>
+            </ul>
+          </td>
+          <td>{{ order.total }}</td>
+          <td>
+            {{ order.status }}
+            <div *ngIf="order.paymentStatus === 'VERIFICATION_PENDING'" style="color:red; font-size: 0.8em">⚠ Check
+              Proof
+            </div>
+            <div *ngIf="order.paymentProof" style="font-size: 0.8em">Proof: {{ order.paymentProof }}</div>
+          </td>
+          <td>
+            <button
+              *ngIf="order.paymentStatus === 'VERIFICATION_PENDING' || (order.paymentMode === 'CASH' && order.status === 'PENDING')"
+              (click)="verifyPayment(order)" class="btn-verify">✅ Verify</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="summary-card">
     <h3>Total Orders: {{ todayOrders.length }}</h3>

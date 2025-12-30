@@ -14,7 +14,25 @@
     </a>
   </div>
 
-  <div class="nav-links">
+  <div class="nav-right" *ngIf="auth.isLoggedIn()">
+    <span class="welcome">
+      👋 {{ auth.currentUser()?.name || auth.currentUser()?.email }}
+    </span>
+    <button class="btn logout" (click)="logout()">Logout</button>
+  </div>
+
+  <!-- Hamburger Menu (Mobile Only) -->
+  <button class="hamburger-menu" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </button>
+
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" *ngIf="isMobileMenuOpen" (click)="closeMobileMenu()"></div>
+
+  <!-- Mobile Nav Links Container (Modified Structure) -->
+  <div class="nav-links" [class.mobile-open]="isMobileMenuOpen" (click)="closeMobileMenu()">
     <!-- Guest Links -->
     <ng-container *ngIf="!auth.isLoggedIn(); else loggedLinks">
       <a routerLink="/home" routerLinkActive="active">Home</a>
@@ -31,6 +49,7 @@
         <a routerLink="/admin/orders" routerLinkActive="active">Orders</a>
         <a routerLink="/admin/menu" routerLinkActive="active">Menu Mgmt</a>
         <a routerLink="/admin/payments" routerLinkActive="active">Payments</a>
+        <a routerLink="/admin/staff" routerLinkActive="active">Staff</a> <!-- Added Missing Link -->
         <a routerLink="/staff/pos" routerLinkActive="active">POS</a>
       </ng-container>
 
@@ -69,13 +88,11 @@
         </ng-template>
       </ng-template>
     </ng-template>
-  </div>
 
-  <div class="nav-right" *ngIf="auth.isLoggedIn()">
-    <span class="welcome">
-      👋 {{ auth.currentUser()?.name || auth.currentUser()?.email }}
-    </span>
-    <button class="btn logout" (click)="logout()">Logout</button>
+    <!-- Mobile-Only Logout -->
+    <a *ngIf="auth.isLoggedIn()" (click)="logout()" class="mobile-logout" style="color: #c62828;">
+      Logout
+    </a>
   </div>
 </nav>
 

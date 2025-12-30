@@ -1,0 +1,106 @@
+.staff-mgmt-container {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    .header {
+        margin-bottom: 24px;
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: #2c3e50;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            margin: 4px 0 0;
+        }
+    }
+}
+
+.tab-content {
+    padding-top: 20px;
+}
+
+.actions-bar {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.add-staff-card {
+    margin-bottom: 24px;
+    background: #f8f9fa;
+    box-shadow: none;
+    border: 1px solid #e0e0e0;
+
+    .form-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+
+        mat-form-field {
+            flex: 1;
+            min-width: 250px;
+        }
+    }
+}
+
+.table-responsive {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+
+    table {
+        width: 100%;
+    }
+
+    .role-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+
+        &.admin {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+    }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+
+        &.PENDING {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        &.APPROVED {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        &.REJECTED {
+            background: #ffebee;
+            color: #c62828;
+        }
+    }
+
+    .admin-comment {
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 2px;
+    }
+}
+
+.empty-state {
+    padding: 40px;
+    text-align: center;
+    color: #999;
+}

@@ -11,19 +11,12 @@
     <h3>{{ editingId ? 'Edit Item' : 'Add New Item' }}</h3>
     <div class="form-group">
       <label>Item Name</label>
-      <input
-        type="text"
-        [(ngModel)]="newItem.name"
-        placeholder="Enter item name"
-      />
+      <input type="text" [(ngModel)]="newItem.name" placeholder="Enter item name" />
     </div>
 
     <div class="form-group">
       <label>Description</label>
-      <textarea
-        [(ngModel)]="newItem.description"
-        placeholder="Enter description"
-      ></textarea>
+      <textarea [(ngModel)]="newItem.description" placeholder="Enter description"></textarea>
     </div>
 
     <div class="form-row">
@@ -34,21 +27,33 @@
 
       <div class="form-group">
         <label>Category</label>
-        <input
-          type="text"
-          [(ngModel)]="newItem.category"
-          placeholder="e.g., Pizza"
-        />
+        <input type="text" [(ngModel)]="newItem.category" placeholder="e.g., Pizza" />
       </div>
     </div>
 
     <div class="form-group">
-      <label>Image URL</label>
-      <input
-        type="text"
-        [(ngModel)]="newItem.imageUrl"
-        placeholder="https://..."
-      />
+      <label>Product Image</label>
+      <div class="image-upload-container">
+        <input type="file" (change)="onFileSelected($event)" accept="image/*" id="fileInput" class="file-input">
+        <div *ngIf="isUploading">Uploading...</div>
+        <div *ngIf="uploadError" class="error">{{ uploadError }}</div>
+
+        <div *ngIf="newItem.imageUrl" class="image-preview">
+          <img [src]="newItem.imageUrl" alt="Preview">
+          <p class="uploaded-text">✅ Image Uploaded</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group checkbox-group">
+      <label>
+        <input type="checkbox" [(ngModel)]="newItem.isVeg">
+        Is Vegetarian? 🌿
+      </label>
+      <label style="margin-left: 20px;">
+        <input type="checkbox" [(ngModel)]="newItem.isAvailable">
+        Is Available? (In Stock) ✅
+      </label>
     </div>
 
     <div class="form-actions">
@@ -61,13 +66,8 @@
 
   <!-- Search -->
   <div class="search-section" *ngIf="!showForm">
-    <input
-      type="text"
-      [(ngModel)]="searchText"
-      (input)="onSearch()"
-      placeholder="Search items..."
-      class="search-input"
-    />
+    <input type="text" [(ngModel)]="searchText" (input)="onSearch()" placeholder="Search items..."
+      class="search-input" />
   </div>
 
   <!-- Loading -->
@@ -80,6 +80,7 @@
         <tr>
           <th>ID</th>
           <th>Name</th>
+          <th>Status</th>
           <th>Category</th>
           <th>Price</th>
           <th>Actions</th>
@@ -88,12 +89,21 @@
       <tbody>
         <tr *ngFor="let item of filteredItems; trackBy: trackByItemId">
           <td>{{ item.id }}</td>
-          <td>{{ item.name }}</td>
+          <td>
+            {{ item.name }}
+            <span *ngIf="item.isVeg" title="Vegetarian">🌿</span>
+          </td>
+          <td>
+            <span class="badge" [style.background-color]="item.isAvailable ? '#e8f5e9' : '#ffebee'"
+              [style.color]="item.isAvailable ? '#2e7d32' : '#c62828'">
+              {{ item.isAvailable ? 'In Stock' : 'Out of Stock' }}
+            </span>
+          </td>
           <td>{{ item.category }}</td>
           <td>₹{{ item.price }}</td>
           <td class="actions">
             <button class="btn-edit" (click)="editItem(item)">✏️ Edit</button>
-            <button class="btn-delete" (click)="deleteItem(item.id)">
+            <button class="btn-delete" (click)="deleteItem(item)">
               🗑️ Delete
             </button>
           </td>

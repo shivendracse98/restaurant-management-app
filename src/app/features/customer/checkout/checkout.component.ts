@@ -72,10 +72,26 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       customerName: ['', [Validators.required, Validators.minLength(2)]],
       customerPhone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      customerEmail: ['', [Validators.required, Validators.email]],
-      address: ['', [Validators.required, Validators.minLength(5)]],
+      customerEmail: ['', [Validators.email]], // Email optional or specific? Keeping loose for now.
+      address: [''], // Remove Required check initially (Managed dynamically)
       orderType: ['DELIVERY', Validators.required]
     });
+
+    // Add dynamic validator for Address
+    this.form.get('orderType')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(type => {
+        const addrCtrl = this.form.get('address');
+        if (type === 'DELIVERY') {
+          addrCtrl?.setValidators([Validators.required, Validators.minLength(5)]);
+        } else {
+          addrCtrl?.clearValidators();
+        }
+        addrCtrl?.updateValueAndValidity();
+      });
+
+    // Handle Query Params for 'tableId' -> Auto set to DINE_IN
+    // (Assuming logic elsewhere or defaults)
     console.log(`${this.LOG} Form initialized`, this.form);
   }
 
@@ -96,7 +112,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           if (user) {
             this.form.patchValue({
               customerName: user.name || '',
-              customerPhone: user.phone || '',
+              customerPhone: user.phone || user.phoneNumber || '',
               customerEmail: user.email || '',
               address: user.address || ''
             });
@@ -194,18 +210,21 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (createdOrder: any) => {
           console.log(`${this.LOG} ✓ Order created successfully:`, createdOrder);
-          console.log(`${this.LOG} Order ID:`, createdOrder.id);
-          console.log(`${this.LOG} Order Total:`, createdOrder.total);
 
-          // Step 2: Show payment modal
-          this.openPaymentModal(createdOrder);
+          // FIX: If DINE_IN or PICKUP, allow "Pay Later" (Skip Payment Modal)
+          if (formValue.orderType === 'DINE_IN' || formValue.orderType === 'PICKUP') {
+            this.toastr.success('✓ Order placed! Please pay at the counter.');
+            this.cartService.clear();
+            setTimeout(() => {
+              this.router.navigate(['/order-tracking', createdOrder.id]);
+            }, 1500);
+          } else {
+            // For DELIVERY, force payment
+            this.openPaymentModal(createdOrder);
+          }
         },
         error: (error: any) => {
           console.error(`${this.LOG} ✗ Order creation failed:`, error);
-          console.error(`${this.LOG} Error status:`, error.status);
-          console.error(`${this.LOG} Error message:`, error.message);
-          console.error(`${this.LOG} Full error:`, error);
-
           this.submitting = false;
           this.toastr.error('Failed to create order. Please try again.');
         }

@@ -9,16 +9,13 @@
       <!-- Customer Name -->
       <div class="form-group">
         <label>👤 Customer Name *</label>
-        <input type="text" 
-               formControlName="customerName" 
-               placeholder="Enter your name"
-               class="form-control" />
+        <input type="text" formControlName="customerName" placeholder="Enter your name" class="form-control" />
         <small *ngIf="form.get('customerName')?.hasError('required') && form.get('customerName')?.touched"
-               class="error">
+          class="error">
           Name is required
         </small>
         <small *ngIf="form.get('customerName')?.hasError('minlength') && form.get('customerName')?.touched"
-               class="error">
+          class="error">
           Minimum 2 characters
         </small>
       </div>
@@ -26,13 +23,10 @@
       <!-- Phone -->
       <div class="form-group">
         <label>📱 Phone *</label>
-        <input type="tel" 
-               formControlName="customerPhone" 
-               placeholder="10-digit phone number"
-               maxlength="10"
-               class="form-control" />
+        <input type="tel" formControlName="customerPhone" placeholder="10-digit phone number" maxlength="10"
+          class="form-control" />
         <small *ngIf="form.get('customerPhone')?.hasError('pattern') && form.get('customerPhone')?.touched"
-               class="error">
+          class="error">
           Enter valid 10-digit phone number
         </small>
       </div>
@@ -40,25 +34,19 @@
       <!-- Email -->
       <div class="form-group">
         <label>📧 Email *</label>
-        <input type="email" 
-               formControlName="customerEmail" 
-               placeholder="your@email.com"
-               class="form-control" />
-        <small *ngIf="form.get('customerEmail')?.hasError('email') && form.get('customerEmail')?.touched"
-               class="error">
+        <input type="email" formControlName="customerEmail" placeholder="your@email.com" class="form-control" />
+        <small *ngIf="form.get('customerEmail')?.hasError('email') && form.get('customerEmail')?.touched" class="error">
           Enter valid email
         </small>
       </div>
 
       <!-- Address -->
       <div class="form-group">
-        <label>📍 Delivery Address *</label>
-        <textarea formControlName="address" 
-                  placeholder="Enter your delivery address"
-                  rows="3"
-                  class="form-control"></textarea>
-        <small *ngIf="form.get('address')?.hasError('required') && form.get('address')?.touched"
-               class="error">
+        <label>📍 Delivery Address <span *ngIf="form.get('orderType')?.value === 'DELIVERY'"
+            style="color:red">*</span></label>
+        <textarea formControlName="address" placeholder="Enter your delivery address" rows="3"
+          class="form-control"></textarea>
+        <small *ngIf="form.get('address')?.hasError('required') && form.get('address')?.touched" class="error">
           Address is required
         </small>
       </div>
@@ -89,10 +77,11 @@
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" 
-              [disabled]="loading || form.invalid || cart.getCount() === 0"
-              class="btn btn-submit">
-        <span *ngIf="!loading">✅ Place Order & Pay via UPI</span>
+      <button type="submit" [disabled]="loading || form.invalid || cart.getCount() === 0" class="btn btn-submit">
+        <span *ngIf="!loading">
+          {{ (form.get('orderType')?.value === 'DINE_IN' || form.get('orderType')?.value === 'PICKUP') ? '✅ Place Order'
+          : '✅ Place Order & Pay via UPI' }}
+        </span>
         <span *ngIf="loading">⏳ Processing...</span>
       </button>
     </form>

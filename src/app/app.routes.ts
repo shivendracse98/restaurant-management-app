@@ -86,6 +86,13 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
   },
   {
+    path: 'admin/staff',
+    loadComponent: () =>
+      import('./features/admin/staff-management/staff-management.component')
+        .then(m => m.StaffManagementComponent),
+    canActivate: [authGuard, adminGuard],
+  },
+  {
     path: 'staff/pos',
     loadComponent: () =>
       import('./features/staff/staff-pos/staff-pos.component').then(m => m.StaffPosComponent),

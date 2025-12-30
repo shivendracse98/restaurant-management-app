@@ -8,7 +8,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MenuService } from '../../../core/services/menu.service';
+import { ImageService } from '../../../core/services/image.service';
 import { FoodItem } from 'src/app/models/food-item.model';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-menu-management',
@@ -38,13 +40,22 @@ export class MenuManagementComponent implements OnInit {
     description: '',
     price: 0,
     imageUrl: '',
-    category: ''
+    category: '',
+    isVeg: true,
+    isAvailable: true // Default In Stock
   };
 
   showForm = false;
   editingId: number | null = null;
 
-  constructor(private menuService: MenuService) {}
+  isUploading = false;
+  uploadError = '';
+
+  constructor(
+    private menuService: MenuService,
+    private imageService: ImageService,
+    private toastr: ToastrService
+  ) { }
 
   ngOnInit(): void {
     this.loadMenuItems();
@@ -53,7 +64,7 @@ export class MenuManagementComponent implements OnInit {
   loadMenuItems(): void {
     this.loading = true;
     console.log('Loading menu items...');
-    
+
     // Use getAllMenuItems instead of getMenu
     this.menuService.getAllMenuItems().subscribe({
       next: (items) => {
@@ -65,7 +76,7 @@ export class MenuManagementComponent implements OnInit {
       error: (err) => {
         console.error('Error loading menu:', err);
         this.loading = false;
-        alert('Failed to load menu items');
+        this.toastr.error('Failed to load menu items', 'Error');
       }
     });
   }
@@ -91,7 +102,9 @@ export class MenuManagementComponent implements OnInit {
       description: '',
       price: 0,
       imageUrl: '',
-      category: ''
+      category: '',
+      isVeg: true, // Default to Veg
+      isAvailable: true // Default In Stock
     };
   }
 
@@ -101,9 +114,30 @@ export class MenuManagementComponent implements OnInit {
     this.newItem = { ...item };
   }
 
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.isUploading = true;
+      this.uploadError = '';
+
+      this.imageService.uploadImage(file).subscribe({
+        next: (response) => {
+          this.newItem.imageUrl = response.url;
+          this.isUploading = false;
+        },
+        error: (err) => {
+          console.error('Upload failed', err);
+          this.uploadError = 'Failed to upload image. Max size 2MB.';
+          this.isUploading = false;
+          this.toastr.error('Image upload failed', 'Error');
+        }
+      });
+    }
+  }
+
   saveItem(): void {
     if (!this.newItem.name || !this.newItem.price) {
-      alert('Please fill all fields');
+      this.toastr.warning('Please enter both Name and Price.', 'Missing Info');
       return;
     }
 
@@ -113,41 +147,41 @@ export class MenuManagementComponent implements OnInit {
         .updateMenuItem(this.editingId, this.newItem)
         .subscribe({
           next: () => {
-            alert('Item updated successfully');
+            this.toastr.success(`${this.newItem.name} updated successfully!`, 'Saved');
             this.showForm = false;
             this.loadMenuItems();
           },
           error: (err) => {
             console.error('Error updating item:', err);
-            alert('Failed to update item');
+            this.toastr.error('Failed to update item', 'Error');
           }
         });
     } else {
       // Add new
       this.menuService.addMenuItem(this.newItem as Omit<FoodItem, 'id'>).subscribe({
         next: () => {
-          alert('Item added successfully');
+          this.toastr.success(`${this.newItem.name} added to the menu!`, 'Success');
           this.showForm = false;
           this.loadMenuItems();
         },
         error: (err) => {
           console.error('Error adding item:', err);
-          alert('Failed to add item');
+          this.toastr.error('Failed to add item', 'Error');
         }
       });
     }
   }
 
-  deleteItem(id: number): void {
-    if (confirm('Are you sure you want to delete this item?')) {
-      this.menuService.deleteMenuItem(id).subscribe({
+  deleteItem(item: FoodItem): void {
+    if (confirm(`Are you sure you want to delete ${item.name}?`)) {
+      this.menuService.deleteMenuItem(item.id).subscribe({
         next: () => {
-          alert('Item deleted successfully');
+          this.toastr.info(`${item.name} removed from menu.`, 'Deleted');
           this.loadMenuItems();
         },
         error: (err) => {
           console.error('Error deleting item:', err);
-          alert('Failed to delete item');
+          this.toastr.error('Failed to delete item', 'Error');
         }
       });
     }

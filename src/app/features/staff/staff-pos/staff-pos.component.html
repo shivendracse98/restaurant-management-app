@@ -24,6 +24,9 @@
       <button class="tab-btn" [class.active]="activeTab === 'REVENUE'" (click)="switchTab('REVENUE')">
         📝 Shift Summary
       </button>
+      <button class="tab-btn" [class.active]="activeTab === 'LEAVES'" (click)="switchTab('LEAVES')">
+        🏖️ My Leaves
+      </button>
     </div>
   </div>
 
@@ -36,19 +39,39 @@
     <!-- (Using existing structure indirectly by not replacing it, just ensuring context match) -->
     <!-- Wait, replacing larger block for safety -->
     <div class="menu-section">
-      <div class="search-bar">
+      <div class="search-bar" style="display: flex; gap: 10px;">
         <input type="text" [(ngModel)]="searchTerm" placeholder="🔍 Search menu or category..." class="search-input" />
+        <button class="btn" [class.primary-btn]="!isManageMode" [class.share-btn]="isManageMode"
+          [style.background-color]="isManageMode ? '#E74C3C' : '#3498DB'" (click)="isManageMode = !isManageMode">
+          {{ isManageMode ? 'Done Managing' : 'Manage Stock' }}
+        </button>
+      </div>
+      <div *ngIf="isManageMode"
+        style="background: #ffebee; color: #c62828; padding: 10px; margin-bottom: 10px; border-radius: 4px; text-align: center; border: 1px solid #ffcdd2;">
+        ⚠️ <strong>Manage Mode Active</strong>: Tap items to toggle In Stock / Out of Stock
       </div>
 
       <div class="menu-grid">
-        <div class="menu-item" *ngFor="let item of filteredMenu; trackBy: trackByItem">
+        <div class="menu-item" *ngFor="let item of filteredMenu; trackBy: trackByItem"
+          [class.out-of-stock]="item.isAvailable === false" [style.opacity]="item.isAvailable === false ? '0.6' : '1'">
+
+          <div *ngIf="item.isAvailable === false"
+            style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; z-index: 1; pointer-events: none;">
+            <span
+              style="background: red; color: white; padding: 2px 8px; font-size: 0.8rem; border-radius: 4px; transform: rotate(-10deg);">OUT
+              OF STOCK</span>
+          </div>
+
           <img [src]="item.imageUrl" [alt]="item.name" />
           <div class="meta">
             <div class="name">{{ item.name }}</div>
             <div class="category">{{ item.category }}</div>
             <div class="price">₹{{ item.price }}</div>
           </div>
-          <button class="btn add" (click)="addItem(item)">+ Add</button>
+          <button class="btn add" (click)="addItem(item)"
+            [style.background-color]="isManageMode ? (item.isAvailable !== false ? '#E74C3C' : '#27AE60') : ''">
+            {{ isManageMode ? (item.isAvailable !== false ? '🚫 Disable' : '✅ Enable') : '+ Add' }}
+          </button>
         </div>
       </div>
     </div>
@@ -115,78 +138,45 @@
   <!-- ========== ONLINE ORDERS (VERIFICATION) TAB ========== -->
   <div *ngIf="activeTab === 'ONLINE'" class="tab-content">
     <h3>🔔 Online Verification Queue</h3>
-    <table class="orders-table" *ngIf="onlineOrders.length > 0">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Customer</th>
-          <th>Items</th>
-          <th>Total</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let o of onlineOrders">
-          <td>#{{ o.id }}</td>
-          <td>{{ o.customerName || 'Guest' }}<br><small>{{ o.customerPhone }}</small></td>
-          <td>{{ o.items?.length }} items</td>
-          <td>₹{{ o.total }}</td>
-          <td>
-            <div *ngIf="o.paymentStatus === 'VERIFICATION_PENDING'" style="color:orange; font-weight:bold;">⚠ Proof
-              Uploaded</div>
-            <div *ngIf="o.paymentMode === 'CASH' && o.status === 'PENDING'" style="color:blue; font-weight:bold;">💵 Pay
-              at Counter</div>
-            <div *ngIf="o.paymentProof" style="font-size:0.8em;">Ref: {{ o.paymentProof }}</div>
-          </td>
-          <td>
-            <button class="btn primary-btn" style="background-color: #27AE60;" (click)="verifyPayment(o)">
-              ✅ Verify & Accept
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-wrapper">
+      <table class="orders-table" *ngIf="onlineOrders.length > 0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of onlineOrders">
+            <td>#{{ o.id }}</td>
+            <td>{{ o.customerName || 'Guest' }}<br><small>{{ o.customerPhone }}</small></td>
+            <td>{{ o.items?.length }} items</td>
+            <td>₹{{ o.total }}</td>
+            <td>
+              <div *ngIf="o.paymentStatus === 'VERIFICATION_PENDING'" style="color:orange; font-weight:bold;">⚠ Proof
+                Uploaded</div>
+              <div *ngIf="o.paymentMode === 'CASH' && o.status === 'PENDING'" style="color:blue; font-weight:bold;">💵
+                Pay
+                at Counter</div>
+              <div *ngIf="o.paymentProof" style="font-size:0.8em;">Ref: {{ o.paymentProof }}</div>
+            </td>
+            <td>
+              <button class="btn primary-btn" style="background-color: #27AE60;" (click)="verifyPayment(o)">
+                ✅ Verify & Accept
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <p *ngIf="onlineOrders.length === 0" class="no-data">No pending online orders! 🎉</p>
   </div>
 
-  <!-- ========== ONLINE ORDERS (VERIFICATION) TAB ========== -->
-  <div *ngIf="activeTab === 'ONLINE'" class="tab-content">
-    <h3>🔔 Online Verification Queue</h3>
-    <table class="orders-table" *ngIf="onlineOrders.length > 0">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Customer</th>
-          <th>Items</th>
-          <th>Total</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let o of onlineOrders">
-          <td>#{{ o.id }}</td>
-          <td>{{ o.customerName || 'Guest' }}<br><small>{{ o.customerPhone }}</small></td>
-          <td>{{ o.items?.length }} items</td>
-          <td>₹{{ o.total }}</td>
-          <td>
-            <div *ngIf="o.paymentStatus === 'VERIFICATION_PENDING'" style="color:orange; font-weight:bold;">⚠ Proof
-              Uploaded</div>
-            <div *ngIf="o.paymentMode === 'CASH' && o.status === 'PENDING'" style="color:blue; font-weight:bold;">💵 Pay
-              at Counter</div>
-            <div *ngIf="o.paymentProof" style="font-size:0.8em;">Ref: {{ o.paymentProof }}</div>
-          </td>
-          <td>
-            <button class="btn primary-btn" style="background-color: #27AE60;" (click)="verifyPayment(o)">
-              ✅ Verify & Accept
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="onlineOrders.length === 0" class="no-data">No pending online orders! 🎉</p>
-  </div>
+
 
   <!-- ========== TIFFIN TAB ========== -->
   <div *ngIf="activeTab === 'TIFFIN'" class="tab-content">
@@ -271,53 +261,54 @@
     </div>
 
     <!-- Tiffin List -->
-    <!-- Tiffin List -->
-    <table class="orders-table" *ngIf="subscriptionsList.length > 0">
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th>Customer</th>
-          <th>Plan</th>
-          <th>Dates (Start - End)</th>
-          <th>Max Extension</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let s of subscriptionsList">
-          <td>
-            <span class="badge" [class.badge-ready]="s.status === 'ACTIVE'"
-              [class.badge-pending]="s.status === 'PAUSED'">
-              {{ s.status }}
-            </span>
-          </td>
-          <td>
-            {{ s.customerName }}<br>
-            <small>{{ s.customerPhone }}</small>
-          </td>
-          <td>
-            {{ s.menuItemName || 'Tiffin' }}<br>
-            <small>₹{{ s.finalAmount }} / {{ s.durationMonths }} mo</small>
-          </td>
-          <td>
-            {{ s.startDate | date:'shortDate' }} - {{ s.endDate | date:'shortDate' }}
-            <div *ngIf="s.status === 'PAUSED'" style="color: red; font-size: 0.8em;">
-              Paused since: {{ s.pausedAt | date:'medium' }}
-            </div>
-          </td>
-          <td>
-            <span style="color: #d32f2f;">{{ s.maxEndDate | date:'shortDate' }}</span>
-          </td>
-          <td>
-            <button class="btn primary-btn" style="padding: 5px 10px; font-size: 0.9em;"
-              [style.background-color]="s.status === 'ACTIVE' ? '#fbc02d' : '#4caf50'"
-              (click)="toggleSubscriptionStatus(s)">
-              {{ s.status === 'ACTIVE' ? '⏸ Pause' : '▶ Resume' }}
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-wrapper">
+      <table class="orders-table" *ngIf="subscriptionsList.length > 0">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Customer</th>
+            <th>Plan</th>
+            <th>Dates (Start - End)</th>
+            <th>Max Extension</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of subscriptionsList">
+            <td>
+              <span class="badge" [class.badge-ready]="s.status === 'ACTIVE'"
+                [class.badge-pending]="s.status === 'PAUSED'">
+                {{ s.status }}
+              </span>
+            </td>
+            <td>
+              {{ s.customerName }}<br>
+              <small>{{ s.customerPhone }}</small>
+            </td>
+            <td>
+              {{ s.menuItemName || 'Tiffin' }}<br>
+              <small>₹{{ s.finalAmount }} / {{ s.durationMonths }} mo</small>
+            </td>
+            <td>
+              {{ s.startDate | date:'shortDate' }} - {{ s.endDate | date:'shortDate' }}
+              <div *ngIf="s.status === 'PAUSED'" style="color: red; font-size: 0.8em;">
+                Paused since: {{ s.pausedAt | date:'medium' }}
+              </div>
+            </td>
+            <td>
+              <span style="color: #d32f2f;">{{ s.maxEndDate | date:'shortDate' }}</span>
+            </td>
+            <td>
+              <button class="btn primary-btn" style="padding: 5px 10px; font-size: 0.9em;"
+                [style.background-color]="s.status === 'ACTIVE' ? '#fbc02d' : '#4caf50'"
+                (click)="toggleSubscriptionStatus(s)">
+                {{ s.status === 'ACTIVE' ? '⏸ Pause' : '▶ Resume' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <p *ngIf="subscriptionsList.length === 0" class="no-data">No active subscriptions</p>
   </div>
@@ -334,61 +325,70 @@
       </select>
     </div>
 
-    <table class="orders-table" *ngIf="sortedOngoingOrders.length > 0">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Table/Customer</th>
-          <th>Items</th>
-          <th>Total</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let o of sortedOngoingOrders">
-          <td>#{{ o.id }}</td>
-          <td>
-            <span *ngIf="o.tableNumber" class="badge table-badge">Table {{ o.tableNumber }}</span>
-            <span *ngIf="!o.tableNumber">{{ o.customerName || 'Guest' }}</span>
-          </td>
-          <td>
-            <div class="items-summary">
-              {{ o.items?.length || 0 }} items
-              <span class="items-tooltip">
-                <div *ngFor="let i of o.items">
-                  {{ i.qty || i.quantity }}x {{ i.name || i.itemName }}
-                </div>
+    <div class="table-wrapper">
+      <table class="orders-table" *ngIf="sortedOngoingOrders.length > 0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Table/Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of sortedOngoingOrders">
+            <td>#{{ o.id }}</td>
+            <td>
+              <span *ngIf="o.tableNumber" class="badge table-badge">Table {{ o.tableNumber }}</span>
+              <span *ngIf="!o.tableNumber">{{ o.customerName || 'Guest' }}</span>
+            </td>
+            <td>
+              <div class="items-summary">
+                {{ o.items?.length || 0 }} items
+                <span class="items-tooltip">
+                  <div *ngFor="let i of o.items">
+                    {{ i.qty || i.quantity }}x {{ i.name || i.itemName }}
+                  </div>
+                </span>
+              </div>
+            </td>
+            <td class="total-cell">₹{{ o.totalAmount || o.total }}</td>
+            <td>
+              <span class="badge" [class.badge-pending]="o.status === 'PENDING' || o.status === 'PREPARING'"
+                [class.badge-ready]="o.status === 'READY' || o.status === 'PREPARED'"
+                [class.badge-delivered]="o.status === 'DELIVERED'">
+                {{ o.status }}
               </span>
-            </div>
-          </td>
-          <td class="total-cell">₹{{ o.totalAmount || o.total }}</td>
-          <td>
-            <span class="badge" [class.badge-pending]="o.status === 'PENDING' || o.status === 'PREPARING'"
-              [class.badge-ready]="o.status === 'READY' || o.status === 'PREPARED'"
-              [class.badge-delivered]="o.status === 'DELIVERED'">
-              {{ o.status }}
-            </span>
-          </td>
-          <td>
-            <button class="btn share-btn" style="margin-right: 5px; background-color: #25D366; color: white;"
-              (click)="shareBill(o)" title="Share on WhatsApp">
-              <i class="fa fa-whatsapp"></i> Share
-            </button>
-            <button class="btn primary-btn" (click)="openEdit(o)">Edit</button>
-            <button class="btn primary-btn" style="margin-left: 5px; background-color: #9C27B0; border-color: #9C27B0;"
-              *ngIf="o.status === 'PENDING' || o.status === 'PREPARING' || o.status === 'READY'"
-              (click)="markAsServed(o)">
-              Serve
-            </button>
-            <button class="btn primary-btn" style="margin-left: 5px; background-color: #E67E22; border-color: #E67E22;"
-              *ngIf="o.status === 'DELIVERED' || o.status === 'READY'" (click)="openPayment(o)">
-              Pay
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+            <td>
+              <button class="btn share-btn" style="margin-right: 5px; background-color: #3498DB; color: white;"
+                (click)="shareBill(o)" title="View & Share Bill">
+                <i class="fa fa-file-text-o"></i> View Bill
+              </button>
+              <button class="btn primary-btn" (click)="openEdit(o)">Edit</button>
+              <button class="btn primary-btn"
+                style="margin-left: 5px; background-color: #9C27B0; border-color: #9C27B0;"
+                *ngIf="o.status === 'PENDING' || o.status === 'PREPARING' || o.status === 'READY'"
+                (click)="markAsServed(o)">
+                Serve
+              </button>
+              <button class="btn primary-btn"
+                style="margin-left: 5px; background-color: #E67E22; border-color: #E67E22;"
+                *ngIf="o.paymentStatus !== 'COMPLETED' && o.paymentStatus !== 'PAID'" (click)="openPayment(o)">
+                Pay
+              </button>
+              <button class="btn primary-btn"
+                style="margin-left: 5px; background-color: #27AE60; border-color: #27AE60; cursor: default;"
+                *ngIf="o.paymentStatus === 'COMPLETED' || o.paymentStatus === 'PAID'" disabled>
+                ✅ Paid
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <p *ngIf="ongoingOrders.length === 0" class="no-data">No ongoing orders right now</p>
   </div>
@@ -418,26 +418,102 @@
       <canvas baseChart [data]="revenueChartData" [options]="revenueChartOptions" type="bar"></canvas>
     </div> -->
 
-    <table class="orders-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Customer</th>
-          <th>Items</th>
-          <th>Total</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let o of todayOrders">
-          <td>#{{ o.id }}</td>
-          <td>{{ o.customerName }}</td>
-          <td>{{ o.items?.length || 0 }} items</td>
-          <td>₹{{ o.total }}</td>
-          <td><span class="badge">{{ o.status }}</span></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-wrapper">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of todayOrders">
+            <td>#{{ o.id }}</td>
+            <td>{{ o.customerName }}</td>
+            <td>{{ o.items?.length || 0 }} items</td>
+            <td>₹{{ o.total }}</td>
+            <td><span class="badge">{{ o.status }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== LEAVES TAB ========== -->
+  <div *ngIf="activeTab === 'LEAVES'" class="tab-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3>🏖️ My Leave History</h3>
+      <button class="btn primary-btn" (click)="openLeaveModal()">+ Apply for Leave</button>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>DateApplied</th>
+            <th>Period</th>
+            <th>Days</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Admin Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let l of myLeaves">
+            <td>#{{ l.id }}</td>
+            <td>{{ l.startDate }} to {{ l.endDate }}</td>
+            <td>
+              {{ getLeaveDuration(l.startDate, l.endDate) }} Days
+            </td>
+            <td>{{ l.reason }}</td>
+            <td>
+              <span class="badge" [class.badge-ready]="l.status === 'APPROVED'"
+                [class.badge-pending]="l.status === 'PENDING'"
+                [style.background-color]="l.status === 'REJECTED' ? '#ffebee' : ''"
+                [style.color]="l.status === 'REJECTED' ? '#c62828' : ''">
+                {{ l.status }}
+              </span>
+            </td>
+            <td>{{ l.adminComments || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p *ngIf="myLeaves.length === 0" class="no-data">No leave applications yet.</p>
+  </div>
+
+  <!-- LEAVE APPLICATION MODAL -->
+  <div class="modal-backdrop" *ngIf="showLeaveModal" (click)="closeLeaveModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🏖️ Apply for Leave</h3>
+        <button class="close-btn" (click)="closeLeaveModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="leaveForm" (ngSubmit)="applyForLeave()">
+          <div class="form-row">
+            <label>Start Date</label>
+            <input type="date" formControlName="startDate">
+          </div>
+          <div class="form-row">
+            <label>End Date</label>
+            <input type="date" formControlName="endDate">
+          </div>
+          <div class="form-row">
+            <label>Reason</label>
+            <textarea formControlName="reason" rows="3" placeholder="e.g. Family Function"></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn" (click)="closeLeaveModal()">Cancel</button>
+            <button type="submit" class="btn primary-btn" [disabled]="leaveForm.invalid || isLoading">Submit
+              Application</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
   <!-- ========== EDIT ORDER MODAL ========== -->
@@ -529,6 +605,46 @@
         <button class="btn primary-btn" (click)="confirmPayment()">
           {{ pendingTiffinPayload ? 'Pay & Create' : 'Confirm Payment' }}
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bill / Share Modal -->
+  <div class="modal-backdrop" *ngIf="showBillModal && viewBillOrder" (click)="closeBillModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🧾 Order Summary #{{ viewBillOrder.id }}</h3>
+        <button class="close-btn" (click)="closeBillModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="bill-details"
+          style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-family: monospace;">
+          <div style="border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px;">
+            <strong>Customer:</strong> {{ viewBillOrder.customerName }}<br>
+            <strong>Phone:</strong> {{ viewBillOrder.customerPhone }}<br>
+            <strong>Date:</strong> {{ viewBillOrder.createdAt | date:'short' }}
+          </div>
+          <div *ngFor="let item of viewBillOrder.items"
+            style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>{{ item.qty }}x {{ item.name }}</span>
+            <span>₹{{ item.price * item.qty }}</span>
+          </div>
+          <div
+            style="border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1em;">
+            <span>TOTAL</span>
+            <span>₹{{ viewBillOrder.total }}</span>
+          </div>
+        </div>
+
+        <h4 style="margin-bottom: 10px;">Share Bill via:</h4>
+        <div class="payment-options" style="display: flex; gap: 1rem;">
+          <button class="btn" style="flex: 1; background: #25D366; color: white;" (click)="confirmShare('WHATSAPP')">
+            <i class="fa fa-whatsapp"></i> WhatsApp
+          </button>
+          <button class="btn" style="flex: 1; background: #3498DB; color: white;" (click)="confirmShare('SMS')">
+            <i class="fa fa-commenting-o"></i> SMS / Text
+          </button>
+        </div>
       </div>
     </div>
   </div>

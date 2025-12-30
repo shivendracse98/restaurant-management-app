@@ -4,15 +4,30 @@
     <p *ngIf="isAdminMode()" class="admin-subtitle">Add, edit, or delete menu items</p>
   </div>
 
+  <!-- Dietary Filter -->
+  <div class="dietary-filter" *ngIf="isCustomerMode()">
+    <button [class.active]="filterType === 'ALL'" (click)="setFilter('ALL')">All</button>
+    <button [class.active]="filterType === 'VEG'" (click)="setFilter('VEG')" class="veg-btn">Veg Only 🌿</button>
+    <button [class.active]="filterType === 'NON_VEG'" (click)="setFilter('NON_VEG')" class="non-veg-btn">Non-Veg
+      🍗</button>
+  </div>
+
   <div class="menu-grid">
-    <div class="menu-item" *ngFor="let item of foodItems; trackBy: trackByItemId">
+    <div class="menu-item" *ngFor="let item of filteredFoodItems; trackBy: trackByItemId"
+      [class.out-of-stock]="item.isAvailable === false">
       <!-- Click Area - Different behavior for customer vs admin -->
-      <div
-        class="click-area"
-        *ngIf="isCustomerMode()"
-        [routerLink]="['/menu', item.id]"
-      >
-        <img [src]="item.imageUrl" [alt]="item.name" />
+      <div class="click-area" *ngIf="isCustomerMode()" [routerLink]="['/menu', item.id]">
+        <div class="image-wrapper">
+          <img [src]="item.imageUrl" [alt]="item.name" />
+          <span class="veg-badge" [class.non-veg]="!item.isVeg">
+            {{ item.isVeg === false ? '🔴' : '🟢' }}
+          </span>
+          <!-- Out of Stock Overlay -->
+          <div *ngIf="item.isAvailable === false" class="stock-overlay">
+            <span>Out Of Stock</span>
+          </div>
+        </div>
+
         <h3>{{ item.name }}</h3>
         <p>{{ item.description }}</p>
         <strong>₹{{ item.price }}</strong>
@@ -32,12 +47,16 @@
       </div>
 
       <!-- Customer: Add to Cart Button -->
-      <button
-        *ngIf="isCustomerMode()"
-        class="btn primary add-to-cart"
-        (click)="addToCart(item)"
-      >
+      <!-- Show Add if Available -->
+      <button *ngIf="isCustomerMode() && item.isAvailable !== false" class="btn primary add-to-cart"
+        (click)="addToCart(item)">
         🛒 Add to Cart
+      </button>
+
+      <!-- Show Disabled if Unavailable -->
+      <button *ngIf="isCustomerMode() && item.isAvailable === false" class="btn disabled add-to-cart" disabled
+        style="background: #ccc; cursor: not-allowed; color: #666;">
+        🔒 Out of Stock
       </button>
 
       <!-- Admin: Edit and Delete Buttons -->

@@ -1,0 +1,163 @@
+<div class="staff-mgmt-container">
+    <div class="header">
+        <h1>👥 Staff Management</h1>
+        <p class="subtitle">Manage your team and their schedules</p>
+    </div>
+
+    <mat-tab-group>
+        <!-- TAB 1: Staff List -->
+        <mat-tab label="Team Members">
+            <div class="tab-content">
+                <div class="actions-bar">
+                    <button mat-raised-button color="primary" (click)="toggleAddStaff()">
+                        <mat-icon>person_add</mat-icon> {{ showAddStaff ? 'Cancel' : 'Add New Staff' }}
+                    </button>
+                </div>
+
+                <!-- Add Staff Form -->
+                <mat-card *ngIf="showAddStaff" class="add-staff-card">
+                    <mat-card-header>
+                        <mat-card-title>Register New Staff</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <form [formGroup]="addStaffForm" (ngSubmit)="createStaff()">
+                            <div class="form-row">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Full Name</mat-label>
+                                    <input matInput formControlName="name" placeholder="John Doe">
+                                </mat-form-field>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Email</mat-label>
+                                    <input matInput formControlName="email" placeholder="john@tastetown.com">
+                                </mat-form-field>
+                            </div>
+                            <div class="form-row">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Password</mat-label>
+                                    <input matInput formControlName="password" type="password">
+                                </mat-form-field>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Phone</mat-label>
+                                    <input matInput formControlName="phoneNumber" placeholder="9876543210">
+                                </mat-form-field>
+                            </div>
+                            <div class="form-row">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Role</mat-label>
+                                    <mat-select formControlName="role">
+                                        <mat-option value="STAFF">Staff</mat-option>
+                                        <mat-option value="ADMIN">Admin</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <button mat-raised-button color="accent" type="submit"
+                                [disabled]="loading || addStaffForm.invalid">
+                                Create Account
+                            </button>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- Staff Table -->
+                <div class="table-responsive">
+                    <table mat-table [dataSource]="staffList" class="mat-elevation-z2">
+
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef> Name </th>
+                            <td mat-cell *matCellDef="let element">
+                                <strong>{{element.name}}</strong>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="email">
+                            <th mat-header-cell *matHeaderCellDef> Email </th>
+                            <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="phone">
+                            <th mat-header-cell *matHeaderCellDef> Phone </th>
+                            <td mat-cell *matCellDef="let element"> {{element.phone || '-'}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="role">
+                            <th mat-header-cell *matHeaderCellDef> Role </th>
+                            <td mat-cell *matCellDef="let element">
+                                <span class="role-badge"
+                                    [class.admin]="element.role === 'ADMIN'">{{element.role}}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef> Actions </th>
+                            <td mat-cell *matCellDef="let element">
+                                <button mat-icon-button color="warn" (click)="deleteStaff(element)"
+                                    *ngIf="element.role !== 'SUPER_ADMIN'">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="staffColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: staffColumns;"></tr>
+                    </table>
+                    <div *ngIf="staffList.length === 0 && !loading" class="empty-state">
+                        No staff found.
+                    </div>
+                </div>
+            </div>
+        </mat-tab>
+
+        <!-- TAB 2: Leave Approvals -->
+        <mat-tab label="Leave Requests">
+            <div class="tab-content">
+                <div class="table-responsive">
+                    <table mat-table [dataSource]="leaveList" class="mat-elevation-z2">
+
+                        <ng-container matColumnDef="staffName">
+                            <th mat-header-cell *matHeaderCellDef> Staff </th>
+                            <td mat-cell *matCellDef="let element"> {{element.staffName}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="dates">
+                            <th mat-header-cell *matHeaderCellDef> Dates </th>
+                            <td mat-cell *matCellDef="let element">
+                                {{element.startDate}} to {{element.endDate}}
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="reason">
+                            <th mat-header-cell *matHeaderCellDef> Reason </th>
+                            <td mat-cell *matCellDef="let element"> {{element.reason}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef> Status </th>
+                            <td mat-cell *matCellDef="let element">
+                                <span class="status-badge" [class]="element.status">{{element.status}}</span>
+                                <div *ngIf="element.adminComments" class="admin-comment">Note: {{element.adminComments}}
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef> Actions </th>
+                            <td mat-cell *matCellDef="let element">
+                                <div *ngIf="element.status === 'PENDING'">
+                                    <button mat-button color="primary" (click)="approveLeave(element)">Approve</button>
+                                    <button mat-button color="warn" (click)="rejectLeave(element)">Reject</button>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="leaveColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: leaveColumns;"></tr>
+                    </table>
+                    <div *ngIf="leaveList.length === 0" class="empty-state">
+                        No leave requests found.
+                    </div>
+                </div>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>
