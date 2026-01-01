@@ -16,6 +16,7 @@ import { CustomerDashboardComponent } from './features/customer/customer-dashboa
 import { StaffTodayOrdersComponent } from './features/staff/staff-today-orders/staff-today-orders.component';
 import { MenuManagementComponent } from './features/admin/menu-management/menu-management.component';
 import { PendingPaymentsComponent } from './features/admin/payments/pending-payments.component';
+import { superAdminGuard } from './core/guards/super-admin.guard';
 
 
 export const routes: Routes = [
@@ -23,7 +24,7 @@ export const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'menu', component: MenuListComponent },
   { path: 'menu/:id', component: FoodDetailComponent },
-  { path: 'cart', component: CartComponent, canActivate: [authGuard] },
+  { path: 'cart', component: CartComponent },
   { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
   {
     path: 'orders',
@@ -93,6 +94,27 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
   },
   {
+    path: 'admin/settings',
+    loadComponent: () =>
+      import('./features/admin/admin-settings/admin-settings.component')
+        .then(m => m.AdminSettingsComponent),
+    canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'admin/reviews',
+    loadComponent: () =>
+      import('./features/admin/admin-reviews/admin-reviews.component')
+        .then(m => m.AdminReviewsComponent),
+    canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'admin/offers',
+    loadComponent: () =>
+      import('./features/admin/admin-offers/admin-offers.component')
+        .then(m => m.AdminOffersComponent),
+    canActivate: [authGuard, adminGuard],
+  },
+  {
     path: 'staff/pos',
     loadComponent: () =>
       import('./features/staff/staff-pos/staff-pos.component').then(m => m.StaffPosComponent),
@@ -110,6 +132,11 @@ export const routes: Routes = [
       .then(m => m.StaffTodayOrdersComponent),
     canActivate: [staffGuard], // keep authGuard + admin/staff checks if you have them
     data: { role: 'STAFF' }
+  },
+  {
+    path: 'super-admin',
+    loadChildren: () => import('./features/super-admin/super-admin.module').then(m => m.SuperAdminModule),
+    canActivate: [authGuard, superAdminGuard]
   },
   { path: 'dashboard', component: CustomerDashboardComponent, canActivate: [authGuard, customerGuard] },
   { path: 'login', component: LoginComponent },

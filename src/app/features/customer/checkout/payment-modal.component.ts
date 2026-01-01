@@ -94,8 +94,8 @@ export class PaymentModalComponent implements OnInit, OnDestroy {
           console.log(`${this.LOG} ✅ Loaded Tenant Config:`, config);
           if (config.upiId) this.upiId = config.upiId;
           // Use config QR if available, else generate from ID
-          if (config.qrImageUrl) {
-            this.qrCodeUrl = config.qrImageUrl;
+          if (config.upiQrImageUrl) {
+            this.qrCodeUrl = config.upiQrImageUrl;
             this.upiDeepLink = `upi://pay?pa=${this.upiId}&pn=TasteTown&tn=Order${this.data.orderId}&am=${this.data.amount}&cu=INR`;
           } else {
             this.generateQRCode();

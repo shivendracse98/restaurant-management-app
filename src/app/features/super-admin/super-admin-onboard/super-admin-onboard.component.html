@@ -1,0 +1,70 @@
+<div class="onboard-container">
+    <div class="card">
+        <div class="card-header">
+            <h2>🚀 Onboard New Restaurant</h2>
+            <p>Create a fresh workspace for a new tenant.</p>
+        </div>
+
+        <form [formGroup]="onboardForm" (ngSubmit)="onSubmit()">
+
+            <!-- Section: Restaurant Details -->
+            <div class="form-section">
+                <h3>🏢 Restaurant Details</h3>
+
+                <div class="form-group">
+                    <label>Restaurant Name</label>
+                    <input type="text" formControlName="restaurantName" placeholder="e.g. Spicy Bites">
+                    <div class="error" *ngIf="f['restaurantName'].touched && f['restaurantName'].errors">
+                        Name is required
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea formControlName="address" placeholder="Full Address"></textarea>
+                    <div class="error" *ngIf="f['address'].touched && f['address'].errors">
+                        Address is required
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Owner Details -->
+            <div class="form-section">
+                <h3>👤 Owner Credentials</h3>
+
+                <div class="form-group">
+                    <label>Owner Name</label>
+                    <input type="text" formControlName="ownerName" placeholder="Full Name">
+                </div>
+
+                <div class="form-group">
+                    <label>Email (Login ID)</label>
+                    <input type="email" formControlName="email" placeholder="owner@example.com">
+                    <div class="error" *ngIf="f['email'].touched && f['email'].errors">
+                        Valid email is required
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" formControlName="phoneNumber" placeholder="10-digit number">
+                </div>
+
+                <div class="form-group">
+                    <label>Initial Password</label>
+                    <input type="text" formControlName="password" placeholder="Set initial password">
+                    <small>Share this with the owner securely.</small>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn-secondary" routerLink="/super-admin/dashboard">Cancel</button>
+                <button type="submit" class="btn-primary" [disabled]="onboardForm.invalid || loading">
+                    <span *ngIf="!loading">✨ Launch Restaurant</span>
+                    <span *ngIf="loading">Creating...</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>

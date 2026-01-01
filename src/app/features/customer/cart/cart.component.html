@@ -10,12 +10,7 @@
 
         <div class="qty">
           <button (click)="cart.updateQty(it.menuItem.id, it.qty - 1)">−</button>
-          <input
-            type="number"
-            [(ngModel)]="it.qty"
-            (change)="cart.updateQty(it.menuItem.id, it.qty)"
-            min="1"
-          />
+          <input type="number" [(ngModel)]="it.qty" (change)="cart.updateQty(it.menuItem.id, it.qty)" min="1" />
           <button (click)="cart.updateQty(it.menuItem.id, it.qty + 1)">+</button>
         </div>
       </div>
@@ -25,19 +20,53 @@
     </div>
 
     <div class="summary">
-      <div>Subtotal</div>
-      <div class="amount">₹{{ cart.getTotal() }}</div>
+      <div class="row">
+        <span>Subtotal</span>
+        <span class="amount">₹{{ subTotal }}</span>
+      </div>
+
+      <!-- Coupon Section -->
+      <div class="coupon-section">
+        <div class="input-group" *ngIf="!isCouponApplied">
+          <input type="text" [(ngModel)]="couponCode" placeholder="Enter Coupon Code" />
+          <button (click)="applyCoupon()">Apply</button>
+        </div>
+
+        <!-- Available Coupons List -->
+        <div class="available-offers" *ngIf="activeOffers.length > 0 && !isCouponApplied">
+          <p class="offers-title">Available Coupons:</p>
+          <div class="offer-pill" *ngFor="let offer of activeOffers" (click)="applyOffer(offer.code)">
+            <span class="code">{{ offer.code }}</span>
+            <span class="desc">{{ offer.description }}</span>
+          </div>
+        </div>
+
+        <div class="coupon-status" *ngIf="isCouponApplied">
+          <span class="success">✅ {{ couponCode }} Applied</span>
+          <button class="remove-btn" (click)="removeCoupon()">✖</button>
+        </div>
+
+        <p class="msg" [class.error]="!isCouponApplied && couponMessage" [class.success]="isCouponApplied">
+          {{ couponMessage }}
+        </p>
+      </div>
+
+      <div class="row discount" *ngIf="discountAmount > 0">
+        <span>Discount</span>
+        <span class="amount">-₹{{ discountAmount }}</span>
+      </div>
+
+      <div class="row total">
+        <strong>Total</strong>
+        <strong class="amount">₹{{ finalTotal }}</strong>
+      </div>
     </div>
 
     <div class="actions">
       <button class="btn clear" (click)="cart.clear()">Clear Cart</button>
-      <button
-        class="btn primary"
-        (click)="goToCheckout()"
-        [disabled]="!auth.isLoggedIn || cart.getCount() === 0">
+      <button class="btn primary" (click)="goToCheckout()" [disabled]="cart.getCount() === 0">
         Proceed to Checkout
       </button>
-      <p *ngIf="!auth.isLoggedIn" class="warn">Please login to proceed with checkout.</p>
     </div>
   </div>
 

@@ -1,0 +1,72 @@
+<div class="offers-container">
+    <div class="header">
+        <h2>Manage Coupons & Offers</h2>
+        <button class="btn-primary" (click)="toggleForm()">
+            {{ showForm ? 'Cancel' : '+ New Offer' }}
+        </button>
+    </div>
+
+    <!-- CREATE FORM -->
+    <div class="form-card" *ngIf="showForm">
+        <h3>Create New Coupon</h3>
+        <form [formGroup]="offerForm" (ngSubmit)="submit()">
+            <div class="form-row">
+                <label>Coupon Code</label>
+                <input type="text" formControlName="code" placeholder="e.g. WELCOME50"
+                    style="text-transform: uppercase;">
+            </div>
+
+            <div class="form-row">
+                <label>Description</label>
+                <input type="text" formControlName="description" placeholder="e.g. 50% Off on First Order">
+            </div>
+
+            <div class="form-row split">
+                <div>
+                    <label>Type</label>
+                    <select formControlName="discountType">
+                        <option value="PERCENTAGE">Percentage (%)</option>
+                        <option value="FLAT">Flat Amount (₹)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Value</label>
+                    <input type="number" formControlName="discountValue">
+                </div>
+            </div>
+
+            <div class="form-row split">
+                <div>
+                    <label>Min Order (₹)</label>
+                    <input type="number" formControlName="minOrderAmount">
+                </div>
+                <div>
+                    <label>Max Discount (Optional ₹)</label>
+                    <input type="number" formControlName="maxDiscountAmount">
+                </div>
+            </div>
+
+            <button type="submit" [disabled]="offerForm.invalid" class="btn-submit">Save Offer</button>
+        </form>
+    </div>
+
+    <!-- LIST -->
+    <div class="offers-list">
+        <div class="no-offers" *ngIf="offers.length === 0 && !loading">
+            <p>No active coupons found.</p>
+        </div>
+
+        <div class="offer-card" *ngFor="let offer of offers">
+            <div class="offer-info">
+                <span class="code">{{ offer.code }}</span>
+                <h4>{{ offer.description }}</h4>
+                <p class="details">
+                    {{ offer.discountType === 'PERCENTAGE' ? offer.discountValue + '%' : '₹' + offer.discountValue }}
+                    Off
+                    <span *ngIf="offer.minOrderAmount"> | Min Order: ₹{{ offer.minOrderAmount }}</span>
+                </p>
+            </div>
+            <button class="btn-delete" (click)="deleteOffer(offer.id)">🗑️</button>
+        </div>
+    </div>
+</div>

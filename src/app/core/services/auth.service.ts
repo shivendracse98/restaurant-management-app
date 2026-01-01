@@ -11,7 +11,7 @@ export interface User {
   name: string;
   email: string;
   password?: string;
-  role?: 'ADMIN' | 'CUSTOMER' | 'STAFF' | string;
+  role?: 'ADMIN' | 'CUSTOMER' | 'STAFF' | 'SUPER_ADMIN' | string;
   phone?: string;
   address?: string;
   restaurantId?: string;
@@ -155,6 +155,11 @@ export class AuthService {
   isAdmin(): boolean {
     const user = this.currentUser();
     return !!user && user.role === 'ADMIN';
+  }
+
+  isSuperAdmin(): boolean {
+    const user = this.currentUser();
+    return !!user && user.role === 'SUPER_ADMIN';
   }
 
   isStaff(): boolean {

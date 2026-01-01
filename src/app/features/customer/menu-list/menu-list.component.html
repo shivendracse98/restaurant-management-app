@@ -1,78 +1,99 @@
 <div class="menu-container" [ngClass]="'mode-' + viewMode">
-  <div class="menu-header">
-    <h2>🍽️ {{ isAdminMode() ? 'Manage Menu' : 'Our Menu' }}</h2>
-    <p *ngIf="isAdminMode()" class="admin-subtitle">Add, edit, or delete menu items</p>
-  </div>
 
-  <!-- Dietary Filter -->
-  <div class="dietary-filter" *ngIf="isCustomerMode()">
-    <button [class.active]="filterType === 'ALL'" (click)="setFilter('ALL')">All</button>
-    <button [class.active]="filterType === 'VEG'" (click)="setFilter('VEG')" class="veg-btn">Veg Only 🌿</button>
-    <button [class.active]="filterType === 'NON_VEG'" (click)="setFilter('NON_VEG')" class="non-veg-btn">Non-Veg
-      🍗</button>
-  </div>
-
-  <div class="menu-grid">
-    <div class="menu-item" *ngFor="let item of filteredFoodItems; trackBy: trackByItemId"
-      [class.out-of-stock]="item.isAvailable === false">
-      <!-- Click Area - Different behavior for customer vs admin -->
-      <div class="click-area" *ngIf="isCustomerMode()" [routerLink]="['/menu', item.id]">
-        <div class="image-wrapper">
-          <img [src]="item.imageUrl" [alt]="item.name" />
-          <span class="veg-badge" [class.non-veg]="!item.isVeg">
-            {{ item.isVeg === false ? '🔴' : '🟢' }}
-          </span>
-          <!-- Out of Stock Overlay -->
-          <div *ngIf="item.isAvailable === false" class="stock-overlay">
-            <span>Out Of Stock</span>
-          </div>
-        </div>
-
-        <h3>{{ item.name }}</h3>
-        <p>{{ item.description }}</p>
-        <strong>₹{{ item.price }}</strong>
-      </div>
-
-      <!-- Admin View - Show item details in table-like format -->
-      <div class="item-details" *ngIf="isAdminMode()">
-        <img [src]="item.imageUrl" [alt]="item.name" class="admin-image" />
-        <div class="admin-info">
-          <h3>{{ item.name }}</h3>
-          <p class="category">{{ item.category }}</p>
-          <p class="description">{{ item.description }}</p>
-          <div class="price-section">
-            <strong class="price">₹{{ item.price }}</strong>
-          </div>
-        </div>
-      </div>
-
-      <!-- Customer: Add to Cart Button -->
-      <!-- Show Add if Available -->
-      <button *ngIf="isCustomerMode() && item.isAvailable !== false" class="btn primary add-to-cart"
-        (click)="addToCart(item)">
-        🛒 Add to Cart
-      </button>
-
-      <!-- Show Disabled if Unavailable -->
-      <button *ngIf="isCustomerMode() && item.isAvailable === false" class="btn disabled add-to-cart" disabled
-        style="background: #ccc; cursor: not-allowed; color: #666;">
-        🔒 Out of Stock
-      </button>
-
-      <!-- Admin: Edit and Delete Buttons -->
-      <div *ngIf="isAdminMode()" class="admin-actions">
-        <button class="btn edit" (click)="editMenuItem(item)">
-          ✏️ Edit
-        </button>
-        <button class="btn delete" (click)="deleteMenuItem(item)">
-          🗑️ Delete
-        </button>
-      </div>
+  <!-- Header with Restaurant Name -->
+  <div class="menu-header-compact" *ngIf="isCustomerMode()">
+    <div class="restaurant-info">
+      <h1>Ordering from <span class="highlight">{{ currentTenantName || 'Restaurant' }}</span></h1>
+      <a routerLink="/home" class="change-location-link">Change</a>
     </div>
+  </div>
+
+  <div class="menu-header" *ngIf="isAdminMode()">
+    <h2>🍽️ Manage Menu</h2>
+    <p class="admin-subtitle">Add, edit, or delete menu items</p>
+  </div>
+
+  <!-- Dietary Filter & Search -->
+  <!-- Search & Filters -->
+  <div class="search-filter-container" *ngIf="isCustomerMode()">
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="updateSearch($event)"
+        placeholder="Search for dishes..." />
+      <button *ngIf="searchQuery" (click)="updateSearch('')" class="clear-btn">✖</button>
+    </div>
+
+    <!-- Dietary Filter -->
+    <div class="dietary-filter">
+      <button [class.active]="filterType === 'ALL'" (click)="setFilter('ALL')">All</button>
+      <button [class.active]="filterType === 'VEG'" (click)="setFilter('VEG')" class="veg-btn">Veg Only 🌿</button>
+      <button [class.active]="filterType === 'NON_VEG'" (click)="setFilter('NON_VEG')" class="non-veg-btn">Non-Veg
+        🍗</button>
+    </div>
+  </div>
+
+  <!-- Category Navigation (Scroll Spy) -->
+  <div class="category-nav" *ngIf="categories.length > 0">
+    <button *ngFor="let cat of categories" (click)="scrollToCategory(cat)">
+      {{ cat }}
+    </button>
+  </div>
+
+  <!-- GROUPED MENU VIEW -->
+  <div class="menu-sections">
+    <div *ngFor="let cat of categories" [id]="'cat-' + cat" class="category-section">
+      <h3 class="category-title">{{ cat }} <span class="count">({{ groupedItems[cat].length }})</span></h3>
+
+      <div class="menu-list">
+        <div class="menu-item-row" *ngFor="let item of groupedItems[cat]; trackBy: trackByItemId"
+          [class.out-of-stock]="item.isAvailable === false">
+
+          <!-- 1. Image (Left) -->
+          <div class="item-visual">
+            <div class="image-wrapper-circle">
+              <img [src]="item.imageUrl || 'assets/default-food.png'" [alt]="item.name" loading="lazy" />
+              <div *ngIf="item.isAvailable === false" class="stock-overlay-circle">
+                <span>Sold Out</span>
+              </div>
+            </div>
+            <span class="veg-dot" [class.non-veg]="!item.isVeg">
+              {{ item.isVeg === false ? '🔴' : '🟢' }}
+            </span>
+          </div>
+
+          <!-- 2. Content (Middle) -->
+          <div class="item-content" [routerLink]="isCustomerMode() ? ['/menu', item.id] : null">
+            <h4 class="item-name">{{ item.name }}</h4>
+            <div class="item-price">₹{{ item.price }}</div>
+            <p class="item-desc">{{ item.description }}</p>
+          </div>
+
+          <!-- 3. Actions (Right) -->
+          <div class="item-actions">
+            <!-- Customer Actions -->
+            <ng-container *ngIf="isCustomerMode()">
+              <button *ngIf="item.isAvailable !== false" class="btn-add-mini"
+                (click)="addToCart(item); $event.stopPropagation()">
+                ADD +
+              </button>
+              <span *ngIf="item.isAvailable === false" class="sold-out-text">Sold Out</span>
+            </ng-container>
+
+            <!-- Admin Actions -->
+            <ng-container *ngIf="isAdminMode()">
+              <button class="btn-icon edit" (click)="editMenuItem(item)">✏️</button>
+              <button class="btn-icon delete" (click)="deleteMenuItem(item)">🗑️</button>
+            </ng-container>
+          </div>
+
+        </div> <!-- End menu-item-row -->
+      </div> <!-- End list -->
+    </div> <!-- End category-section -->
   </div>
 
   <!-- Empty State -->
   <div *ngIf="foodItems.length === 0" class="empty-state">
-    <p>{{ isAdminMode() ? 'No menu items available' : 'No items available' }}</p>
+    <p>{{ isAdminMode() ? 'No menu items available' : 'Menu looks empty! 🍛' }}</p>
   </div>
 </div>

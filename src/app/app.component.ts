@@ -9,10 +9,12 @@ import { NetworkService } from './core/services/network.service';
 import { TenantService } from './core/services/tenant.service';
 import { ConfigService } from './core/services/config.service';
 
+import { MobileBottomNavComponent } from './shared/components/mobile-bottom-nav/mobile-bottom-nav.component';
+
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MobileBottomNavComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
@@ -53,6 +55,17 @@ export class AppComponent implements OnInit, OnDestroy {
         });
       }
     });
+
+    // ✅ Sync Tenant from User if Logged In (Restores correct admin context on refresh)
+    const currentUser = this.auth.currentUser();
+    if (currentUser && currentUser.restaurantId) {
+      const currentTenant = this.tenantService.getTenantId();
+      // Only override if different or default
+      if (currentTenant !== currentUser.restaurantId) {
+        console.log('🔄 Restoring Tenant from Session:', currentUser.restaurantId);
+        this.tenantService.setTenantId(currentUser.restaurantId);
+      }
+    }
 
     // Cart count listener
     this.sub = this.cart.items$.subscribe(items => {

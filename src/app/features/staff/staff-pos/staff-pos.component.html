@@ -21,6 +21,10 @@
       <button class="tab-btn" [class.active]="activeTab === 'ONLINE'" (click)="switchTab('ONLINE')">
         🔔 Online Orders <span *ngIf="onlineOrders.length > 0" class="badge-count">{{ onlineOrders.length }}</span>
       </button>
+      <button class="tab-btn" [class.active]="activeTab === 'UNPAID'" (click)="switchTab('UNPAID')">
+        💳 Unpaid <span *ngIf="unpaidOrders.length > 0" class="badge-count" style="background:#c62828;">{{
+          unpaidOrders.length }}</span>
+      </button>
       <button class="tab-btn" [class.active]="activeTab === 'REVENUE'" (click)="switchTab('REVENUE')">
         📝 Shift Summary
       </button>
@@ -32,6 +36,50 @@
 
   <!-- Message -->
   <div *ngIf="message" class="message">{{ message }}</div>
+
+  <!-- ========== UNPAID ORDERS TAB ========== -->
+  <div *ngIf="activeTab === 'UNPAID'" class="tab-content">
+    <h3>💳 Served & Unpaid Orders</h3>
+    <div class="table-wrapper">
+      <table class="orders-table" *ngIf="unpaidOrders.length > 0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of unpaidOrders">
+            <td>#{{ o.id }}</td>
+            <td>
+              {{ o.customerName || 'Guest' }}<br>
+              <small>{{ o.customerPhone }}</small>
+            </td>
+            <td>{{ o.items?.length || 0 }} items</td>
+            <td style="color: #c62828; font-weight: bold;">₹{{ o.totalAmount || o.total }}</td>
+            <td>
+              <span class="badge badge-delivered">SERVED / UNPAID</span>
+            </td>
+            <td>
+              <button class="btn share-btn" style="margin-right: 5px; background-color: #3498DB; color: white;"
+                (click)="shareBill(o)" title="View & Share Bill">
+                <i class="fa fa-file-text-o"></i> Bill
+              </button>
+              <button class="btn primary-btn" style="background-color: #E67E22; border-color: #E67E22;"
+                (click)="openPayment(o)">
+                💰 Collect Payment
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p *ngIf="unpaidOrders.length === 0" class="no-data">No unpaid orders! All clear. 🎉</p>
+  </div>
 
   <!-- ========== TAKE ORDER TAB ========== -->
   <div *ngIf="activeTab === 'ORDER'" class="pos-layout">
@@ -76,60 +124,67 @@
       </div>
     </div>
 
-    <!-- Right: Order Form & Cart (Sticky) -->
-    <div class="cart-section">
-      <!-- ... (Cart omitted for brevity in replace, but context is critical) ... -->
-      <div class="cart-wrapper">
-        <h3 class="cart-title">📋 Current Order</h3>
-        <form [formGroup]="orderForm" class="order-form">
-          <!-- Form fields -->
-          <div class="form-row">
-            <label>Customer Name</label>
-            <input type="text" formControlName="customerName" placeholder="Walk-in Guest" />
-          </div>
-          <div class="form-row">
-            <label>Phone</label>
-            <input type="tel" formControlName="customerPhone" placeholder="0000000000" />
-          </div>
-          <div class="form-row">
-            <label>Order Type</label>
-            <select formControlName="orderType">
-              <option value="DINE_IN">Dine In</option>
-              <option value="TAKEAWAY">Takeaway</option>
-              <option value="DELIVERY">Delivery</option>
-            </select>
-          </div>
-          <div class="form-row">
-            <label>Table #</label>
-            <input type="text" formControlName="tableNumber" placeholder="Optional" />
-          </div>
-        </form>
+    <!-- FAB: Floating Cart Bar (Mobile/Standard) -->
+    <div class="fab-cart-bar" *ngIf="cartItems.length > 0" (click)="toggleCart()">
+      <div class="fab-info">
+        <span class="count">{{ cartItems.length }} Item(s)</span>
+        <span class="pipe">|</span>
+        <span class="total">₹{{ getTotal(cartItems) }}</span>
+      </div>
+      <div class="fab-action">
+        View Cart 🛒
+      </div>
+    </div>
 
-        <div class="cart-items">
-          <!-- Items -->
-          <div *ngIf="cartItems.length === 0" class="empty-cart">
-            👉 Add items from menu →
-          </div>
-
-          <div *ngFor="let item of cartItems; let i = index" class="cart-item">
-            <div class="item-info">
-              <div class="item-name">{{ item.name }}</div>
-              <div class="item-price">₹{{ item.price }}</div>
-            </div>
-            <button class="remove-btn" (click)="removeItemFromOrder(i)">✕</button>
-          </div>
+    <!-- CART MODAL (Instead of sticky side) -->
+    <div class="modal-backdrop" *ngIf="showCartModal" (click)="toggleCart()">
+      <div class="modal cart-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>🛒 Current Order</h3>
+          <button class="close-btn" (click)="toggleCart()">✕</button>
         </div>
-        <div class="cart-footer">
-          <div class="total-section">
-            <div class="total-label">Total</div>
-            <div class="total-amount">₹{{ getTotal(cartItems) }}</div>
-          </div>
 
-          <button class="btn place-order-btn" (click)="placeOrder()" [disabled]="cartItems.length === 0 || isLoading">
-            {{ isLoading ? '⏳ Placing...' : '✓ Place Order' }}
+        <div class="modal-body">
+          <form [formGroup]="orderForm" class="order-form">
+            <div class="form-row two-col">
+              <div>
+                <label>Table # <span style="color:red">*</span></label>
+                <input type="number" formControlName="tableNumber" placeholder="0 = Standing" class="highlight-input" />
+                <small style="color: #888; display: block; margin-top: 2px; font-size: 0.75rem;">
+                  (0: Walk-in, >0: Append)
+                </small>
+              </div>
+              <div>
+                <label>Type</label>
+                <select formControlName="orderType">
+                  <option value="DINE_IN">Dine In</option>
+                  <option value="TAKEAWAY">Takeaway</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label>Customer Name</label>
+              <input type="text" formControlName="customerName" placeholder="Guest Name" />
+            </div>
+
+            <div class="cart-items-list">
+              <div *ngFor="let item of cartItems; let i = index" class="cart-item">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-price">₹{{ item.price }}</div>
+                <button class="remove-btn" (click)="removeItemFromOrder(i)">🗑️</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <div class="grand-total">Total: ₹{{ getTotal(cartItems) }}</div>
+          <button class="btn clear-btn" (click)="clearCart(); toggleCart()">Clear</button>
+          <button class="btn place-order-btn" (click)="placeOrder()"
+            [disabled]="!orderForm.valid || cartItems.length === 0 || isLoading">
+            {{ isLoading ? '⏳ Processing...' : '✅ Place Order' }}
           </button>
-
-          <button class="btn clear-btn" (click)="clearCart()">Clear Cart</button>
         </div>
       </div>
     </div>
@@ -580,8 +635,8 @@
             }}</span></h4>
 
         <!-- QR Code Section -->
-        <div *ngIf="paymentMode === 'UPI' && paymentConfig?.qrImageUrl" style="text-align: center; margin: 1rem 0;">
-          <img [src]="paymentConfig?.qrImageUrl" alt="Scan to Pay"
+        <div *ngIf="paymentMode === 'UPI' && paymentConfig?.upiQrImageUrl" style="text-align: center; margin: 1rem 0;">
+          <img [src]="paymentConfig?.upiQrImageUrl" alt="Scan to Pay"
             style="width: 150px; height: 150px; border: 2px solid #27AE60; padding: 5px; border-radius: 10px;">
           <div style="margin-top: 5px; font-weight: 600; color: #555;">{{ paymentConfig?.upiId }}</div>
         </div>

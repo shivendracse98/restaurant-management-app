@@ -1,0 +1,67 @@
+<div class="reviews-container">
+    <div class="header">
+        <h1>⭐ Customer Reviews</h1>
+        <p class="subtitle">Monitor and respond to customer feedback</p>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="spinner-container" *ngIf="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && reviews.length === 0">
+        <div class="icon">📝</div>
+        <h3>No Reviews Yet</h3>
+        <p>Wait for customers to rate their experience.</p>
+    </div>
+
+    <!-- Reviews List -->
+    <div class="reviews-list" *ngIf="!loading">
+        <div class="review-card" *ngFor="let review of reviews" [class.hidden-review]="review.isHidden">
+
+            <div class="review-header">
+                <div class="user-info">
+                    <span class="avatar">{{ review.customerName.charAt(0) | uppercase }}</span>
+                    <div>
+                        <h4>{{ review.customerName }}</h4>
+                        <span class="date">Customer #{{ review.customerId }}</span>
+                        <!-- Format date if available -->
+                    </div>
+                </div>
+                <div class="rating">
+                    <span *ngFor="let s of getStars(review.rating)">⭐</span>
+                </div>
+            </div>
+
+            <div class="review-content">
+                <p>"{{ review.comment }}"</p>
+            </div>
+
+            <!-- Admin Reply Display -->
+            <div class="admin-reply" *ngIf="review.adminReply && activeReplyId !== review.id">
+                <strong>↪️ Response:</strong> {{ review.adminReply }}
+            </div>
+
+            <!-- Reply Form -->
+            <div class="reply-form" *ngIf="activeReplyId === review.id">
+                <textarea [(ngModel)]="replyText" placeholder="Write your response..."></textarea>
+                <div class="actions">
+                    <button class="btn-cancel" (click)="cancelReply()">Cancel</button>
+                    <button class="btn-submit" (click)="submitReply(review.id!)">Send Reply</button>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <button class="btn-link" (click)="openReply(review)" *ngIf="activeReplyId !== review.id">
+                    {{ review.adminReply ? 'Edit Reply' : '↩️ Reply' }}
+                </button>
+
+                <button class="btn-link danger" (click)="toggleHide(review)">
+                    {{ review.isHidden ? '👁️ Unhide' : '🚫 Hide' }}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

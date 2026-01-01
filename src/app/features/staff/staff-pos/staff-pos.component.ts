@@ -29,7 +29,7 @@ import { ChartConfiguration } from 'chart.js';
 })
 export class StaffPosComponent implements OnInit, OnDestroy {
   // Tabs
-  activeTab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' | 'LEAVES' = 'ORDER';
+  activeTab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' | 'LEAVES' | 'UNPAID' = 'ORDER';
 
   // Data
   menuItems: FoodItem[] = [];
@@ -37,6 +37,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
   todayOrders: any[] = [];
   ongoingOrders: any[] = [];
   onlineOrders: any[] = [];
+  unpaidOrders: any[] = []; // New
   myLeaves: LeaveResponse[] = []; // New
 
   paymentConfig: PaymentConfig | null = null;
@@ -56,13 +57,21 @@ export class StaffPosComponent implements OnInit, OnDestroy {
   searchTerm = '';
   ongoingSortOption: string = 'newest';
 
+  // Cart UI
+  showCartModal = false; // ✅ New UI State for Floating Cart
+
+  toggleCart(): void {
+    // If opening, maybe focus or something, but simple toggle is enough
+    this.showCartModal = !this.showCartModal;
+  }
+
   // forms
   orderForm = this.fb.group({
     customerName: ['Walk-in Guest', Validators.required],
     customerPhone: ['0000000000'],
     address: ['Restaurant'],
     orderType: ['DINE_IN', Validators.required],
-    tableNumber: [''],
+    tableNumber: ['', Validators.required], // ✅ REQUIRED
     items: [[] as FoodItem[]]
   });
 
@@ -71,8 +80,6 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     endDate: ['', Validators.required],
     reason: ['', Validators.required]
   });
-
-  // ... (rest of vars)
 
   tiffinForm = this.fb.group({
     customerName: ['', Validators.required],
@@ -121,7 +128,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private route: ActivatedRoute,
     private toastr: ToastrService,
-    private leaveService: LeaveService // New
+    private leaveService: LeaveService
   ) { }
 
   ngOnInit(): void {
@@ -145,14 +152,11 @@ export class StaffPosComponent implements OnInit, OnDestroy {
           return forkJoin(tasks);
         })
       ).subscribe((results: any[]) => {
-        // results[0] is always orders (handled by refreshOrders side-effect or strictly void if changed, but refreshOrders returns Observable<Order[]>)
-        // results[1] would be leaves if activeTab was LEAVES
         if (results.length > 1 && results[1]) {
           this.myLeaves = results[1];
         }
       });
 
-    // query param driven tab selection
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((qp: any) => {
       if (qp['tab'] === 'orders') this.activeTab = 'REVENUE';
       else if (qp['tab'] === 'tiffin') this.activeTab = 'TIFFIN';
@@ -160,11 +164,10 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       else this.activeTab = 'ORDER';
     });
 
-    // Load Payment Config
     this.configService.getPaymentConfig().subscribe(config => {
       if (config) {
         this.paymentConfig = config;
-        if (config.defaultMode === 'UPI') {
+        if (config.defaultPaymentMode === 'UPI') {
           this.paymentMode = 'UPI';
         }
       }
@@ -176,13 +179,11 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ========== LOADS ==========
-
   loadMenu(): void {
     this.menuService.getAllMenuItems().pipe(takeUntil(this.destroy$)).subscribe({
       next: (data: any) => {
         this.menuItems = data || [];
-        this.filterTiffinMenu(); // Separate Tiffin items
+        this.filterTiffinMenu();
       },
       error: (err: any) => console.error('Menu load error', err)
     });
@@ -197,53 +198,44 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Unified Handler for Order Updates
   processOrders(all: any[]): void {
     const arr = Array.isArray(all) ? all : [];
     const today = new Date().toISOString().split('T')[0];
 
-    // 1. Filter Today's Orders
     this.todayOrders = arr.filter((o: any) => (o.createdAt || '').startsWith(today));
     this.prepareRevenueChart();
 
-    // 2. Filter Online / Verification Pending Orders
     this.onlineOrders = arr.filter((o: any) => {
       const status = o.status || 'PENDING';
       const paymentStatus = o.paymentStatus || 'PENDING';
-
-      // Show if Waiting for Verification OR (Pay at Counter & Pending)
       const needsVerification = paymentStatus === 'VERIFICATION_PENDING';
       const payAtCounter = o.paymentMode === 'CASH' && status === 'PENDING';
-
       return needsVerification || payAtCounter;
     });
 
-    // 3. Filter Ongoing Orders (Kitchen View / Active)
     this.ongoingOrders = arr.filter((o: any) => {
       const status = o.status || 'PENDING';
       const paymentStatus = o.paymentStatus || 'PENDING';
-
-      // Ongoing should ONLY show Confirmed/Preparing/Ready
-      // Must NOT show Cancelled, Delivered(Completed), or Unverified
       const isUnverified = paymentStatus === 'VERIFICATION_PENDING' || (o.paymentMode === 'CASH' && status === 'PENDING');
-
       return !isUnverified &&
         status !== 'CANCELLED' &&
         status !== 'COMPLETED' &&
-        status !== 'DELIVERED' && // Once delivered, show in Shift Summary only? Or keep in ongoing until paid?
-        // Actually, usually Delivered = Done.
+        status !== 'DELIVERED' &&
         status !== 'PAID';
-      // Note: If delivered but NOT paid, it might stay? 
-      // Ideally: Ongoing = Confirmed -> Delivered. 
-      // If Delivered, it goes to History/Summary.
+    });
+
+    this.unpaidOrders = arr.filter((o: any) => {
+      const status = o.status || 'PENDING';
+      const paymentStatus = o.paymentStatus || 'PENDING';
+      const isServed = status === 'DELIVERED';
+      const isNotPaid = paymentStatus !== 'PAID' && paymentStatus !== 'COMPLETED';
+      return isServed && isNotPaid;
     });
   }
 
-  // Wrappers to keep template happy if it calls them (though we removed calls)
   loadTodayOrders() { this.orderService.refreshOrders().subscribe(); }
   loadOngoingOrders() { this.orderService.refreshOrders().subscribe(); }
 
-  // ✅ Verify Payment (Staff)
   verifyPayment(order: any): void {
     if (!confirm(`Verify payment for Order #${order.id}?`)) return;
 
@@ -258,8 +250,6 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  // ========== GETTERS ==========
 
   get cartItems(): FoodItem[] {
     return (this.orderForm.value.items as FoodItem[]) || [];
@@ -294,15 +284,11 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     return (this.subscriptionsList || []).filter((s: any) => s.status === 'ACTIVE').length;
   }
 
-  // ========== POS ACTIONS ==========
-
   addItem(item: FoodItem): void {
     if (this.isManageMode) {
-      // Toggle Availability Logic
-      const newStatus = !item.isAvailable; // Toggle
+      const newStatus = !item.isAvailable;
       this.menuService.updateAvailability(item.id, newStatus).subscribe({
         next: (updated) => {
-          // Update local list
           const idx = this.menuItems.findIndex(m => m.id === updated.id);
           if (idx !== -1) this.menuItems[idx] = updated;
           this.toastr.success(`${updated.name} is now ${updated.isAvailable ? 'In Stock' : 'Out of Stock'}`);
@@ -314,8 +300,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
     const current = this.orderForm.value.items || [];
     this.orderForm.patchValue({ items: [...current, item] });
-    this.message = `✓ ${item.name} added`;
-    setTimeout(() => (this.message = ''), 1500);
+    this.toastr.success(`✓ ${item.name} added`, '', { timeOut: 1200, positionClass: 'toast-bottom-center' });
   }
 
   removeItemFromOrder(index: number): void {
@@ -335,11 +320,16 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       customerPhone: '0000000000',
       address: 'Restaurant',
       orderType: 'DINE_IN',
+      tableNumber: '', // Added tableNumber reset
       items: []
     });
     this.message = '🗑️ Cart cleared';
     setTimeout(() => (this.message = ''), 1500);
   }
+
+  // ... (rest of vars)
+
+  // ...
 
   placeOrder(): void {
     const items = this.orderForm.value.items || [];
@@ -348,51 +338,121 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const mapped = items.map((i: FoodItem) => ({
-      // If 'i' has 'id' (from menu selection), use that as menuItemId.
-      id: i.id, // IMPORTANT: cart item must have 'id' so OrderService can map it to 'menuItemId'
-      menuItemId: i.id, // Also keeping this for safety if logic changes
+    const tableNumStr = this.orderForm.value.tableNumber;
+    // Strict check: Must be present. 0 is allowed.
+    if (tableNumStr === null || tableNumStr === undefined || tableNumStr === '') {
+      this.message = '⚠️ Table Number is Required (Use 0 for No Table)';
+      return;
+    }
+
+    const tableNum = Number(tableNumStr);
+    const newItemsMapped = items.map((i: FoodItem) => ({
+      id: i.id,
+      menuItemId: i.id,
       qty: 1,
       price: i.price,
       name: i.name
     }));
 
-    const payload: any = {
-      customerName: this.orderForm.value.customerName || 'Walk-in Guest',
-      customerPhone: this.orderForm.value.customerPhone || '0000000000',
-      address: this.orderForm.value.address || 'Restaurant',
-      orderType: this.orderForm.value.orderType || 'DINE_IN',
-      tableNumber: this.orderForm.value.tableNumber || '', // Added tableNumber
-      items: mapped,
-      total: mapped.reduce((s: number, m: any) => s + (m.price || 0) * (m.qty || 1), 0),
-      // FIX: Set status to 'CONFIRMED' so Kitchen View sees it immediately.
-      // POS orders are trusted and don't need 'Online Verification'.
-      status: 'CONFIRMED',
-      createdAt: new Date().toISOString()
-    };
+    // === SMART APPEND LOGIC ===
+    let existingOrder: any = null;
+
+    // Only look for existing order if Table > 0
+    if (tableNum > 0) {
+      existingOrder = this.ongoingOrders.find(o =>
+        Number(o.tableNumber) === tableNum &&
+        o.status !== 'DELIVERED' &&
+        o.status !== 'PAID' &&
+        o.status !== 'COMPLETED'
+      );
+    }
 
     this.isLoading = true;
 
-    this.orderService.createOrder(payload).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        this.message = '✅ Order placed successfully';
-        this.isLoading = false;
-        this.orderForm.reset({
-          customerName: 'Walk-in Guest',
-          customerPhone: '0000000000',
-          address: 'Restaurant',
-          orderType: 'DINE_IN',
-          items: []
-        });
-        this.loadOngoingOrders();
-        this.loadTodayOrders();
-      },
-      error: (err: any) => {
-        console.error('Place order error', err);
-        this.message = '❌ Failed to place order';
-        this.isLoading = false;
-      }
+    if (existingOrder) {
+      // --- SCENARIO: APPEND TO EXISTING ---
+      console.log('🔄 Appending to existing Order #', existingOrder.id);
+
+      // Merge items: active existing items + new items
+      // We need to match by menuItemId to increment qty if same item
+      const combinedItems = [...(existingOrder.items || [])];
+
+      newItemsMapped.forEach(newItem => {
+        const existingItemIndex = combinedItems.findIndex((ex: any) => ex.menuItemId === newItem.menuItemId);
+        if (existingItemIndex >= 0) {
+          // Increment qty
+          combinedItems[existingItemIndex].qty = (combinedItems[existingItemIndex].qty || 1) + 1;
+        } else {
+          // Add new
+          combinedItems.push(newItem);
+        }
+      });
+
+      const newTotal = combinedItems.reduce((s: number, it: any) => s + (it.price || 0) * (it.qty || 1), 0);
+
+      const updatePayload = {
+        items: combinedItems,
+        total: newTotal,
+        updatedBy: this.auth.currentUser()?.name || 'Staff',
+        updatedAt: new Date().toISOString()
+      };
+
+      this.orderService.updateOrder(existingOrder.id, updatePayload).pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          this.finishOrderPlacement('✅ Items added to Table ' + tableNum);
+        },
+        error: (err) => {
+          console.error('Append failed', err);
+          this.message = '❌ Failed to append to order';
+          this.isLoading = false;
+        }
+      });
+
+    } else {
+      // --- SCENARIO: CREATE NEW ---
+      console.log('✨ Creating NEW Order for Table', tableNum);
+
+      const payload: any = {
+        customerName: this.orderForm.value.customerName || 'Walk-in Guest',
+        customerPhone: this.orderForm.value.customerPhone || '0000000000',
+        address: this.orderForm.value.address || 'Restaurant',
+        orderType: this.orderForm.value.orderType || 'DINE_IN',
+        tableNumber: tableNumStr,
+        items: newItemsMapped,
+        total: newItemsMapped.reduce((s: number, m: any) => s + (m.price || 0) * (m.qty || 1), 0),
+        status: 'CONFIRMED',
+        createdAt: new Date().toISOString()
+      };
+
+      this.orderService.createOrder(payload).pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => this.finishOrderPlacement('✅ Order placed successfully'),
+        error: (err: any) => {
+          console.error('Place order error', err);
+          this.message = '❌ Failed to place order';
+          this.isLoading = false;
+        }
+      });
+    }
+  }
+
+  private finishOrderPlacement(msg: string): void {
+    this.message = msg;
+    this.isLoading = false;
+    // Clear items but KEEP Table Number (likely to add more for same table or diff table?)
+    // User Requirement: "make table number mandatory". Usually reset is safer.
+    this.orderForm.reset({
+      customerName: 'Walk-in Guest',
+      customerPhone: '0000000000',
+      address: 'Restaurant',
+      orderType: 'DINE_IN',
+      tableNumber: '', // Reset table too
+      items: []
     });
+    // Close modal if open (will implement next)
+    this.showCartModal = false;
+
+    this.loadOngoingOrders();
+    this.loadTodayOrders();
   }
 
   // ========== TIFFIN MANAGEMENT ==========
@@ -714,11 +774,12 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   // ========== SWITCH TAB ==========
 
-  switchTab(tab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' | 'LEAVES'): void {
+  switchTab(tab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' | 'LEAVES' | 'UNPAID'): void {
     this.activeTab = tab;
     this.message = '';
     if (tab === 'REVENUE') this.loadTodayOrders();
     if (tab === 'ONGOING') this.loadOngoingOrders();
+    if (tab === 'UNPAID') this.loadOngoingOrders(); // Refresh orders
     if (tab === 'LEAVES') this.loadMyLeaves();
   }
 

@@ -1,0 +1,35 @@
+<nav class="bottom-nav">
+    <a routerLink="/home" routerLinkActive="active" class="nav-item">
+        <i class="fa fa-home"></i>
+        <span>Home</span>
+    </a>
+
+    <a routerLink="/menu" routerLinkActive="active" class="nav-item">
+        <i class="fa fa-cutlery"></i>
+        <span>Menu</span>
+        <!-- FAB Style integration if needed later, for now simple icon -->
+    </a>
+
+    <a routerLink="/cart" routerLinkActive="active" class="nav-item cart-item">
+        <div class="icon-wrap">
+            <i class="fa fa-shopping-cart"></i>
+            <span *ngIf="cart.getCount() > 0" class="badge">{{ cart.getCount() }}</span>
+        </div>
+        <span>Cart</span>
+    </a>
+
+    <!-- Profile or Login -->
+    <ng-container *ngIf="auth.isLoggedIn(); else loginLink">
+        <a routerLink="/customer/dashboard" routerLinkActive="active" class="nav-item">
+            <i class="fa fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </ng-container>
+
+    <ng-template #loginLink>
+        <a routerLink="/login" routerLinkActive="active" class="nav-item">
+            <i class="fa fa-sign-in"></i>
+            <span>Login</span>
+        </a>
+    </ng-template>
+</nav>

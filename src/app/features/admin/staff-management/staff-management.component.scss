@@ -51,6 +51,18 @@
     background: white;
     border-radius: 8px;
     overflow: hidden;
+    width: 100%;
+
+    /* Force horizontal scroll on mobile */
+    @media (max-width: 768px) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+
+        table {
+            min-width: 600px;
+            /* Force table to be wide enough to trigger scroll */
+        }
+    }
 
     table {
         width: 100%;

@@ -15,10 +15,20 @@
   </div>
 
   <div class="nav-right" *ngIf="auth.isLoggedIn()">
-    <span class="welcome">
+    <!-- Desktop Welcome Msg -->
+    <span class="welcome d-none-mobile">
       👋 {{ auth.currentUser()?.name || auth.currentUser()?.email }}
     </span>
-    <button class="btn logout" (click)="logout()">Logout</button>
+
+    <!-- Mobile Shortcuts (Super Admin Only) -->
+    <ng-container *ngIf="auth.isSuperAdmin()">
+      <a routerLink="/super-admin/dashboard" class="mobile-icon-link" title="Command Center">🏠</a>
+      <a routerLink="/super-admin/onboard" class="mobile-icon-link" title="Onboard">➕</a>
+    </ng-container>
+
+    <button class="btn logout d-none-mobile" (click)="logout()">
+      <span>Logout</span>
+    </button>
   </div>
 
   <!-- Hamburger Menu (Mobile Only) -->
@@ -37,56 +47,63 @@
     <ng-container *ngIf="!auth.isLoggedIn(); else loggedLinks">
       <a routerLink="/home" routerLinkActive="active">Home</a>
       <a routerLink="/menu" routerLinkActive="active">Menu</a>
+      <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+        🛒 Cart
+        <span class="badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+      </a>
       <a routerLink="/login" routerLinkActive="active">Login</a>
       <a routerLink="/register" routerLinkActive="active">Register</a>
     </ng-container>
 
     <!-- Logged-in Links -->
     <ng-template #loggedLinks>
-      <!-- Admin -->
-      <ng-container *ngIf="auth.isAdmin(); else nonAdminLinks">
+
+      <!-- 👑 Super Admin -->
+      <ng-container *ngIf="auth.isSuperAdmin()">
+        <a routerLink="/super-admin/dashboard" routerLinkActive="active" style="color: #FFD700; font-weight: bold;">👑
+          Command Center</a>
+      </ng-container>
+
+      <!-- 🛡️ Admin -->
+      <ng-container *ngIf="auth.isAdmin()">
         <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
         <a routerLink="/admin/orders" routerLinkActive="active">Orders</a>
         <a routerLink="/admin/menu" routerLinkActive="active">Menu Mgmt</a>
+        <a routerLink="/admin/offers" routerLinkActive="active">Offers 🎫</a>
         <a routerLink="/admin/payments" routerLinkActive="active">Payments</a>
-        <a routerLink="/admin/staff" routerLinkActive="active">Staff</a> <!-- Added Missing Link -->
+        <a routerLink="/admin/staff" routerLinkActive="active">Staff</a>
         <a routerLink="/staff/pos" routerLinkActive="active">POS</a>
       </ng-container>
 
-      <!-- Staff -->
-      <ng-template #nonAdminLinks>
-        <ng-container *ngIf="auth.isStaff(); else customerLinks">
-          <!-- POS -->
-          <a [routerLink]="['/staff/pos']" [queryParams]="{ tab: 'order' }" routerLinkActive="active">
-            POS
-          </a>
+      <!-- 🧑‍🍳 Staff (Pure Staff) -->
+      <ng-container *ngIf="auth.isStaff() && !auth.isAdmin()">
+        <a [routerLink]="['/staff/pos']" [queryParams]="{ tab: 'order' }" routerLinkActive="active">
+          POS
+        </a>
+        <a routerLink="/staff/today-orders" routerLinkActive="active">
+          Today's Orders
+        </a>
+      </ng-container>
 
-          <!-- Today's Orders -->
-          <a routerLink="/staff/today-orders" routerLinkActive="active">
-            Today's Orders
-          </a>
+      <!-- 👤 Customer (If not Admin, Staff, or Super Admin) -->
+      <ng-container *ngIf="!auth.isAdmin() && !auth.isStaff() && !auth.isSuperAdmin()">
 
-        </ng-container>
+        <!-- 📍 Location Picker -->
+        <div class="location-picker" *ngIf="currentTenantName">
+          <span class="loc-icon">📍</span>
+          <span class="loc-name">{{ currentTenantName }}</span>
+          <a routerLink="/home" class="loc-change">Change</a>
+        </div>
 
-        <!-- Customer -->
-        <ng-template #customerLinks>
+        <a routerLink="/customer/dashboard" routerLinkActive="active">Dashboard</a>
+        <a routerLink="/menu" routerLinkActive="active">Menu</a>
+        <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+          🛒 Cart
+          <span class="badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+        </a>
+        <a routerLink="/orders" routerLinkActive="active">My Orders</a>
+      </ng-container>
 
-          <!-- 📍 Location / Restaurant Picker -->
-          <div class="location-picker" *ngIf="currentTenantName">
-            <span class="loc-icon">📍</span>
-            <span class="loc-name">{{ currentTenantName }}</span>
-            <a routerLink="/home" class="loc-change">Change</a>
-          </div>
-
-          <a routerLink="/customer/dashboard" routerLinkActive="active">Dashboard</a>
-          <a routerLink="/menu" routerLinkActive="active">Menu</a>
-          <a routerLink="/cart" routerLinkActive="active" class="cart-link">
-            🛒 Cart
-            <span class="badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
-          </a>
-          <a routerLink="/orders" routerLinkActive="active">My Orders</a>
-        </ng-template>
-      </ng-template>
     </ng-template>
 
     <!-- Mobile-Only Logout -->
@@ -107,3 +124,9 @@
      TOAST NOTIFICATION
 ============================ -->
 <div class="toast" *ngIf="toastVisible">{{ toastMessage }}</div>
+
+<!-- ============================
+     MOBILE BOTTOM NAV
+============================ -->
+<!-- Show only for Customers/Guests on Mobile -->
+<app-mobile-bottom-nav *ngIf="!auth.isAdmin() && !auth.isStaff() && !auth.isSuperAdmin()"></app-mobile-bottom-nav>
