@@ -77,13 +77,17 @@
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" [disabled]="loading || form.invalid || cart.getCount() === 0" class="btn btn-submit">
-        <span *ngIf="!loading">
-          {{ (form.get('orderType')?.value === 'DINE_IN' || form.get('orderType')?.value === 'PICKUP') ? '✅ Place Order'
-          : '✅ Place Order & Pay via UPI' }}
-        </span>
-        <span *ngIf="loading">⏳ Processing...</span>
-      </button>
+      <!-- Submit Button (Wrapped for Sticky Footer) -->
+      <div class="actions">
+        <button type="submit" [disabled]="loading || form.invalid || cart.getCount() === 0" class="btn-submit">
+          <span *ngIf="!loading">
+            {{ (form.get('orderType')?.value === 'DINE_IN' || form.get('orderType')?.value === 'PICKUP') ? '✅ Place
+            Order'
+            : '✅ Place Order & Pay' }}
+          </span>
+          <span *ngIf="loading">⏳ Processing...</span>
+        </button>
+      </div>
     </form>
   </div>
 </div>

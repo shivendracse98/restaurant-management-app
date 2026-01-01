@@ -60,8 +60,17 @@ export const coreInterceptor: HttpInterceptorFn = (req, next) => {
                 if (!error.error) message = error.message;
             }
 
-            // 4. Show Toast Immediately
-            toastr.error(message, `Error (${error.status})`);
+            // 4. Show Toast Immediately (Unless Suppressed)
+            const isConfig403 = error.status === 403 && (
+                req.url.includes('/config') ||
+                req.url.includes('/offers')
+            );
+
+            if (!isConfig403) {
+                toastr.error(message, `Error (${error.status})`);
+            } else {
+                console.warn('⚠️ Suppressed Toast for 403 on Config:', req.url);
+            }
 
             // Pass error along, but we've handled the UI notification
             return throwError(() => error);

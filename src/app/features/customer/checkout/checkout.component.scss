@@ -7,9 +7,13 @@
   padding: 2rem 1rem;
   background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
   min-height: 100vh;
+  padding-bottom: 150px;
+  /* Vital: Increased to ensure last input clears sticky footer */
 
   @media (max-width: 768px) {
     padding: 1rem;
+    padding-bottom: 180px;
+    /* Extra scroll space for mobile inputs */
   }
 }
 
@@ -21,6 +25,7 @@
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
+  position: relative;
 
   &:hover {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
@@ -243,55 +248,53 @@
       }
     }
 
-    // ============= SUBMIT BUTTON =============
-    .btn {
-      padding: 14px 24px;
+    // ============= SUBMIT BUTTON (NEW STYLE) =============
+    .actions {
+      margin-top: 1.5rem;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px 24px;
       border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s ease;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(90deg, #E67E22 0%, #D35400 100%);
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      margin-top: 1.5rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      box-shadow: 0 4px 12px rgba(230, 126, 34, 0.2);
+      gap: 10px;
 
-      &.btn-submit {
-        background: linear-gradient(135deg, #E67E22 0%, #D35400 100%);
-        color: white;
-        min-height: 50px;
+      span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-        &:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(230, 126, 34, 0.4);
-          background: linear-gradient(135deg, #D35400 0%, #E67E22 100%);
-        }
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(230, 126, 34, 0.5);
+        background: linear-gradient(90deg, #D35400 0%, #E67E22 100%);
+      }
 
-        &:active:not(:disabled) {
-          transform: translateY(0);
-        }
+      &:active:not(:disabled) {
+        transform: scale(0.98);
+      }
 
-        &:disabled {
-          background: #ccc;
-          color: #999;
-          cursor: not-allowed;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-          &:hover {
-            transform: none;
-          }
-        }
-
-        span {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.4rem;
-        }
+      &:disabled {
+        background: #e0e0e0;
+        color: #999;
+        cursor: not-allowed;
+        box-shadow: none;
       }
     }
   }
@@ -303,54 +306,62 @@
     opacity: 0;
     transform: translateY(-5px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-// ============= RESPONSIVE DESIGN =============
-@media (max-width: 768px) {
-  .checkout-card {
-    max-width: 100%;
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
 
-    .checkout-form {
-      gap: 1rem;
-
-      .order-summary {
-        padding: 1rem;
-
-        h3 {
-          font-size: 1rem;
-        }
-
-        .summary-items {
-          max-height: 250px;
-
-          .item-line {
-            font-size: 0.85rem;
-            padding: 8px 10px;
-          }
-        }
-
-        .summary-total {
-          strong {
-            font-size: 1.2rem;
-          }
-        }
-      }
-
-      .btn.btn-submit {
-        min-height: 48px;
-        font-size: 0.9rem;
-      }
-    }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
+// ============= MOBILE STICKY FOOTER =============
+@media (max-width: 768px) {
+  .checkout-container {
+    display: block;
+    /* Allow flow */
+  }
+
+  /* Make the button sticky at bottom of screen on mobile */
+  .checkout-form .actions {
+    position: fixed;
+    bottom: 0;
+    /* Attach to bottom edge (nav sits above/below depending on z-index) or use 70px if nav is strictly fixed */
+    /* ADJUSTMENT: Bottom Nav is ~70px. Let's position it at 70px to sit perfectly ON TOP of the nav */
+    bottom: 70px;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+    z-index: 900;
+    margin-top: 0;
+    border-top: 1px solid #f0f0f0;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .checkout-card {
+    padding-bottom: 20px;
+    border-radius: 0 0 16px 16px;
+  }
+}
+
+// ============= RESPONSIVE DESIGN TWEAKS =============
 @media (max-width: 480px) {
   .checkout-container {
     padding: 0.5rem;
+    padding-bottom: 180px;
+    /* Consistent scroll space */
   }
 
   .checkout-card {
@@ -359,66 +370,6 @@
     h2 {
       font-size: 1.4rem;
       margin-bottom: 0.3rem;
-    }
-
-    .subtext {
-      font-size: 0.85rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .checkout-form {
-      gap: 1rem;
-
-      .form-group {
-        gap: 0.4rem;
-
-        label {
-          font-size: 0.9rem;
-        }
-
-        input,
-        textarea,
-        select {
-          padding: 10px 12px;
-          font-size: 0.9rem;
-        }
-      }
-
-      .order-summary {
-        padding: 0.8rem;
-        margin-top: 1.5rem;
-
-        h3 {
-          font-size: 0.95rem;
-          margin-bottom: 0.8rem;
-        }
-
-        .summary-items {
-          gap: 0.6rem;
-          max-height: 200px;
-
-          .item-line {
-            font-size: 0.8rem;
-            padding: 6px 8px;
-          }
-        }
-
-        .summary-total {
-          font-size: 0.9rem;
-          padding: 10px 0;
-
-          strong {
-            font-size: 1.1rem;
-          }
-        }
-      }
-
-      .btn.btn-submit {
-        min-height: 46px;
-        font-size: 0.85rem;
-        padding: 12px 16px;
-        margin-top: 1rem;
-      }
     }
   }
 }

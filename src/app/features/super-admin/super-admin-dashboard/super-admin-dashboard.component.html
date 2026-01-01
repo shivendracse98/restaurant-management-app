@@ -1,0 +1,62 @@
+<div class="sa-container">
+  <div class="header">
+    <h1>👑 TasteTown Command Center</h1>
+    <div class="actions">
+      <button class="btn-onboard" routerLink="/super-admin/onboard">➕ Onboard New Restaurant</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading Tenants...</div>
+
+  <table *ngIf="!loading" class="tenant-table">
+    <thead>
+      <tr>
+        <th>Restaurant</th>
+        <th>Owner</th>
+        <th>Plan</th>
+        <th>Status</th>
+        <th>Expiry</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tenant of tenants">
+        <td>
+          <strong>{{ tenant.restaurantName }}</strong><br>
+          <small class="text-muted">{{ tenant.tenantId }}</small>
+        </td>
+        <td>
+          {{ tenant.ownerName }}<br>
+          <small class="text-muted">{{ tenant.ownerEmail }}</small>
+        </td>
+        <td>{{ tenant.planType }}</td>
+        <td>
+          <span class="badge" [ngClass]="tenant.status.toLowerCase()">
+            {{ tenant.status }}
+          </span>
+        </td>
+        <td>
+          {{ tenant.endDate | date:'mediumDate' }}
+          <div *ngIf="tenant.status !== 'EXPIRED'" class="days-left"
+            [ngClass]="{'critical': getDaysRemaining(tenant.endDate) < 5}">
+            ({{ getDaysRemaining(tenant.endDate) }} days left)
+          </div>
+        </td>
+        <td>
+          <button class="btn-action btn-extend" (click)="extendSubscription(tenant)">
+            +1 Month
+          </button>
+
+          <button *ngIf="tenant.status !== 'SUSPENDED'" class="btn-action btn-suspend" (click)="toggleStatus(tenant)">
+            Suspend
+          </button>
+
+          <button *ngIf="tenant.status === 'SUSPENDED'" class="btn-action btn-reactivate"
+            (click)="toggleStatus(tenant)">
+            Reactivate
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

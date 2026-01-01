@@ -2,12 +2,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 export interface PaymentConfig {
-    upiId: string;
-    qrImageUrl: string;
-    defaultMode: string;
+    upiId?: string;
+    upiQrImageUrl?: string;
+    defaultPaymentMode?: string;
+    restaurantName?: string;
+    restaurantContact?: string;
+    restaurantAddress?: string;
+    logoUrl?: string;
 }
 
 @Injectable({
@@ -27,24 +31,26 @@ export class ConfigService {
         );
     }
 
+    updateConfig(data: any): Observable<any> {
+        return this.http.put(`${this.apiUrl}`, data);
+    }
+
     getAllTenants(): Observable<any[]> {
-        // TODO: Replace with real API call: this.http.get<any[]>(`${this.apiUrl}/tenants`)
-        // For now, return the mock/db list
-        return of([
-            {
-                tenantId: 'Maa-Ashtabhuja',
-                name: 'Maa Ashtabhuja Refreshments',
-                description: 'Best Tiffin & Thali in Town',
-                detailedDescription: 'Pure Veg. We provide superb tiffin services and delicious meals that fit right within your budget.',
-                imageUrl: 'assets/images/maa-ashtabhuja-log.png'
-            },
-            {
-                tenantId: 'pizza-hut',
-                name: 'Pizza Hut',
-                description: 'Tastiest Pizzas',
-                detailedDescription: 'Experience the cheesiest pizzas in town with our signature pan crusts and fresh toppings.',
-                imageUrl: 'assets/images/logo.png'
-            }
-        ]);
+        return this.http.get<any[]>(`${this.apiUrl}/tenants`).pipe(
+            map(response => {
+                return response.map(t => ({
+                    tenantId: t.tenantId,
+                    name: t.restaurantName || t.tenantId,
+                    description: t.description || 'Delicious food served hot.',
+                    detailedDescription: t.detailedDescription || t.restaurantAddress,
+                    imageUrl: t.logoUrl
+                }));
+            }),
+            catchError(err => {
+                console.error('Failed to load tenants', err);
+                // Return generic list if fails, or empty
+                return of([]);
+            })
+        );
     }
 }

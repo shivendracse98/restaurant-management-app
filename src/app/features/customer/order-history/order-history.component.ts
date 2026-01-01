@@ -1,15 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms'; // Added form module
 import { OrderService } from '../../../core/services/order.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ReviewService, Review } from '../../../core/services/review.service';
+import { ToastrService } from 'ngx-toastr';
 import { Order } from '../../../models/order.model';
 import { Observable, of } from 'rxjs';
 
 @Component({
     selector: 'app-order-history',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, FormsModule],
     templateUrl: './order-history.component.html',
     styleUrls: ['./order-history.component.scss']
 })
@@ -17,10 +20,7 @@ export class OrderHistoryComponent implements OnInit {
     orders$: Observable<Order[]> = of([]);
     loading = true;
 
-    constructor(
-        private orderService: OrderService,
-        private auth: AuthService
-    ) { }
+
 
     ngOnInit(): void {
         const user = this.auth.currentUser();
@@ -48,5 +48,50 @@ export class OrderHistoryComponent implements OnInit {
             case 'CANCELLED': return 'badge-danger';
             default: return 'badge-secondary';
         }
+    }
+
+    // --- Review Logic ---
+    showRateModal = false;
+    selectedOrder: Order | null = null;
+    rating = 0;
+    reviewComment = '';
+
+    constructor(
+        private orderService: OrderService,
+        private auth: AuthService,
+        private reviewService: ReviewService,
+        private toastr: ToastrService
+    ) { }
+
+    openRateModal(order: Order): void {
+        this.selectedOrder = order;
+        this.rating = 0;
+        this.reviewComment = '';
+        this.showRateModal = true;
+    }
+
+    closeRateModal(): void {
+        this.showRateModal = false;
+        this.selectedOrder = null;
+    }
+
+    submitReview(): void {
+        if (!this.selectedOrder || this.rating === 0) return;
+
+        const review: Review = {
+            restaurantId: this.selectedOrder.restaurantId || '',
+            customerId: this.selectedOrder.customerId || 0,
+            customerName: this.selectedOrder.customerName || 'Anonymous',
+            rating: this.rating,
+            comment: this.reviewComment
+        };
+
+        this.reviewService.submitReview(review).subscribe({
+            next: () => {
+                this.toastr.success('Thanks for your feedback!');
+                this.closeRateModal();
+            },
+            error: () => this.toastr.error('Failed to submit review')
+        });
     }
 }

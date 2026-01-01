@@ -34,11 +34,40 @@
                     <span class="badge" [ngClass]="getStatusClass(order.status)">
                         {{ order.status }}
                     </span>
-                    <a [routerLink]="['/order-tracking', order.id]" class="btn btn-sm btn-outline">
-                        Track Order ➡️
-                    </a>
+                    <div class="actions">
+                        <button class="btn btn-sm btn-outline" *ngIf="order.status === 'DELIVERED'"
+                            (click)="openRateModal(order)">
+                            ⭐ Rate
+                        </button>
+                        <a [routerLink]="['/order-tracking', order.id]" class="btn btn-sm btn-outline">
+                            Track ➡️
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </ng-container>
+
+    <!-- RATING MODAL -->
+    <div class="modal-backdrop" *ngIf="showRateModal" (click)="closeRateModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>⭐ Rate Order #{{ selectedOrder?.id }}</h3>
+                <button class="close-btn" (click)="closeRateModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="star-rating">
+                    <span *ngFor="let star of [1,2,3,4,5]" (click)="rating = star" [class.filled]="star <= rating">
+                        ★
+                    </span>
+                </div>
+                <textarea [(ngModel)]="reviewComment" placeholder="Tell us about your experience..."
+                    rows="3"></textarea>
+                <div class="modal-actions">
+                    <button class="btn" (click)="closeRateModal()">Cancel</button>
+                    <button class="btn btn-primary" (click)="submitReview()" [disabled]="rating === 0">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

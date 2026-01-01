@@ -1,29 +1,124 @@
 .menu-container {
-  padding: 20px;
-  text-align: center;
+  padding: 10px 15px;
+  /* Compact padding */
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+  /* Space for FAB/Bottom Nav */
 }
 
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  gap: 20px;
-  margin-top: 20px;
+/* Header Compact */
+.menu-header-compact {
+  margin-bottom: 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+
+  h1 {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .highlight {
+    color: #333;
+    font-weight: 800;
+    font-size: 1.2rem;
+    /* New line on mobile */
+  }
+
+  .change-location-link {
+    font-size: 0.85rem;
+    color: #e67e22;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 5px;
+    display: inline-block;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
+/* Search & Filter Container */
+.search-filter-container {
+  margin-bottom: 20px;
+}
+
+/* Search Bar */
+.search-bar {
+  position: relative;
+  margin-bottom: 15px;
+
+  input {
+    width: 100%;
+    padding: 10px 40px;
+    /* Space for icon and clear btn */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s;
+
+    &:focus {
+      border-color: #e67e22;
+      box-shadow: 0 4px 8px rgba(230, 126, 34, 0.1);
+    }
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .clear-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    color: #999;
+    cursor: pointer;
+    padding: 5px;
+
+    &:hover {
+      color: #333;
+    }
+  }
+}
+
+/* Filters */
 .dietary-filter {
   display: flex;
-  justify-content: center;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
+  /* Container handles margin now */
+  overflow-x: auto;
+  white-space: nowrap;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   button {
-    padding: 8px 16px;
-    border: 1px solid #ddd;
-    background: white;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 500;
+    padding: 6px 14px;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
     transition: all 0.2s;
 
     &.active {
@@ -33,129 +128,249 @@
     }
 
     &.veg-btn.active {
-      background: #2ecc71;
-      border-color: #2ecc71;
+      background: #27ae60;
+      border-color: #27ae60;
     }
 
     &.non-veg-btn.active {
-      background: #e74c3c;
-      border-color: #e74c3c;
+      background: #c0392b;
+      border-color: #c0392b;
     }
   }
 }
 
-.image-wrapper {
-  position: relative;
+/* Sticky Category Nav */
+.category-nav {
+  position: sticky;
+  top: 70px;
+  /* Below navbar */
+  background: white;
+  z-index: 90;
+  padding: 10px 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  border-bottom: 1px solid #f0f0f0;
+  margin: 0 -15px 20px -15px;
+  /* Full bleed */
+  padding-left: 15px;
+  /* Restore internal padding */
 
-  .veg-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: white;
-    border-radius: 4px;
-    padding: 2px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    font-size: 12px;
-    border: 1px solid #ddd;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  button {
+    padding: 6px 12px;
+    margin-right: 8px;
+    border: none;
+    background: #f5f5f5;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+
+    &.active {
+      background: #333;
+      color: white;
+    }
   }
 }
 
-.menu-item {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  transition: transform 0.2s ease;
+/* List Layout */
+.category-section {
+  margin-bottom: 30px;
+
+  .category-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 15px;
+    border-left: none;
+    /* Removed old style */
+    padding-left: 0;
+  }
 }
 
-.menu-item:hover {
-  transform: translateY(-4px);
-}
-
-.menu-item img {
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.btn.primary {
-  margin-top: 10px;
-  padding: 8px 14px;
-  background-color: #ff6b4a;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.btn.primary:hover {
-  background-color: #e64a19;
-}
-
-.menu-item {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  transition: transform 0.2s ease;
+.menu-list {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 15px;
 }
 
-.click-area {
-  cursor: pointer;
-}
-
-.menu-item:hover {
-  transform: translateY(-4px);
-}
-
-/* --- Out of Stock Styles --- */
-.stock-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+.menu-item-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  z-index: 10;
-  backdrop-filter: blur(2px);
+  align-items: flex-start;
+  gap: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px dotted #e0e0e0;
+  position: relative;
+  background: #fff;
 
-  span {
-    color: white;
-    font-weight: 800;
-    font-size: 1.2rem;
-    padding: 8px 16px;
-    border: 2px solid white;
-    border-radius: 8px;
-    text-transform: uppercase;
-    transform: rotate(-10deg);
-    background: rgba(0, 0, 0, 0.4);
-    pointer-events: none;
+  &:last-child {
+    border-bottom: none;
+  }
+
+  /* 1. Visuals */
+  .item-visual {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    .image-wrapper-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      /* Slight rounded square, Zomato style isn't strictly circle anymore, but fits 80x80 */
+      overflow: hidden;
+      position: relative;
+      background: #f0f0f0;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .stock-overlay-circle {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        span {
+          font-size: 0.7rem;
+          font-weight: 800;
+          color: #888;
+          text-transform: uppercase;
+        }
+      }
+    }
+
+    .veg-dot {
+      font-size: 0.7rem;
+    }
+  }
+
+  /* 2. Content */
+  .item-content {
+    flex-grow: 1;
+    min-width: 0;
+    /* Text truncation fix */
+
+    .item-name {
+      margin: 0 0 4px 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #333;
+      line-height: 1.2;
+    }
+
+    .item-price {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .item-desc {
+      font-size: 0.8rem;
+      color: #888;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.3;
+    }
+  }
+
+  /* 3. Actions */
+  .item-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 10px;
+
+    .btn-add-mini {
+      background: #fff;
+      color: #e67e22;
+      /* Zomato Orange */
+      border: 1px solid #e0e0e0;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+      white-space: nowrap;
+
+      &:hover {
+        background: #fff5f0;
+        border-color: #e67e22;
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+
+    .sold-out-text {
+      font-size: 0.7rem;
+      color: #aaa;
+      margin-top: 5px;
+    }
+
+    /* Admin Actions */
+    .btn-icon {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      padding: 5px;
+      cursor: pointer;
+      opacity: 0.6;
+
+      &:hover {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+
+      &.delete:hover {
+        color: red;
+      }
+
+      &.edit:hover {
+        color: blue;
+      }
+    }
   }
 }
 
-.menu-item.out-of-stock {
-  .image-wrapper img {
-    filter: grayscale(100%);
-    opacity: 0.7;
-  }
+/* Out of Stock State */
+.menu-item-row.out-of-stock {
+  opacity: 0.7;
 
-  h3,
-  p,
-  strong {
+  .item-name,
+  .item-price {
     color: #999;
   }
+}
 
-  /* Prevent clicks on the item details when out of stock */
-  .click-area {
-    cursor: not-allowed;
+@media (min-width: 768px) {
+  .menu-container {
+    padding: 20px;
+  }
+
+  .menu-item-row {
+    .image-wrapper-circle {
+      width: 100px;
+      height: 100px;
+    }
   }
 }

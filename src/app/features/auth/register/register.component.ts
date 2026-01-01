@@ -23,7 +23,8 @@ export class RegisterComponent {
     this.auth.register(this.name, this.email, this.password, this.phoneNumber).subscribe({
       next: (user) => {
         alert(`🎉 Welcome ${user.name}! A welcome email has been sent to ${user.email}.`);
-        this.router.navigate(['/login']);
+        // Auto-login is handled by AuthService, so just go home
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         console.error('Registration failed', err);
