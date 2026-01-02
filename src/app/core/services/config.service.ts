@@ -12,6 +12,14 @@ export interface PaymentConfig {
     restaurantContact?: string;
     restaurantAddress?: string;
     logoUrl?: string;
+
+    // Delivery Config
+    isDeliveryEnabled?: boolean;
+    isAcceptingDelivery?: boolean;
+    serviceablePincodes?: string;
+    deliveryFee?: number;
+    minOrderAmount?: number;
+    freeDeliveryThreshold?: number;
 }
 
 @Injectable({

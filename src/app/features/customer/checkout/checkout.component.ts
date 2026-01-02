@@ -10,7 +10,8 @@ import { OrderService } from 'src/app/core/services/order.service';
 import { PaymentService } from 'src/app/core/services/payment.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { PaymentModalComponent } from './payment-modal.component';
-import { TenantService } from 'src/app/core/services/tenant.service'; // Added
+import { TenantService } from 'src/app/core/services/tenant.service';
+import { ConfigService } from 'src/app/core/services/config.service'; // Added
 import { ToastrModule, ToastrService } from 'ngx-toastr';  // ✅ Import both
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -53,42 +54,138 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     private router: Router,
     private dialog: MatDialog,
     private toastr: ToastrService,
-    private tenantService: TenantService // Added
+    private tenantService: TenantService,
+    private configService: ConfigService // Added
   ) {
     console.log(`${this.LOG} Constructor called`);
     this.initializeForm();
   }
 
+  // Delivery Config
+  tenantConfig: any = null;
+  deliveryFee: number = 0;
+  isDeliveryAvailable: boolean = true; // Based on flags
+  deliveryError: string | null = null; // e.g. "Min order is 500"
+
   ngOnInit(): void {
     console.log(`${this.LOG} ngOnInit called`);
+    this.loadTenantConfig(); // Load config first
     this.loadCheckoutData();
+
+    // Recalculate on Cart or OrderType changes
+    this.form.get('orderType')?.valueChanges.subscribe(() => this.calculateTotal());
+    // Also recalculate when Pincode changes
+    this.form.get('deliveryPincode')?.valueChanges.subscribe(() => this.calculateTotal());
+  }
+
+  loadTenantConfig() {
+    this.configService.getPaymentConfig().subscribe((config: any) => {
+      this.tenantConfig = config;
+      console.log('Tenant Config Loaded:', config);
+      this.calculateTotal(); // Recalc once config is loaded
+    });
+  }
+
+  calculateTotal() {
+    const rawTotal = this.cartService.getTotal();
+    this.deliveryFee = 0;
+    this.deliveryError = null;
+    this.isDeliveryAvailable = true;
+
+    const orderType = this.form.get('orderType')?.value;
+
+    if (orderType === 'DELIVERY' && this.tenantConfig) {
+
+      // 1. Check Flags
+      if (this.tenantConfig.isDeliveryEnabled === false) {
+        this.isDeliveryAvailable = false;
+        this.deliveryError = "Delivery is currently disabled by admin.";
+        return;
+      }
+      if (this.tenantConfig.isAcceptingDelivery === false) {
+        this.isDeliveryAvailable = false;
+        this.deliveryError = "Restaurant is not accepting delivery orders right now.";
+        return;
+      }
+
+      // 2. Pincode Validation
+      const enteredPin = this.form.get('deliveryPincode')?.value;
+      if (this.tenantConfig.serviceablePincodes && this.tenantConfig.serviceablePincodes.trim().length > 0) {
+        if (!enteredPin || enteredPin.length < 6) {
+          // Don't show error yet if typing, but fee might be 0 until valid.
+          // Actually, let's wait for 6 digits to validate strictness, 
+          // but for "Available" check we can be strict.
+        } else {
+          const allowedPins = this.tenantConfig.serviceablePincodes.split(',').map((p: string) => p.trim());
+          if (!allowedPins.includes(enteredPin)) {
+            this.isDeliveryAvailable = false;
+            this.deliveryError = `Sorry, we do not deliver to ${enteredPin}.`;
+            // We return here so fee is 0 and block submit
+            // Don't return if you want to show fee? No, if no deliver, no fee/total.
+            // But let's show error.
+          }
+        }
+      }
+
+      if (this.deliveryError) {
+        // Validation failed above
+        this.total = rawTotal;
+        return;
+      }
+
+      // 3. Min Order
+      if (this.tenantConfig.minOrderAmount && rawTotal < this.tenantConfig.minOrderAmount) {
+        this.deliveryError = `Minimum order for delivery is ₹${this.tenantConfig.minOrderAmount}`;
+      }
+
+      // 4. Fee
+      if (this.tenantConfig.deliveryFee) {
+        const threshold = this.tenantConfig.freeDeliveryThreshold || 0;
+        if (threshold > 0 && rawTotal >= threshold) {
+          this.deliveryFee = 0; // Free
+        } else {
+          this.deliveryFee = this.tenantConfig.deliveryFee;
+        }
+      }
+    }
+
+    this.total = rawTotal + this.deliveryFee;
   }
 
   /**
-   * Initialize form with validators
-   */
+ * Initialize form with validators
+ */
   private initializeForm(): void {
     console.log(`${this.LOG} Initializing form`);
     this.form = this.fb.group({
       customerName: ['', [Validators.required, Validators.minLength(2)]],
       customerPhone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      customerEmail: ['', [Validators.email]], // Email optional or specific? Keeping loose for now.
-      address: [''], // Remove Required check initially (Managed dynamically)
-      orderType: ['DELIVERY', Validators.required]
+      customerEmail: ['', [Validators.email]],
+      address: [''],
+      orderType: ['DELIVERY', Validators.required],
+      deliveryPincode: ['']
     });
 
-    // Add dynamic validator for Address
+    // Add dynamic validator for Address and Pincode
     this.form.get('orderType')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(type => {
         const addrCtrl = this.form.get('address');
+        const pinCtrl = this.form.get('deliveryPincode');
+
         if (type === 'DELIVERY') {
           addrCtrl?.setValidators([Validators.required, Validators.minLength(5)]);
+          pinCtrl?.setValidators([Validators.required, Validators.pattern(/^\d{6}$/)]);
         } else {
           addrCtrl?.clearValidators();
+          pinCtrl?.clearValidators();
         }
         addrCtrl?.updateValueAndValidity();
+        pinCtrl?.updateValueAndValidity();
       });
+
+    // Trigger initial validation for Order Type
+    this.form.get('orderType')?.updateValueAndValidity({ emitEvent: true });
 
     // Handle Query Params for 'tableId' -> Auto set to DINE_IN
     // (Assuming logic elsewhere or defaults)
@@ -172,6 +269,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.form.get('orderType')?.value === 'DELIVERY' && this.deliveryError) {
+      this.toastr.error(this.deliveryError);
+      return;
+    }
+
     console.log(`${this.LOG} ✓ Validation passed, starting order creation...`);
     this.submitting = true;
 
@@ -190,13 +292,15 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       customerName: formValue.customerName,
       customerPhone: formValue.customerPhone,
       customerEmail: formValue.customerEmail,
-      address: formValue.address,
+      deliveryAddress: formValue.address, // ✅ Map local 'address' to 'deliveryAddress'
+      deliveryPincode: formValue.deliveryPincode, // ✅ Now mapped from form
       orderType: formValue.orderType,
       items: orderItems,
-      total: this.cartService.getTotal(),
+      total: this.total, // ✅ Use calculated total (includes fee)
+      // Note: Backend will RE-CALCULATE fee to be safe, but we send this for reference.
       userId: this.currentUser?.id,
-      restaurantId: this.tenantService.getTenantId() || 'Maa-Ashtabhuja', // ✅ Explicitly include Tenant ID
-      tableNumber: sessionStorage.getItem('rms_table_id') || '', // ✅ Include Table Number from QR
+      restaurantId: this.tenantService.getTenantId() || 'Maa-Ashtabhuja',
+      tableNumber: sessionStorage.getItem('rms_table_id') || '',
       status: 'PENDING' as any,
       createdAt: new Date().toISOString()
     };

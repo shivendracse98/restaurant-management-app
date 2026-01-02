@@ -361,7 +361,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     if (tableNum > 0) {
       existingOrder = this.ongoingOrders.find(o =>
         Number(o.tableNumber) === tableNum &&
-        o.status !== 'DELIVERED' &&
+        // Fix: Allow appending even if DELIVERED (Served), as long as not fully closed (PAID/COMPLETED)
         o.status !== 'PAID' &&
         o.status !== 'COMPLETED'
       );
@@ -378,21 +378,44 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       const combinedItems = [...(existingOrder.items || [])];
 
       newItemsMapped.forEach(newItem => {
-        const existingItemIndex = combinedItems.findIndex((ex: any) => ex.menuItemId === newItem.menuItemId);
+        // Fix: Only merge if menuItemId AND status match.
+        // New items are implicitly 'PREPARING', existing items might be 'READY' or 'DELIVERED'.
+        // If statuses differ, we should keep them separate so Kitchen knows which one is new.
+        const newItemStatus = 'PREPARING';
+
+        const existingItemIndex = combinedItems.findIndex((ex: any) =>
+          ex.menuItemId === newItem.menuItemId &&
+          (ex.status || 'PREPARING') === newItemStatus
+        );
+
         if (existingItemIndex >= 0) {
-          // Increment qty
+          // Increment qty (Statuses match)
           combinedItems[existingItemIndex].qty = (combinedItems[existingItemIndex].qty || 1) + 1;
         } else {
-          // Add new
-          combinedItems.push(newItem);
+          // Add as new separate line item
+          combinedItems.push({ ...newItem, status: newItemStatus });
         }
       });
 
       const newTotal = combinedItems.reduce((s: number, it: any) => s + (it.price || 0) * (it.qty || 1), 0);
 
+      // Map combinedItems to strictly match Backend DTO (OrderItemRequest)
+      const finalItemsPayload = combinedItems.map((item: any) => {
+        const qty = item.quantity || item.qty || 1;
+        const price = item.pricePerUnit || item.price || 0;
+        return {
+          menuItemId: item.menuItemId || item.id,
+          itemName: item.itemName || item.name,
+          quantity: qty,
+          pricePerUnit: price,
+          subtotal: qty * price,
+          status: item.status || 'PREPARING' // Preserve existing status or default new to PREPARING
+        };
+      });
+
       const updatePayload = {
-        items: combinedItems,
-        total: newTotal,
+        items: finalItemsPayload,
+        totalAmount: newTotal,
         updatedBy: this.auth.currentUser()?.name || 'Staff',
         updatedAt: new Date().toISOString()
       };

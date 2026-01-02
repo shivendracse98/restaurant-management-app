@@ -61,9 +61,13 @@ import { takeUntil, switchMap } from 'rxjs/operators';
                 <span class="time">{{ order.createdAt | date:'shortTime' }}</span>
               </div>
               <div class="items">
-                <div *ngFor="let item of order.items" class="item">
-                  <span class="qty">{{ item.qty }}x</span> {{ item.name }}
-                </div>
+                  <div *ngFor="let item of order.items" class="item" 
+                       [style.color]="item.status === 'PREPARING' ? '#d97706' : '#059669'"
+                       [style.fontWeight]="item.status === 'PREPARING' ? 'bold' : 'normal'">
+                    <span class="qty">{{ item.qty }}x</span> {{ item.name }}
+                    <small *ngIf="item.status === 'PREPARING'"> (🕒 Prep)</small>
+                    <small *ngIf="item.status === 'READY'"> (✅ Ready)</small>
+                  </div>
               </div>
               <div class="actions">
                 <button class="btn ready-btn" (click)="updateStatus(order, 'READY')">✅ Mark Ready</button>

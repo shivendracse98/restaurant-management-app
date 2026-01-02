@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+
 import { ConfigService } from '../../../core/services/config.service';
 import { ImageService } from '../../../core/services/image.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -9,7 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
     selector: 'app-admin-settings',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, MatSlideToggleModule],
     templateUrl: './admin-settings.component.html',
     styleUrls: ['./admin-settings.component.scss']
 })
@@ -42,7 +44,15 @@ export class AdminSettingsComponent implements OnInit {
 
             contactPhone: [''],
             contactEmail: ['', [Validators.email]],
-            address: ['']
+            address: [''],
+
+            // Delivery
+            isDeliveryEnabled: [false], // Master Toggle
+            isAcceptingDelivery: [true],
+            serviceablePincodes: [''],
+            deliveryFee: [0, [Validators.min(0)]],
+            minOrderAmount: [0, [Validators.min(0)]],
+            freeDeliveryThreshold: [0, [Validators.min(0)]]
         });
     }
 
@@ -52,51 +62,40 @@ export class AdminSettingsComponent implements OnInit {
 
     loadConfig(): void {
         this.loading = true;
-        // We need an endpoint to get the FULL config, not just payment.
-        // Assuming ConfigService.getPaymentConfig returns partial, but we need full tenant config.
-        // The backend `TenantConfigController` has verifyConfig (public) and updateConfig (private).
-        // Let's assume we can fetch current config via a new GET endpoint or reuse the Auth user's data for basics.
-        // Wait, `ConfigService` has `getPaymentConfig`. 
-        // Ideally we should have `GET /api/config` that returns the full `TenantConfig` entity.
-
-        // For now, let's try to get payment config and merge.
-        // If backend doesn't support full GET, we might have to rely on what we have.
-        // Actually, `TenantConfigController` maps `GET /payment` -> returns only payment info?
-        // Let's check if we can fetch full config. 
-        // If not, I'll rely on `getPaymentConfig` for payment parts and placeholders for others or assume they are empty initially.
 
         this.configService.getPaymentConfig().subscribe({
             next: (data: any) => {
-                // Data might be just PaymentConfig or Full Config depending on backend DTO.
-                // If it's partial, we might miss Name/Desc. 
-                // But `TenantConfig` entity has everything.
-                // Let's assume the backend `GET /config/payment` actually returns the full config or we fix backend later.
-                // For MVP, if we don't have Name/Desc from API, we can pre-fill from Auth User if available.
-
                 const currentUser = this.auth.currentUser();
 
                 this.configForm.patchValue({
                     name: data?.name || currentUser?.restaurantName || '',
                     description: data?.description || '',
                     detailedDescription: data?.detailedDescription || '',
-                    userId: data?.userId, // Hidden field if needed
                     logoUrl: data?.logoUrl,
 
                     upiId: data?.upiId || '',
-                    qrImageUrl: data?.qrImageUrl || '',
-                    defaultMode: data?.defaultMode || 'CASH',
+                    qrImageUrl: data?.upiQrImageUrl || '', // ✅ Fix: Map from backend 'upiQrImageUrl' to local form 'qrImageUrl'
+                    defaultMode: data?.defaultPaymentMode || 'CASH',
 
-                    contactPhone: data?.contactPhone || currentUser?.phone || '',
+                    contactPhone: data?.restaurantContact || currentUser?.phone || '',
                     contactEmail: data?.contactEmail || currentUser?.email || '',
-                    address: data?.address || ''
+                    address: data?.restaurantAddress || '',
+
+                    // Delivery
+                    isDeliveryEnabled: data?.isDeliveryEnabled !== undefined ? data.isDeliveryEnabled : false,
+                    isAcceptingDelivery: data?.isAcceptingDelivery !== undefined ? data.isAcceptingDelivery : true,
+                    serviceablePincodes: data?.serviceablePincodes || '',
+                    deliveryFee: data?.deliveryFee || 0,
+                    minOrderAmount: data?.minOrderAmount || 0,
+                    freeDeliveryThreshold: data?.freeDeliveryThreshold || 0
                 });
 
                 if (data?.logoUrl) this.logoPreview = data.logoUrl;
-                if (data?.qrImageUrl) this.qrPreview = data.qrImageUrl;
+                if (data?.upiQrImageUrl) this.qrPreview = data.upiQrImageUrl; // ✅ Fix: Use correct field for preview
 
                 this.loading = false;
             },
-            error: (err) => {
+            error: (err: any) => {
                 console.error('Config load error', err);
                 this.loading = false;
             }
@@ -108,13 +107,13 @@ export class AdminSettingsComponent implements OnInit {
         if (file) {
             this.uploadingLogo = true;
             this.imageService.uploadImage(file).subscribe({
-                next: (res) => {
+                next: (res: any) => {
                     this.logoPreview = res.url;
                     this.configForm.patchValue({ logoUrl: res.url });
                     this.uploadingLogo = false;
                     this.toastr.success('Logo uploaded!');
                 },
-                error: () => {
+                error: (err: any) => {
                     this.toastr.error('Logo upload failed');
                     this.uploadingLogo = false;
                 }
@@ -127,13 +126,13 @@ export class AdminSettingsComponent implements OnInit {
         if (file) {
             this.uploadingQr = true;
             this.imageService.uploadImage(file).subscribe({
-                next: (res) => {
+                next: (res: any) => {
                     this.qrPreview = res.url;
                     this.configForm.patchValue({ qrImageUrl: res.url });
                     this.uploadingQr = false;
                     this.toastr.success('QR Code uploaded!');
                 },
-                error: () => {
+                error: (err: any) => {
                     this.toastr.error('QR upload failed');
                     this.uploadingQr = false;
                 }
@@ -145,7 +144,30 @@ export class AdminSettingsComponent implements OnInit {
         if (this.configForm.invalid) return;
 
         this.loading = true;
-        const payload = this.configForm.value;
+        const formValue = this.configForm.value;
+
+        // Map Form -> Backend DTO (TenantConfigRequest)
+        const payload = {
+            restaurantName: formValue.name,
+            description: formValue.description,
+            detailedDescription: formValue.detailedDescription,
+            logoUrl: formValue.logoUrl,
+
+            upiId: formValue.upiId,
+            upiQrImageUrl: formValue.qrImageUrl, // ✅ Fix: Map local 'qrImageUrl' to backend 'upiQrImageUrl'
+            defaultPaymentMode: formValue.defaultMode,
+
+            restaurantContact: formValue.contactPhone,
+            restaurantAddress: formValue.address,
+
+            // Delivery
+            isDeliveryEnabled: formValue.isDeliveryEnabled,
+            isAcceptingDelivery: formValue.isAcceptingDelivery,
+            serviceablePincodes: formValue.serviceablePincodes,
+            deliveryFee: formValue.deliveryFee,
+            minOrderAmount: formValue.minOrderAmount,
+            freeDeliveryThreshold: formValue.freeDeliveryThreshold
+        };
 
         this.configService.updateConfig(payload).subscribe({
             next: () => {
@@ -153,7 +175,7 @@ export class AdminSettingsComponent implements OnInit {
                 this.loading = false;
                 // Optionally update Auth User locally if name changed
             },
-            error: (err) => {
+            error: (err: any) => {
                 console.error('Save failed', err);
                 this.toastr.error('Failed to save settings');
                 this.loading = false;

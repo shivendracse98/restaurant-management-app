@@ -71,7 +71,8 @@ export class OrderService {
         menuItemId: i.menuItemId,
         qty: i.quantity || i.qty,
         name: i.itemName || i.name,
-        price: i.pricePerUnit || i.price
+        price: i.pricePerUnit || i.price,
+        status: i.status
       }))
     };
   }
@@ -223,14 +224,16 @@ export class OrderService {
   }
 
   updateOrder(id: number | string, data: any): Observable<any> {
-    // This generic update might not exist in backend, specifically update status
-    return this.http.patch<any>(`${this.apiUrl}/${id}/status`, null, { params: { status: data.status } }).pipe(
-      tap(() => {
-        // Optimistic update
+    // Correctly mapped to backend PUT update endpoint
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data).pipe(
+      tap((updatedOrder) => {
+        // Optimistic update (or response sync)
         const current = this.ordersSubject.value;
         const index = current.findIndex(o => o.id == id);
         if (index > -1) {
-          current[index] = { ...current[index], ...data };
+          // Merge backed response to ensure consistency
+          const mapped = this.mapBackendOrderToFrontend(updatedOrder);
+          current[index] = mapped;
           this.ordersSubject.next([...current]);
         }
       })
