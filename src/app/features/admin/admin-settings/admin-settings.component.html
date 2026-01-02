@@ -125,6 +125,72 @@
                 </div>
             </div>
 
+
+            <!-- CARD 4: DELIVERY MANAGEMENT -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2>🚚 Delivery Settings</h2>
+                    <p>Manage fees and delivery areas</p>
+                </div>
+                <div class="card-body">
+
+                    <!-- Master Delivery Toggle -->
+                    <div class="form-group mb-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <label class="mb-0 font-weight-bold">Enable Delivery Feature</label>
+                                <small class="hint d-block">Turn on to allow customers to choose delivery at
+                                    checkout.</small>
+                            </div>
+                            <mat-slide-toggle formControlName="isDeliveryEnabled" color="primary"></mat-slide-toggle>
+                        </div>
+                    </div>
+
+                    <!-- Operational Toggle -->
+                    <div class="form-group mb-3" *ngIf="configForm.get('isDeliveryEnabled')?.value">
+                        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded">
+                            <div>
+                                <label class="mb-0">Currently Accepting Delivery Orders?</label>
+                                <small class="text-muted d-block">Turn off temporarily if you are too busy or weather is
+                                    bad.</small>
+                            </div>
+                            <mat-slide-toggle formControlName="isAcceptingDelivery" color="warn"></mat-slide-toggle>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <!-- Delivery Fee -->
+                        <div class="col">
+                            <label>Base Delivery Fee (₹)</label>
+                            <input type="number" formControlName="deliveryFee" min="0">
+                        </div>
+                        <!-- Min Order -->
+                        <div class="col">
+                            <label>Min Order Value (₹)</label>
+                            <input type="number" formControlName="minOrderAmount" min="0">
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <!-- Free Delivery Threshold -->
+                        <div class="col">
+                            <label>Free Delivery Above (₹)</label>
+                            <input type="number" formControlName="freeDeliveryThreshold" min="0">
+                            <small class="hint">Set to 0 to disable free delivery.</small>
+                        </div>
+                    </div>
+
+                    <!-- Serviceable Pincodes -->
+                    <div class="form-group mt-3">
+                        <label>Serviceable Pincodes (Comma Separated)</label>
+                        <textarea formControlName="serviceablePincodes" rows="2"
+                            placeholder="e.g. 560001, 560037, 560102"></textarea>
+                        <small class="hint">Leave empty to allow ALL pincodes (Not recommended).</small>
+                    </div>
+
+                </div>
+            </div>
+
             <!-- ACTIONS -->
             <div class="actions">
                 <button type="submit" class="btn btn-primary btn-lg"

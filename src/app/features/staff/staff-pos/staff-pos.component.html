@@ -404,7 +404,12 @@
                 {{ o.items?.length || 0 }} items
                 <span class="items-tooltip">
                   <div *ngFor="let i of o.items">
-                    {{ i.qty || i.quantity }}x {{ i.name || i.itemName }}
+                    <span [style.color]="i.status === 'PREPARING' ? '#E67E22' : '#27AE60'"
+                      [style.fontWeight]="i.status === 'PREPARING' ? 'bold' : 'normal'">
+                      {{ i.qty || i.quantity }}x {{ i.name || i.itemName }}
+                      <small *ngIf="i.status === 'PREPARING'"> (🕒 Prep)</small>
+                      <small *ngIf="i.status === 'READY'"> (✅ Ready)</small>
+                    </span>
                   </div>
                 </span>
               </div>

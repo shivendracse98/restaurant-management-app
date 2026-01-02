@@ -61,6 +61,26 @@
         </select>
       </div>
 
+      <!-- Pincode Input (Only if Delivery) -->
+      <div class="form-group" *ngIf="form.get('orderType')?.value === 'DELIVERY'">
+        <label>📮 Pincode *</label>
+        <input type="text" formControlName="deliveryPincode" placeholder="e.g. 560001" maxlength="6"
+          class="form-control" />
+        <small *ngIf="form.get('deliveryPincode')?.hasError('required') && form.get('deliveryPincode')?.touched"
+          class="error">
+          Pincode is required
+        </small>
+        <small *ngIf="form.get('deliveryPincode')?.hasError('pattern') && form.get('deliveryPincode')?.touched"
+          class="error">
+          Enter valid 6-digit pincode
+        </small>
+      </div>
+
+      <!-- Delivery Unavailable Warning -->
+      <div class="alert alert-danger" *ngIf="form.get('orderType')?.value === 'DELIVERY' && deliveryError">
+        🛑 {{ deliveryError }}
+      </div>
+
       <!-- Order Summary -->
       <div class="order-summary">
         <h3>Order Summary</h3>
@@ -68,6 +88,13 @@
           <div *ngFor="let item of cart.items" class="item-line">
             <span>{{ item.menuItem.name }} × {{ item.qty }}</span>
             <span>₹{{ (item.menuItem.price * item.qty).toFixed(2) }}</span>
+          </div>
+
+          <!-- Delivery Fee Line -->
+          <div *ngIf="form.get('orderType')?.value === 'DELIVERY'" class="item-line fee-line">
+            <span>🚚 Delivery Fee</span>
+            <span *ngIf="deliveryFee > 0">₹{{ deliveryFee }}</span>
+            <span *ngIf="deliveryFee === 0" class="text-success">FREE</span>
           </div>
         </div>
         <div class="summary-total">
