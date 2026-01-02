@@ -361,9 +361,10 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     if (tableNum > 0) {
       existingOrder = this.ongoingOrders.find(o =>
         Number(o.tableNumber) === tableNum &&
-        // Fix: Allow appending even if DELIVERED (Served), as long as not fully closed (PAID/COMPLETED)
         o.status !== 'PAID' &&
         o.status !== 'COMPLETED'
+      ) || this.unpaidOrders.find(o =>
+        Number(o.tableNumber) === tableNum
       );
     }
 
