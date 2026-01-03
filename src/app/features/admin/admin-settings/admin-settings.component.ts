@@ -163,7 +163,7 @@ export class AdminSettingsComponent implements OnInit {
             // Delivery
             isDeliveryEnabled: formValue.isDeliveryEnabled,
             isAcceptingDelivery: formValue.isAcceptingDelivery,
-            serviceablePincodes: formValue.serviceablePincodes,
+            serviceablePincodes: formValue.serviceablePincodes ? formValue.serviceablePincodes.trim() : '',
             deliveryFee: formValue.deliveryFee,
             minOrderAmount: formValue.minOrderAmount,
             freeDeliveryThreshold: formValue.freeDeliveryThreshold

@@ -1,0 +1,275 @@
+/* ================= POS ORDER TAKING COMPONENT ================= */
+.pos-order-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    height: 100%;
+}
+
+/* ========== 1. SEARCH & MANAGE BAR ========== */
+.menu-header {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    .search-bar {
+        flex: 1;
+        display: flex;
+
+        .search-input {
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            border: 2px solid #E67E22;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: #FFF8E7;
+            transition: all 0.25s;
+            font-weight: 500;
+
+            &::placeholder {
+                color: #ccc;
+            }
+
+            &:focus {
+                outline: none;
+                border-color: #27AE60;
+                background: white;
+                box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+            }
+        }
+    }
+
+    .manage-btn {
+        padding: 0.65rem 1rem;
+        background: #3498DB;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s;
+
+        &:active {
+            transform: scale(0.96);
+        }
+    }
+}
+
+/* ========== 2. MANAGE WARNING ========== */
+.manage-warning {
+    background: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #ffcdd2;
+    font-size: 0.9rem;
+    animation: fadeIn 0.3s ease;
+}
+
+/* ========== 3. MENU GRID ========== */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.25rem;
+    padding-bottom: 80px;
+    /* Space for FAB */
+
+    .menu-item {
+        position: relative;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: 220px;
+        border: 1.5px solid #F5F5F5;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+
+        &.out-of-stock {
+            filter: grayscale(1);
+        }
+
+        /* OOS Overlay */
+        .oos-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            pointer-events: none;
+
+            span {
+                background: #c62828;
+                color: white;
+                padding: 4px 10px;
+                font-size: 0.8rem;
+                font-weight: bold;
+                border-radius: 4px;
+                transform: rotate(-10deg);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(230, 126, 34, 0.15);
+            border-color: #E67E22;
+
+            .btn.add {
+                background: #D97706;
+                transform: scale(1.02);
+            }
+        }
+
+        img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .meta {
+            padding: 0.6rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            .name {
+                font-weight: 700;
+                color: #222;
+                font-size: 0.9rem;
+                line-height: 1.2;
+                margin-bottom: 0.15rem;
+            }
+
+            .category {
+                font-size: 0.75rem;
+                color: #999;
+                margin-bottom: 0.3rem;
+                font-weight: 500;
+            }
+
+            .price {
+                color: #27AE60;
+                font-weight: 800;
+                font-size: 1.1rem;
+                margin-top: auto;
+            }
+        }
+
+        .btn.add {
+            width: 100%;
+            padding: 0.6rem;
+            background: #27AE60;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.25s;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+
+            &:active {
+                transform: scale(0.96);
+            }
+        }
+    }
+}
+
+/* ========== 4. FAB CART BAR ========== */
+.fab-cart-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2D3E50;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 90%;
+    max-width: 400px;
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.2s, bottom 0.2s;
+    animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    &:hover {
+        transform: translateX(-50%) scale(1.03);
+        bottom: 22px;
+    }
+
+    &:active {
+        transform: translateX(-50%) scale(0.98);
+    }
+
+    .fab-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+
+        .count {
+            background: #E67E22;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        .pipe {
+            opacity: 0.5;
+        }
+
+        .total {
+            font-size: 1.1rem;
+            color: #2ecc71;
+        }
+    }
+
+    .fab-action {
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+}
+
+@keyframes popUp {
+    from {
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

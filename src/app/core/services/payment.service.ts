@@ -44,6 +44,7 @@ export interface PaymentStats {
 })
 export class PaymentService {
   private apiUrl = `${environment.apiBaseUrl}/payments`;
+  private backendUrl = `${environment.apiBaseUrl}`; // For legacy access if needed or just use apiUrl
   private paymentsSubject = new BehaviorSubject<Payment[]>([]);
   public payments$ = this.paymentsSubject.asObservable();
 
@@ -482,6 +483,32 @@ export class PaymentService {
    */
   getUpiId(): string {
     return this.UPI_ID;
+  }
+
+  /**
+   * ============================================
+   * GATEWAY INTEGRATION (Razorpay)
+   * ============================================
+   */
+
+  /**
+   * Initiate a Payment Transaction
+   * Calls POST /api/payments/initiate
+   */
+  initiateTransaction(orderId: string | number, amount: number): Observable<any> {
+    const payload = { orderId, amount };
+    // headers should include X-Restaurant-Id, handled by Interceptor or add explicitly if needed?
+    // Using default TenantInterceptor strategy if exists.
+    return this.http.post<any>(`${this.apiUrl}/initiate`, payload);
+  }
+
+  /**
+   * Verify a Payment Transaction
+   * Calls POST /api/payments/verify
+   */
+  verifyTransaction(gatewayOrderId: string, gatewayPaymentId: string, signature: string): Observable<any> {
+    const payload = { gatewayOrderId, gatewayPaymentId, signature };
+    return this.http.post<any>(`${this.apiUrl}/verify`, payload);
   }
 
   /**

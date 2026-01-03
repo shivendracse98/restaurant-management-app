@@ -1,0 +1,92 @@
+<div class="pos-ongoing-container">
+
+    <!-- 1. Header & Sort -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3>⏳ Ongoing Orders</h3>
+        <select [ngModel]="sortOption()" (ngModelChange)="sortOption.set($event)"
+            style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="newest">📅 Newest First</option>
+            <option value="oldest">📅 Oldest First</option>
+            <option value="customer_asc">👤 Customer (A-Z)</option>
+            <option value="customer_desc">👤 Customer (Z-A)</option>
+        </select>
+    </div>
+
+    <!-- 2. Table Wrapper -->
+    <div class="table-wrapper">
+        <table class="orders-table" *ngIf="sortedOrders.length > 0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Table/Customer</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let o of sortedOrders">
+                    <td>#{{ o.id }}</td>
+                    <td>
+                        <span *ngIf="o.tableNumber" class="badge table-badge">Table {{ o.tableNumber }}</span>
+                        <!-- Shared Table Fix: Show Customer Name always -->
+                        <div style="font-weight: 500; font-size: 0.9em; margin-top: 2px;">
+                            {{ o.customerName || 'Guest' }}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="items-summary">
+                            {{ o.items?.length || 0 }} items
+                            <span class="items-tooltip">
+                                <div *ngFor="let i of o.items">
+                                    <span [style.color]="i.status === 'PREPARING' ? '#E67E22' : '#27AE60'"
+                                        [style.fontWeight]="i.status === 'PREPARING' ? 'bold' : 'normal'">
+                                        {{ i.qty || i.quantity }}x {{ i.name || i.itemName }}
+                                        <small *ngIf="i.status === 'PREPARING'"> (🕒 Prep)</small>
+                                        <small *ngIf="i.status === 'READY'"> (✅ Ready)</small>
+                                    </span>
+                                </div>
+                            </span>
+                        </div>
+                    </td>
+                    <td class="total-cell">₹{{ o.totalAmount || o.total }}</td>
+                    <td>
+                        <span class="badge" [class.badge-pending]="o.status === 'PENDING' || o.status === 'PREPARING'"
+                            [class.badge-ready]="o.status === 'READY' || o.status === 'PREPARED'"
+                            [class.badge-delivered]="o.status === 'DELIVERED'">
+                            {{ o.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn share-btn"
+                            style="margin-right: 5px; background-color: #3498DB; color: white;"
+                            (click)="shareBill.emit(o)" title="View & Share Bill">
+                            <i class="fa fa-file-text-o"></i> View Bill
+                        </button>
+                        <button class="btn primary-btn" (click)="openEdit.emit(o)">Edit</button>
+                        <button class="btn primary-btn"
+                            style="margin-left: 5px; background-color: #9C27B0; border-color: #9C27B0;"
+                            *ngIf="o.status === 'PENDING' || o.status === 'PREPARING' || o.status === 'READY'"
+                            (click)="markAsServed.emit(o)">
+                            Serve
+                        </button>
+                        <button class="btn primary-btn"
+                            style="margin-left: 5px; background-color: #E67E22; border-color: #E67E22;"
+                            *ngIf="o.paymentStatus !== 'COMPLETED' && o.paymentStatus !== 'PAID'"
+                            (click)="openPayment.emit(o)">
+                            Pay
+                        </button>
+                        <button class="btn primary-btn"
+                            style="margin-left: 5px; background-color: #27AE60; border-color: #27AE60; cursor: default;"
+                            *ngIf="o.paymentStatus === 'COMPLETED' || o.paymentStatus === 'PAID'" disabled>
+                            ✅ Paid
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p *ngIf="sortedOrders.length === 0" class="no-data">No ongoing orders right now</p>
+</div>

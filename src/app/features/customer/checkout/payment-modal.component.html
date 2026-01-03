@@ -13,6 +13,10 @@
       <button [class.active]="paymentMethod === 'QR_CODE'" (click)="paymentMethod = 'QR_CODE'" class="method-tab">
         📲 QR Code
       </button>
+      <button [class.active]="paymentMethod === 'RAZORPAY'" (click)="paymentMethod = 'RAZORPAY'" class="method-tab"
+        style="background: #e3f2fd; color: #1976d2; border-color: #1976d2;">
+        💳 Pay Online
+      </button>
       <button [class.active]="paymentMethod === 'UPI'" (click)="paymentMethod = 'UPI'" class="method-tab">
         📱 UPI Ref
       </button>
@@ -26,7 +30,8 @@
   <div class="modal-content">
 
     <!-- Platform Fee Waiver Banner -->
-    <div *ngIf="paymentMethod !== 'CASH' && !paymentSubmitted" class="fee-waiver-banner">
+    <div *ngIf="paymentMethod !== 'CASH' && paymentMethod !== 'RAZORPAY' && !paymentSubmitted"
+      class="fee-waiver-banner">
       <mat-icon>verified_user</mat-icon>
       <span>Upload Payment Proof to <strong>WAIVE ₹10 Platform Fee!</strong></span>
     </div>
@@ -62,6 +67,21 @@
       </div>
     </div>
 
+    <!-- RAZORPAY Method -->
+    <div *ngIf="paymentMethod === 'RAZORPAY' && !paymentSubmitted" class="payment-section razorpay-section">
+      <div class="counter-pay-icon" style="color: #1976d2; background: #e3f2fd;">
+        <mat-icon>security</mat-icon>
+      </div>
+      <h3>Secure Online Payment</h3>
+      <p>Pay via UPI, Cards, or Netbanking securely.</p>
+
+      <div class="trust-badges"
+        style="display: flex; gap: 10px; justify-content: center; margin-top: 10px; opacity: 0.7;">
+        <span>🔒 100% Secure</span>
+        <span>⚡ Instant Verification</span>
+      </div>
+    </div>
+
     <!-- PAY AT COUNTER Method -->
     <div *ngIf="paymentMethod === 'CASH' && !paymentSubmitted" class="payment-section cash-section">
       <div class="counter-pay-icon">
@@ -94,6 +114,13 @@
     <button *ngIf="!paymentSubmitted" (click)="cancelPayment()" type="button" [disabled]="processing"
       class="btn btn-secondary">
       Cancel
+    </button>
+
+    <!-- Razorpay Submit -->
+    <button *ngIf="paymentMethod === 'RAZORPAY' && !paymentSubmitted" (click)="submitOnlinePayment()" type="button"
+      [disabled]="processing" class="btn btn-primary" style="background: #1976d2;">
+      <span *ngIf="!processing">Proceed to Pay ₹{{ data.amount }}</span>
+      <span *ngIf="processing">⏳ Processing...</span>
     </button>
 
     <!-- QR/UPI Submit (Requires Proof) -->
