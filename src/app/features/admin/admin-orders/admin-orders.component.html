@@ -94,8 +94,10 @@
                 <option value="CONFIRMED">Confirmed</option>
                 <option value="PREPARING">Preparing</option>
                 <option value="READY">Ready</option>
+                @if (featureFlagStore.isFeatureEnabled('DELIVERY_MANAGEMENT')) {
                 <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
                 <option value="DELIVERED">Delivered</option>
+                }
                 <option value="CANCELLED">Cancelled</option>
               </select>
             </div>

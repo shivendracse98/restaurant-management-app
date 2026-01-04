@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +25,8 @@ export class PendingPaymentsComponent implements OnInit {
   pendingPayments: any[] = [];
   loading = false;
 
+  @ViewChild('paymentsTable') paymentsTableRef!: ElementRef;
+
   // 1. New filter logic
   currentFilter: 'PENDING' | 'APPROVED' | 'REJECTED' | 'ALL' = 'PENDING';
   allOrdersCache: any[] = [];
@@ -48,6 +50,13 @@ export class PendingPaymentsComponent implements OnInit {
   setFilter(filter: 'PENDING' | 'APPROVED' | 'REJECTED'): void {
     this.currentFilter = filter;
     this.applyFilter();
+
+    // Scroll to table only if it exists
+    setTimeout(() => {
+      if (this.paymentsTableRef?.nativeElement) {
+        this.paymentsTableRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
 
   loadPendingPayments(): void {

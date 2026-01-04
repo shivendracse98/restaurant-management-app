@@ -2,40 +2,54 @@
   <!-- Statistics -->
   <!-- Statistics -->
   <div class="stats-section" *ngIf="stats">
-    <div class="stat-card" (click)="setFilter('PENDING')" [class.active]="currentFilter === 'PENDING'"
-      style="cursor: pointer;">
-      <div class="stat-value">{{ stats.pendingApprovals }}</div>
-      <div class="stat-label">Pending Approvals</div>
+    <div class="stat-card pending" (click)="setFilter('PENDING')" [class.active]="currentFilter === 'PENDING'">
+      <div class="icon">⏳</div>
+      <div class="content">
+        <div class="stat-value">{{ stats.pendingApprovals }}</div>
+        <div class="stat-label">Pending Approvals</div>
+      </div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-value">₹{{ stats.totalRevenue }}</div>
-      <div class="stat-label">Total Revenue</div>
+    <div class="stat-card revenue">
+      <div class="icon">💰</div>
+      <div class="content">
+        <div class="stat-value">₹{{ stats.totalRevenue }}</div>
+        <div class="stat-label">Total Revenue</div>
+      </div>
     </div>
 
-    <div class="stat-card" (click)="setFilter('APPROVED')" [class.active]="currentFilter === 'APPROVED'"
-      style="cursor: pointer;">
-      <div class="stat-value">{{ stats.successfulTransactions }}</div>
-      <div class="stat-label">Approved</div>
+    <div class="stat-card approved" (click)="setFilter('APPROVED')" [class.active]="currentFilter === 'APPROVED'">
+      <div class="icon">✅</div>
+      <div class="content">
+        <div class="stat-value">{{ stats.successfulTransactions }}</div>
+        <div class="stat-label">Approved</div>
+      </div>
     </div>
 
-    <div class="stat-card" (click)="setFilter('REJECTED')" [class.active]="currentFilter === 'REJECTED'"
-      style="cursor: pointer;">
-      <div class="stat-value">{{ stats.failedTransactions }}</div>
-      <div class="stat-label">Rejected</div>
+    <div class="stat-card rejected" (click)="setFilter('REJECTED')" [class.active]="currentFilter === 'REJECTED'">
+      <div class="icon">❌</div>
+      <div class="content">
+        <div class="stat-value">{{ stats.failedTransactions }}</div>
+        <div class="stat-label">Rejected</div>
+      </div>
     </div>
   </div>
 
   <!-- Header -->
   <div class="header">
-    <h2>💳 Pending Payment Approvals</h2>
+    <div>
+      <h2>💳 Payment Requests</h2>
+      <p class="subtitle">Manage customer proofs and verify transactions.</p>
+    </div>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading">Loading...</div>
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+  </div>
 
   <!-- Table -->
-  <div class="table-section" *ngIf="!loading">
+  <div class="table-section" *ngIf="!loading" #paymentsTable>
     <div class="table-wrapper">
       <table class="payments-table" *ngIf="pendingPayments.length > 0">
         <thead>

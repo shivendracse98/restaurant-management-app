@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Added for ngModel binding
 import { OrderService } from '../../../core/services/order.service';
 import { Subject, timer } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
+import { FeatureFlagStore } from '../../../core/feature-flag/feature-flag.store';
 
 @Component({
   selector: 'app-admin-orders',
@@ -19,9 +20,13 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   sortOption: string = 'newest';
   selectedDate: string | null = null; // 📅 New Property
 
+  readonly featureFlagStore = inject(FeatureFlagStore);
   private destroy$ = new Subject<void>();
 
-  constructor(private orderService: OrderService) { }
+  constructor(private orderService: OrderService) {
+    // Load flags early to have them available for templates
+    this.featureFlagStore.loadFlags();
+  }
 
   ngOnInit(): void {
     this.pollOrders();

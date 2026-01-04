@@ -162,22 +162,16 @@ export class OrderService {
   }
 
   createOrder(order: any): Observable<any> {
-    // Pack metadata into notes since backend API lacks these fields
-    const metadata = {
-      customerName: order.customerName,
-      customerPhone: order.customerPhone,
-      customerEmail: order.customerEmail, // ✅ Persist Email in Notes
-      tableNumber: order.tableNumber,
-      orderType: order.orderType,
-      address: order.address,
-      restaurantId: order.restaurantId,
-      originalNotes: order.notes // Keep real notes if any
-    };
-
     // Map frontend model to API request model
     const payload = {
       customerId: order.userId, // ✅ Send User ID to link order
       restaurantId: order.restaurantId, // ✅ Send Tenant ID explicitly
+      tableNumber: order.tableNumber,
+      customerName: order.customerName,
+      customerPhone: order.customerPhone,
+      deliveryAddress: order.deliveryAddress || order.address, // Support both formats
+      deliveryPincode: order.deliveryPincode || order.pincode, // Support both formats
+      orderType: order.orderType,
       items: order.items.map((i: any) => ({
         menuItemId: i.menuItemId || i.id, // Handle both cases safely
         itemName: i.name || i.itemName, // Handle both name fields
@@ -186,7 +180,7 @@ export class OrderService {
         subtotal: i.qty * i.price
       })),
       totalAmount: order.total,
-      notes: JSON.stringify(metadata)
+      notes: order.notes // Send original notes directly
     };
 
     if (this.networkService.isOnline) {
@@ -195,7 +189,9 @@ export class OrderService {
           // Map Backend DTO to Frontend Model
           return {
             ...newOrder,
-            ...metadata,
+            // Map backend fields back to frontend model names
+            address: newOrder.deliveryAddress || order.address,
+            pincode: newOrder.deliveryPincode || order.pincode,
             total: newOrder.totalAmount || payload.totalAmount,
             // Ensure items are also mapped
             items: (newOrder.items || payload.items).map((i: any) => ({
@@ -224,8 +220,20 @@ export class OrderService {
   }
 
   updateOrder(id: number | string, data: any): Observable<any> {
-    // Correctly mapped to backend PUT update endpoint
-    return this.http.put<any>(`${this.apiUrl}/${id}`, data).pipe(
+    // Map frontend model to API request model
+    const payload = {
+      ...data,
+      restaurantId: data.restaurantId || this.tenantService.getTenantId(), // Ensure tenant ID
+      items: (data.items || []).map((i: any) => ({
+        menuItemId: i.menuItemId || i.id,
+        itemName: i.name || i.itemName, // Map name -> itemName
+        quantity: i.qty || i.quantity,
+        pricePerUnit: i.price || i.pricePerUnit,
+        subtotal: (i.qty || i.quantity) * (i.price || i.pricePerUnit)
+      }))
+    };
+
+    return this.http.put<any>(`${this.apiUrl}/${id}`, payload).pipe(
       tap((updatedOrder) => {
         // Optimistic update (or response sync)
         const current = this.ordersSubject.value;

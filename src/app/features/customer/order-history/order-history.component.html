@@ -49,23 +49,33 @@
     </ng-container>
 
     <!-- RATING MODAL -->
+    <!-- RATING MODAL -->
     <div class="modal-backdrop" *ngIf="showRateModal" (click)="closeRateModal()">
         <div class="modal" (click)="$event.stopPropagation()">
             <div class="modal-header">
-                <h3>⭐ Rate Order #{{ selectedOrder?.id }}</h3>
+                <h3>Rate Order #{{ selectedOrder?.id }}</h3>
                 <button class="close-btn" (click)="closeRateModal()">×</button>
             </div>
             <div class="modal-body">
-                <div class="star-rating">
-                    <span *ngFor="let star of [1,2,3,4,5]" (click)="rating = star" [class.filled]="star <= rating">
-                        ★
-                    </span>
+                <div class="star-rating-container">
+                    <div class="stars">
+                        <span *ngFor="let star of [1,2,3,4,5]" class="star-icon" [class.filled]="rating >= star"
+                            (click)="rating = star" (mouseenter)="hoverRating = star" (mouseleave)="hoverRating = 0">
+                            ★
+                        </span>
+                    </div>
+                    <div class="rating-label">
+                        {{ getRatingLabel(hoverRating || rating) }}
+                    </div>
                 </div>
-                <textarea [(ngModel)]="reviewComment" placeholder="Tell us about your experience..."
-                    rows="3"></textarea>
+
+                <textarea [(ngModel)]="reviewComment" placeholder="How was the food? Tell us about your experience..."
+                    rows="4"></textarea>
+
                 <div class="modal-actions">
-                    <button class="btn" (click)="closeRateModal()">Cancel</button>
-                    <button class="btn btn-primary" (click)="submitReview()" [disabled]="rating === 0">Submit</button>
+                    <button (click)="closeRateModal()">Cancel</button>
+                    <button class="btn-primary" (click)="submitReview()" [disabled]="rating === 0">Submit
+                        Review</button>
                 </div>
             </div>
         </div>

@@ -8,25 +8,24 @@ import { GlobalErrorHandler } from './core/handlers/global-error.handler';
 
 import { routes } from './app.routes';
 import { provideServiceWorker } from '@angular/service-worker';
-
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
-    { provide: ErrorHandler, useClass: GlobalErrorHandler },
-    provideRouter(routes),
-    provideAnimations(),
-    provideHttpClient(withInterceptors([coreInterceptor])),
-    provideToastr({
-        timeOut: 3000,
-        positionClass: 'toast-top-right',
-        preventDuplicates: true,
-        progressBar: true,
-        closeButton: true,
-        newestOnTop: true
-    }),
-    provideServiceWorker('ngsw-worker.js', {
-        enabled: !isDevMode(),
-        registrationStrategy: 'registerWhenStable:30000'
-    })
-]
+    providers: [
+        provideZoneChangeDetection({ eventCoalescing: true }),
+        { provide: ErrorHandler, useClass: GlobalErrorHandler },
+        provideRouter(routes),
+        provideAnimations(),
+        provideHttpClient(withInterceptors([coreInterceptor])),
+        provideToastr({
+            timeOut: 3000,
+            positionClass: 'toast-top-right',
+            preventDuplicates: true,
+            progressBar: true,
+            closeButton: true,
+            newestOnTop: true
+        }),
+        provideServiceWorker('ngsw-worker.js', {
+            enabled: !isDevMode(),
+            registrationStrategy: 'registerWhenStable:30000'
+        })
+    ]
 };

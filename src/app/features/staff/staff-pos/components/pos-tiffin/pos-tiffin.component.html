@@ -1,0 +1,134 @@
+<div class="pos-tiffin-container">
+    <h3>🍱 Tiffin Subscriptions</h3>
+
+    <!-- 1. Tiffin Subscription Form & Pricing -->
+    <div class="tiffin-workspace" style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px;">
+
+        <!-- Form Panel -->
+        <form [formGroup]="tiffinForm" class="tiffin-form">
+            <h4 style="grid-column: 1 / -1; margin-top: 0;">New Subscription</h4>
+
+            <div class="form-row">
+                <label>Customer Name</label>
+                <input type="text" formControlName="customerName" placeholder="Full Name" />
+            </div>
+            <div class="form-row">
+                <label>Mobile Number</label>
+                <input type="tel" formControlName="customerPhone" placeholder="10-digit Mobile" />
+            </div>
+
+            <div class="form-row" style="grid-column: 1 / -1;">
+                <label>Delivery Address</label>
+                <textarea formControlName="address" rows="2" placeholder="Flat No, Building, Landmark"></textarea>
+            </div>
+
+            <div class="form-row">
+                <label>Select Plan (Menu Item)</label>
+                <select formControlName="menuItemId">
+                    <option [ngValue]="null">-- Select Tiffin Plan --</option>
+                    <option *ngFor="let m of tiffinMenuItems()" [value]="m.id">{{ m.name }} (₹{{ m.price }}/day)
+                    </option>
+                </select>
+                <small *ngIf="tiffinMenuItems().length === 0" style="color: red;">No 'TIFFIN' category items found in
+                    menu.</small>
+            </div>
+
+            <div class="form-row">
+                <label>Duration (Months)</label>
+                <input type="number" formControlName="durationMonths" min="1" max="12" />
+            </div>
+
+            <button type="button" class="btn primary-btn" style="grid-column: 1 / -1; margin-top: 10px;"
+                (click)="onCreate()" [disabled]="tiffinForm.invalid || !tiffinCalculation">
+                Create Subscription
+            </button>
+        </form>
+
+        <!-- Pricing Preview Panel -->
+        <div *ngIf="tiffinCalculation" class="pricing-card"
+            style="width: 300px; background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9;">
+            <h4 style="margin-top: 0; color: #1565c0;">💰 Price Breakdown</h4>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span>Daily Rate:</span>
+                <strong>₹{{ tiffinCalculation.dailyPrice }}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span>Duration:</span>
+                <span>{{ tiffinCalculation.months }} Month(s)</span>
+            </div>
+            <hr style="border-color: #bbdefb;">
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #757575;">
+                <span>Standard (30 days/mo):</span>
+                <span style="text-decoration: line-through;">₹{{ tiffinCalculation.dailyPrice * 30 *
+                    tiffinCalculation.months
+                    }}</span>
+            </div>
+
+            <div
+                style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #2e7d32; font-weight: bold;">
+                <span>Pro Deal (28 days/mo):</span>
+                <span>₹{{ tiffinCalculation.finalPrice }}</span>
+            </div>
+
+            <div
+                style="margin-top: 10px; background: #c8e6c9; color: #1b5e20; padding: 8px; border-radius: 4px; text-align: center; font-size: 0.9em;">
+                🎉 You save <strong>₹{{ tiffinCalculation.saved }}</strong>!<br>
+                <small>(2 Free Meals / Month)</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Tiffin List -->
+    <div class="table-wrapper">
+        <table class="orders-table" *ngIf="subscriptions().length > 0">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Customer</th>
+                    <th>Plan</th>
+                    <th>Dates (Start - End)</th>
+                    <th>Max Extension</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let s of subscriptions()">
+                    <td>
+                        <span class="badge" [class.badge-ready]="s.status === 'ACTIVE'"
+                            [class.badge-pending]="s.status === 'PAUSED'">
+                            {{ s.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {{ s.customerName }}<br>
+                        <small>{{ s.customerPhone }}</small>
+                    </td>
+                    <td>
+                        {{ s.menuItemName || 'Tiffin' }}<br>
+                        <small>₹{{ s.finalAmount }} / {{ s.durationMonths }} mo</small>
+                    </td>
+                    <td>
+                        {{ s.startDate | date:'shortDate' }} - {{ s.endDate | date:'shortDate' }}
+                        <div *ngIf="s.status === 'PAUSED'" style="color: red; font-size: 0.8em;">
+                            Paused since: {{ s.pausedAt | date:'medium' }}
+                        </div>
+                    </td>
+                    <td>
+                        <span style="color: #d32f2f;">{{ s.maxEndDate | date:'shortDate' }}</span>
+                    </td>
+                    <td>
+                        <button class="btn primary-btn" style="padding: 5px 10px; font-size: 0.9em;"
+                            [style.background-color]="s.status === 'ACTIVE' ? '#fbc02d' : '#4caf50'"
+                            (click)="toggleStatus.emit(s)">
+                            {{ s.status === 'ACTIVE' ? '⏸ Pause' : '▶ Resume' }}
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p *ngIf="subscriptions().length === 0" class="no-data">No active subscriptions</p>
+</div>

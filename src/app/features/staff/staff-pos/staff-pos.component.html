@@ -83,60 +83,13 @@
 
   <!-- ========== TAKE ORDER TAB ========== -->
   <div *ngIf="activeTab === 'ORDER'" class="pos-layout">
-    <!-- ... content ... -->
-    <!-- (Using existing structure indirectly by not replacing it, just ensuring context match) -->
-    <!-- Wait, replacing larger block for safety -->
-    <div class="menu-section">
-      <div class="search-bar" style="display: flex; gap: 10px;">
-        <input type="text" [(ngModel)]="searchTerm" placeholder="🔍 Search menu or category..." class="search-input" />
-        <button class="btn" [class.primary-btn]="!isManageMode" [class.share-btn]="isManageMode"
-          [style.background-color]="isManageMode ? '#E74C3C' : '#3498DB'" (click)="isManageMode = !isManageMode">
-          {{ isManageMode ? 'Done Managing' : 'Manage Stock' }}
-        </button>
-      </div>
-      <div *ngIf="isManageMode"
-        style="background: #ffebee; color: #c62828; padding: 10px; margin-bottom: 10px; border-radius: 4px; text-align: center; border: 1px solid #ffcdd2;">
-        ⚠️ <strong>Manage Mode Active</strong>: Tap items to toggle In Stock / Out of Stock
-      </div>
+    <app-pos-order-taking [menuItems]="menuItems" [orderForm]="orderForm" [isLoading]="isLoading"
+      [isManageMode]="isManageMode" (placeOrderTrigger)="toggleCart()" (addToCart)="addItem($event)"
+      (toggleStock)="addItem($event)" (removeFromCartInput)="removeItemFromOrder($event)"
+      (clearCartTrigger)="clearCart()">
+    </app-pos-order-taking>
 
-      <div class="menu-grid">
-        <div class="menu-item" *ngFor="let item of filteredMenu; trackBy: trackByItem"
-          [class.out-of-stock]="item.isAvailable === false" [style.opacity]="item.isAvailable === false ? '0.6' : '1'">
-
-          <div *ngIf="item.isAvailable === false"
-            style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; z-index: 1; pointer-events: none;">
-            <span
-              style="background: red; color: white; padding: 2px 8px; font-size: 0.8rem; border-radius: 4px; transform: rotate(-10deg);">OUT
-              OF STOCK</span>
-          </div>
-
-          <img [src]="item.imageUrl" [alt]="item.name" />
-          <div class="meta">
-            <div class="name">{{ item.name }}</div>
-            <div class="category">{{ item.category }}</div>
-            <div class="price">₹{{ item.price }}</div>
-          </div>
-          <button class="btn add" (click)="addItem(item)"
-            [style.background-color]="isManageMode ? (item.isAvailable !== false ? '#E74C3C' : '#27AE60') : ''">
-            {{ isManageMode ? (item.isAvailable !== false ? '🚫 Disable' : '✅ Enable') : '+ Add' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- FAB: Floating Cart Bar (Mobile/Standard) -->
-    <div class="fab-cart-bar" *ngIf="cartItems.length > 0" (click)="toggleCart()">
-      <div class="fab-info">
-        <span class="count">{{ cartItems.length }} Item(s)</span>
-        <span class="pipe">|</span>
-        <span class="total">₹{{ getTotal(cartItems) }}</span>
-      </div>
-      <div class="fab-action">
-        View Cart 🛒
-      </div>
-    </div>
-
-    <!-- CART MODAL (Instead of sticky side) -->
+    <!-- CART MODAL (Kept in Parent as it manages the Form + Submission Logic) -->
     <div class="modal-backdrop" *ngIf="showCartModal" (click)="toggleCart()">
       <div class="modal cart-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -231,226 +184,19 @@
     <p *ngIf="onlineOrders.length === 0" class="no-data">No pending online orders! 🎉</p>
   </div>
 
-
-
   <!-- ========== TIFFIN TAB ========== -->
   <div *ngIf="activeTab === 'TIFFIN'" class="tab-content">
-    <h3>🍱 Tiffin Subscriptions</h3>
-
-    <!-- Professional Tiffin Subscription Form -->
-    <div class="tiffin-container" style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px;">
-
-      <!-- Form Panel -->
-      <form [formGroup]="tiffinForm" class="tiffin-form"
-        style="flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h4 style="grid-column: 1 / -1; margin-top: 0;">New Subscription</h4>
-
-        <div class="form-row">
-          <label>Customer Name</label>
-          <input type="text" formControlName="customerName" placeholder="Full Name" />
-        </div>
-        <div class="form-row">
-          <label>Mobile Number</label>
-          <input type="tel" formControlName="customerPhone" placeholder="10-digit Mobile" />
-        </div>
-
-        <div class="form-row" style="grid-column: 1 / -1;">
-          <label>Delivery Address</label>
-          <textarea formControlName="address" rows="2" placeholder="Flat No, Building, Landmark"></textarea>
-        </div>
-
-        <div class="form-row">
-          <label>Select Plan (Menu Item)</label>
-          <select formControlName="menuItemId">
-            <option [ngValue]="null">-- Select Tiffin Plan --</option>
-            <option *ngFor="let m of tiffinMenuItems" [value]="m.id">{{ m.name }} (₹{{ m.price }}/day)</option>
-          </select>
-          <small *ngIf="tiffinMenuItems.length === 0" style="color: red;">No 'TIFFIN' category items found in
-            menu.</small>
-        </div>
-
-        <div class="form-row">
-          <label>Duration (Months)</label>
-          <input type="number" formControlName="durationMonths" min="1" max="12" />
-        </div>
-
-        <button type="button" class="btn primary-btn" style="grid-column: 1 / -1; margin-top: 10px;"
-          (click)="createTiffin()" [disabled]="tiffinForm.invalid || !tiffinCalculation">
-          Create Subscription
-        </button>
-      </form>
-
-      <!-- Pricing Preview Panel -->
-      <div *ngIf="tiffinCalculation" class="pricing-card"
-        style="width: 300px; background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9;">
-        <h4 style="margin-top: 0; color: #1565c0;">💰 Price Breakdown</h4>
-
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span>Daily Rate:</span>
-          <strong>₹{{ tiffinCalculation.dailyPrice }}</strong>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span>Duration:</span>
-          <span>{{ tiffinCalculation.months }} Month(s)</span>
-        </div>
-        <hr style="border-color: #bbdefb;">
-
-        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #757575;">
-          <span>Standard (30 days/mo):</span>
-          <span style="text-decoration: line-through;">₹{{ tiffinCalculation.dailyPrice * 30 * tiffinCalculation.months
-            }}</span>
-        </div>
-
-        <div
-          style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #2e7d32; font-weight: bold;">
-          <span>Pro Deal (28 days/mo):</span>
-          <span>₹{{ tiffinCalculation.finalPrice }}</span>
-        </div>
-
-        <div
-          style="margin-top: 10px; background: #c8e6c9; color: #1b5e20; padding: 8px; border-radius: 4px; text-align: center; font-size: 0.9em;">
-          🎉 You save <strong>₹{{ tiffinCalculation.saved }}</strong>!<br>
-          <small>(2 Free Meals / Month)</small>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tiffin List -->
-    <div class="table-wrapper">
-      <table class="orders-table" *ngIf="subscriptionsList.length > 0">
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Customer</th>
-            <th>Plan</th>
-            <th>Dates (Start - End)</th>
-            <th>Max Extension</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let s of subscriptionsList">
-            <td>
-              <span class="badge" [class.badge-ready]="s.status === 'ACTIVE'"
-                [class.badge-pending]="s.status === 'PAUSED'">
-                {{ s.status }}
-              </span>
-            </td>
-            <td>
-              {{ s.customerName }}<br>
-              <small>{{ s.customerPhone }}</small>
-            </td>
-            <td>
-              {{ s.menuItemName || 'Tiffin' }}<br>
-              <small>₹{{ s.finalAmount }} / {{ s.durationMonths }} mo</small>
-            </td>
-            <td>
-              {{ s.startDate | date:'shortDate' }} - {{ s.endDate | date:'shortDate' }}
-              <div *ngIf="s.status === 'PAUSED'" style="color: red; font-size: 0.8em;">
-                Paused since: {{ s.pausedAt | date:'medium' }}
-              </div>
-            </td>
-            <td>
-              <span style="color: #d32f2f;">{{ s.maxEndDate | date:'shortDate' }}</span>
-            </td>
-            <td>
-              <button class="btn primary-btn" style="padding: 5px 10px; font-size: 0.9em;"
-                [style.background-color]="s.status === 'ACTIVE' ? '#fbc02d' : '#4caf50'"
-                (click)="toggleSubscriptionStatus(s)">
-                {{ s.status === 'ACTIVE' ? '⏸ Pause' : '▶ Resume' }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p *ngIf="subscriptionsList.length === 0" class="no-data">No active subscriptions</p>
+    <app-pos-tiffin [menuItems]="menuItems" [subscriptions]="subscriptionsList" [isLoading]="isLoading"
+      (createSubscription)="createSubscription($event)" (toggleStatus)="toggleSubscriptionStatus($event)">
+    </app-pos-tiffin>
   </div>
 
   <!-- ========== ONGOING ORDERS TAB ========== -->
   <div *ngIf="activeTab === 'ONGOING'" class="tab-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-      <h3>⏳ Ongoing Orders</h3>
-      <select [(ngModel)]="ongoingSortOption" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
-        <option value="newest">📅 Newest First</option>
-        <option value="oldest">📅 Oldest First</option>
-        <option value="customer_asc">👤 Customer (A-Z)</option>
-        <option value="customer_desc">👤 Customer (Z-A)</option>
-      </select>
-    </div>
-
-    <div class="table-wrapper">
-      <table class="orders-table" *ngIf="sortedOngoingOrders.length > 0">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Table/Customer</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let o of sortedOngoingOrders">
-            <td>#{{ o.id }}</td>
-            <td>
-              <span *ngIf="o.tableNumber" class="badge table-badge">Table {{ o.tableNumber }}</span>
-              <span *ngIf="!o.tableNumber">{{ o.customerName || 'Guest' }}</span>
-            </td>
-            <td>
-              <div class="items-summary">
-                {{ o.items?.length || 0 }} items
-                <span class="items-tooltip">
-                  <div *ngFor="let i of o.items">
-                    <span [style.color]="i.status === 'PREPARING' ? '#E67E22' : '#27AE60'"
-                      [style.fontWeight]="i.status === 'PREPARING' ? 'bold' : 'normal'">
-                      {{ i.qty || i.quantity }}x {{ i.name || i.itemName }}
-                      <small *ngIf="i.status === 'PREPARING'"> (🕒 Prep)</small>
-                      <small *ngIf="i.status === 'READY'"> (✅ Ready)</small>
-                    </span>
-                  </div>
-                </span>
-              </div>
-            </td>
-            <td class="total-cell">₹{{ o.totalAmount || o.total }}</td>
-            <td>
-              <span class="badge" [class.badge-pending]="o.status === 'PENDING' || o.status === 'PREPARING'"
-                [class.badge-ready]="o.status === 'READY' || o.status === 'PREPARED'"
-                [class.badge-delivered]="o.status === 'DELIVERED'">
-                {{ o.status }}
-              </span>
-            </td>
-            <td>
-              <button class="btn share-btn" style="margin-right: 5px; background-color: #3498DB; color: white;"
-                (click)="shareBill(o)" title="View & Share Bill">
-                <i class="fa fa-file-text-o"></i> View Bill
-              </button>
-              <button class="btn primary-btn" (click)="openEdit(o)">Edit</button>
-              <button class="btn primary-btn"
-                style="margin-left: 5px; background-color: #9C27B0; border-color: #9C27B0;"
-                *ngIf="o.status === 'PENDING' || o.status === 'PREPARING' || o.status === 'READY'"
-                (click)="markAsServed(o)">
-                Serve
-              </button>
-              <button class="btn primary-btn"
-                style="margin-left: 5px; background-color: #E67E22; border-color: #E67E22;"
-                *ngIf="o.paymentStatus !== 'COMPLETED' && o.paymentStatus !== 'PAID'" (click)="openPayment(o)">
-                Pay
-              </button>
-              <button class="btn primary-btn"
-                style="margin-left: 5px; background-color: #27AE60; border-color: #27AE60; cursor: default;"
-                *ngIf="o.paymentStatus === 'COMPLETED' || o.paymentStatus === 'PAID'" disabled>
-                ✅ Paid
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p *ngIf="ongoingOrders.length === 0" class="no-data">No ongoing orders right now</p>
+    <app-pos-ongoing-orders [ongoingOrders]="ongoingOrders" [isLoading]="isLoading"
+      (verifyPayment)="verifyPayment($event)" (markAsServed)="markAsServed($event)" (openPayment)="openPayment($event)"
+      (shareBill)="shareBill($event)" (openEdit)="openEdit($event)">
+    </app-pos-ongoing-orders>
   </div>
 
   <!-- ========== SHIFT SUMMARY TAB ========== -->
@@ -703,6 +449,38 @@
           </button>
           <button class="btn" style="flex: 1; background: #3498DB; color: white;" (click)="confirmShare('SMS')">
             <i class="fa fa-commenting-o"></i> SMS / Text
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- CONFLICT MODAL (Shared Table) -->
+  <div class="modal-backdrop" *ngIf="showConflictModal" (click)="closeConflictModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>⚠️ Table Occupied</h3>
+        <button class="close-btn" (click)="closeConflictModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>This table already has active orders. What would you like to do?</p>
+
+        <div class="existing-orders-list" style="margin: 15px 0;">
+          <div *ngFor="let ord of conflictOrders"
+            style="background: #fff3e0; padding: 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #ffe0b2; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>{{ ord.customerName || 'Guest' }}</strong>
+              <div style="font-size: 0.85em; color: #666;">#{{ ord.id }} • {{ ord.items?.length }} items</div>
+            </div>
+            <button class="btn secondary-btn" (click)="confirmAppend(ord)">
+              Append Items
+            </button>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 10px; border-top: 1px solid #eee; padding-top: 15px;">
+          <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Or start a fresh bill for a new customer?</p>
+          <button class="btn primary-btn" style="width: 100%;" (click)="confirmNewBill()">
+            ✨ Start New Separate Bill
           </button>
         </div>
       </div>

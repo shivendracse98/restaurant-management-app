@@ -50,10 +50,12 @@ export class OrderHistoryComponent implements OnInit {
         }
     }
 
+
     // --- Review Logic ---
     showRateModal = false;
     selectedOrder: Order | null = null;
     rating = 0;
+    hoverRating = 0; // For star hover effect
     reviewComment = '';
 
     constructor(
@@ -93,5 +95,16 @@ export class OrderHistoryComponent implements OnInit {
             },
             error: () => this.toastr.error('Failed to submit review')
         });
+    }
+
+    getRatingLabel(rating: number): string {
+        switch (rating) {
+            case 1: return 'Terrible 😠';
+            case 2: return 'Bad 😞';
+            case 3: return 'Okay 😐';
+            case 4: return 'Good 🙂';
+            case 5: return 'Excellent! 🤩';
+            default: return 'Select a rating';
+        }
     }
 }

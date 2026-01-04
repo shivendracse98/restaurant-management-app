@@ -19,11 +19,18 @@ import { FoodItem } from '../../../models/food-item.model';
 import { Subscription as TiffinModel } from '../../../models/subscription.model';
 import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
+import { PosOrderTakingComponent } from './components/pos-order-taking/pos-order-taking.component';
+import { PosOngoingOrdersComponent } from './components/pos-ongoing-orders/pos-ongoing-orders.component';
+import { PosTiffinComponent } from './components/pos-tiffin/pos-tiffin.component';
 
 @Component({
   selector: 'app-staff-pos',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgChartsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgChartsModule,
+    PosOrderTakingComponent,
+    PosOngoingOrdersComponent,
+    PosTiffinComponent
+  ],
   templateUrl: './staff-pos.component.html',
   styleUrls: ['./staff-pos.component.scss']
 })
@@ -55,7 +62,6 @@ export class StaffPosComponent implements OnInit, OnDestroy {
   // forms
   // search
   searchTerm = '';
-  ongoingSortOption: string = 'newest';
 
   // Cart UI
   showCartModal = false; // ✅ New UI State for Floating Cart
@@ -81,16 +87,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     reason: ['', Validators.required]
   });
 
-  tiffinForm = this.fb.group({
-    customerName: ['', Validators.required],
-    customerPhone: ['', Validators.required],
-    frequency: ['DAILY', Validators.required],
-    durationMonths: [1, Validators.required],
-    type: ['LUNCH', Validators.required],
-    address: ['', Validators.required],
-    pricePerMeal: [100, [Validators.required, Validators.min(1)]],
-    menuItemId: [null, Validators.required]
-  });
+
 
   // chart data (ng2-charts)
   revenueChartLabels: string[] = [];
@@ -183,7 +180,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     this.menuService.getAllMenuItems().pipe(takeUntil(this.destroy$)).subscribe({
       next: (data: any) => {
         this.menuItems = data || [];
-        this.filterTiffinMenu();
+        // Child handles filtering now
       },
       error: (err: any) => console.error('Menu load error', err)
     });
@@ -255,21 +252,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     return (this.orderForm.value.items as FoodItem[]) || [];
   }
 
-  get sortedOngoingOrders(): any[] {
-    const sorted = [...this.ongoingOrders];
-    switch (this.ongoingSortOption) {
-      case 'newest':
-        return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      case 'oldest':
-        return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-      case 'customer_asc':
-        return sorted.sort((a, b) => (a.customerName || '').localeCompare(b.customerName || ''));
-      case 'customer_desc':
-        return sorted.sort((a, b) => (b.customerName || '').localeCompare(a.customerName || ''));
-      default:
-        return sorted;
-    }
-  }
+  // Sorted Order Logic moved to Child Component
 
   get filteredMenu(): FoodItem[] {
     const term = (this.searchTerm || '').toLowerCase().trim();
@@ -331,6 +314,11 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   // ...
 
+  // ========== SHARED TABLE CONFLICT LOGIC ==========
+  showConflictModal = false;
+  conflictOrders: any[] = [];
+  pendingNewItems: any[] = []; // Store items while user decides
+
   placeOrder(): void {
     const items = this.orderForm.value.items || [];
     if (!items.length) {
@@ -339,14 +327,15 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     }
 
     const tableNumStr = this.orderForm.value.tableNumber;
-    // Strict check: Must be present. 0 is allowed.
     if (tableNumStr === null || tableNumStr === undefined || tableNumStr === '') {
       this.message = '⚠️ Table Number is Required (Use 0 for No Table)';
       return;
     }
 
     const tableNum = Number(tableNumStr);
-    const newItemsMapped = items.map((i: FoodItem) => ({
+
+    // Map items to payload format
+    this.pendingNewItems = items.map((i: FoodItem) => ({
       id: i.id,
       menuItemId: i.id,
       qty: 1,
@@ -354,109 +343,131 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       name: i.name
     }));
 
-    // === SMART APPEND LOGIC ===
-    let existingOrder: any = null;
-
-    // Only look for existing order if Table > 0
+    // 1. Check for Active Orders on this Table
+    let activeOrdersOnTable: any[] = [];
     if (tableNum > 0) {
-      existingOrder = this.ongoingOrders.find(o =>
-        Number(o.tableNumber) === tableNum &&
-        o.status !== 'PAID' &&
-        o.status !== 'COMPLETED'
-      ) || this.unpaidOrders.find(o =>
-        Number(o.tableNumber) === tableNum
-      );
+      // Find ALL active orders for this table (Ongoing + Unpaid)
+      const ongoing = this.ongoingOrders.filter(o => Number(o.tableNumber) === tableNum);
+      const unpaid = this.unpaidOrders.filter(o => Number(o.tableNumber) === tableNum);
+
+      // Merge unique by ID
+      const map = new Map();
+      ongoing.forEach(o => map.set(o.id, o));
+      unpaid.forEach(o => map.set(o.id, o));
+      activeOrdersOnTable = Array.from(map.values());
     }
 
-    this.isLoading = true;
-
-    if (existingOrder) {
-      // --- SCENARIO: APPEND TO EXISTING ---
-      console.log('🔄 Appending to existing Order #', existingOrder.id);
-
-      // Merge items: active existing items + new items
-      // We need to match by menuItemId to increment qty if same item
-      const combinedItems = [...(existingOrder.items || [])];
-
-      newItemsMapped.forEach(newItem => {
-        // Fix: Only merge if menuItemId AND status match.
-        // New items are implicitly 'PREPARING', existing items might be 'READY' or 'DELIVERED'.
-        // If statuses differ, we should keep them separate so Kitchen knows which one is new.
-        const newItemStatus = 'PREPARING';
-
-        const existingItemIndex = combinedItems.findIndex((ex: any) =>
-          ex.menuItemId === newItem.menuItemId &&
-          (ex.status || 'PREPARING') === newItemStatus
-        );
-
-        if (existingItemIndex >= 0) {
-          // Increment qty (Statuses match)
-          combinedItems[existingItemIndex].qty = (combinedItems[existingItemIndex].qty || 1) + 1;
-        } else {
-          // Add as new separate line item
-          combinedItems.push({ ...newItem, status: newItemStatus });
-        }
-      });
-
-      const newTotal = combinedItems.reduce((s: number, it: any) => s + (it.price || 0) * (it.qty || 1), 0);
-
-      // Map combinedItems to strictly match Backend DTO (OrderItemRequest)
-      const finalItemsPayload = combinedItems.map((item: any) => {
-        const qty = item.quantity || item.qty || 1;
-        const price = item.pricePerUnit || item.price || 0;
-        return {
-          menuItemId: item.menuItemId || item.id,
-          itemName: item.itemName || item.name,
-          quantity: qty,
-          pricePerUnit: price,
-          subtotal: qty * price,
-          status: item.status || 'PREPARING' // Preserve existing status or default new to PREPARING
-        };
-      });
-
-      const updatePayload = {
-        items: finalItemsPayload,
-        totalAmount: newTotal,
-        updatedBy: this.auth.currentUser()?.name || 'Staff',
-        updatedAt: new Date().toISOString()
-      };
-
-      this.orderService.updateOrder(existingOrder.id, updatePayload).pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => {
-          this.finishOrderPlacement('✅ Items added to Table ' + tableNum);
-        },
-        error: (err) => {
-          console.error('Append failed', err);
-          this.message = '❌ Failed to append to order';
-          this.isLoading = false;
-        }
-      });
-
+    // 2. Decide Flow
+    if (activeOrdersOnTable.length > 0) {
+      // --- CONFLICT DETECTED ---
+      console.log(`⚠️ Table ${tableNum} has ${activeOrdersOnTable.length} active orders. Prompting user.`);
+      this.conflictOrders = activeOrdersOnTable;
+      this.showConflictModal = true;
+      // Close Cart Modal temporarily effectively (visual only, logic waits)
+      this.showCartModal = false;
     } else {
-      // --- SCENARIO: CREATE NEW ---
-      console.log('✨ Creating NEW Order for Table', tableNum);
-
-      const payload: any = {
-        customerName: this.orderForm.value.customerName || 'Walk-in Guest',
-        customerPhone: this.orderForm.value.customerPhone || '0000000000',
-        address: this.orderForm.value.address || 'Restaurant',
-        orderType: this.orderForm.value.orderType || 'DINE_IN',
-        tableNumber: tableNumStr,
-        items: newItemsMapped,
-        total: newItemsMapped.reduce((s: number, m: any) => s + (m.price || 0) * (m.qty || 1), 0),
-        status: 'CONFIRMED',
-        createdAt: new Date().toISOString()
-      };
-
-      this.orderService.createOrder(payload).pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => this.finishOrderPlacement('✅ Order placed successfully'),
-        error: (err: any) => {
-          console.error('Place order error', err);
-          this.message = '❌ Failed to place order';
-          this.isLoading = false;
-        }
-      });
+      // --- NO CONFLICT ---
+      this.executeCreateNewOrder(tableNum);
     }
+  }
+
+  // Option A: User selected "Start New Bill"
+  confirmNewBill(): void {
+    const tableNum = Number(this.orderForm.value.tableNumber);
+    this.executeCreateNewOrder(tableNum);
+    this.closeConflictModal();
+  }
+
+  // Option B: User selected "Append to Order #ID"
+  confirmAppend(existingOrder: any): void {
+    this.executeAppendOrder(existingOrder);
+    this.closeConflictModal();
+  }
+
+  closeConflictModal(): void {
+    this.showConflictModal = false;
+    this.conflictOrders = [];
+    this.pendingNewItems = []; // Clear stash ? No, keep form state in case they cancel? 
+    // Actually if they cancel modal, they might want to go back to cart.
+    // For now simple close.
+    this.showCartModal = true; // Re-open cart if they cancel conflict decision?
+  }
+
+  private executeCreateNewOrder(tableNum: number): void {
+    this.isLoading = true;
+    console.log('✨ Creating NEW Order for Table', tableNum);
+
+    const payload: any = {
+      customerName: this.orderForm.value.customerName || 'Walk-in Guest',
+      customerPhone: this.orderForm.value.customerPhone || '0000000000',
+      address: this.orderForm.value.address || 'Restaurant',
+      orderType: this.orderForm.value.orderType || 'DINE_IN',
+      tableNumber: tableNum.toString(),
+      items: this.pendingNewItems,
+      total: this.pendingNewItems.reduce((s: number, m: any) => s + (m.price || 0) * (m.qty || 1), 0),
+      status: 'CONFIRMED',
+      createdAt: new Date().toISOString()
+    };
+
+    this.orderService.createOrder(payload).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => this.finishOrderPlacement('✅ Order placed successfully'),
+      error: (err: any) => {
+        console.error('Place order error', err);
+        this.message = '❌ Failed to place order';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private executeAppendOrder(existingOrder: any): void {
+    this.isLoading = true;
+    console.log('🔄 Appending to existing Order #', existingOrder.id);
+
+    // Merge logic
+    const combinedItems = [...(existingOrder.items || [])];
+
+    this.pendingNewItems.forEach(newItem => {
+      const newItemStatus = 'PREPARING';
+      const existingItemIndex = combinedItems.findIndex((ex: any) =>
+        ex.menuItemId === newItem.menuItemId &&
+        (ex.status || 'PREPARING') === newItemStatus
+      );
+
+      if (existingItemIndex >= 0) {
+        combinedItems[existingItemIndex].qty = (combinedItems[existingItemIndex].qty || 1) + 1;
+      } else {
+        combinedItems.push({ ...newItem, status: newItemStatus });
+      }
+    });
+
+    const newTotal = combinedItems.reduce((s: number, it: any) => s + (it.price || 0) * (it.qty || 1), 0);
+
+    const finalItemsPayload = combinedItems.map((item: any) => ({
+      menuItemId: item.menuItemId || item.id,
+      itemName: item.itemName || item.name,
+      quantity: item.quantity || item.qty || 1,
+      pricePerUnit: item.pricePerUnit || item.price || 0,
+      subtotal: (item.quantity || item.qty || 1) * (item.pricePerUnit || item.price || 0),
+      status: item.status || 'PREPARING'
+    }));
+
+    const updatePayload = {
+      items: finalItemsPayload,
+      totalAmount: newTotal,
+      updatedBy: this.auth.currentUser()?.name || 'Staff',
+      updatedAt: new Date().toISOString()
+    };
+
+    this.orderService.updateOrder(existingOrder.id, updatePayload).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.finishOrderPlacement('✅ Items added to Order #' + existingOrder.id);
+      },
+      error: (err) => {
+        console.error('Append failed', err);
+        this.message = '❌ Failed to append to order';
+        this.isLoading = false;
+      }
+    });
   }
 
   private finishOrderPlacement(msg: string): void {
@@ -481,85 +492,10 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   // ========== TIFFIN MANAGEMENT ==========
 
-  tiffinMenuItems: FoodItem[] = [];
+  // Removed Local Tiffin Logic (Moved to PosTiffinComponent)
 
-  // Recalculate Tiffin list when menu loads
-  private filterTiffinMenu(): void {
-    this.tiffinMenuItems = this.menuItems.filter(m => (m.category || '').toUpperCase() === 'TIFFIN');
-  }
-
-  // Dynamic Price Calculation
-  get tiffinCalculation(): any {
-    const months = this.tiffinForm.value.durationMonths || 1;
-    const menuId = this.tiffinForm.value.menuItemId;
-    const selected = this.menuItems.find(m => m.id == Number(menuId));
-
-    if (!selected) return null;
-
-    const dailyPrice = selected.price || 0;
-    const standardDays = 30 * months;
-    const billedDays = 28 * months; // 2 Days Free per month
-
-    const standardTotal = dailyPrice * standardDays;
-    const finalPrice = dailyPrice * billedDays;
-    const saved = standardTotal - finalPrice;
-
-    return {
-      dailyPrice,
-      months,
-      billedDays,
-      finalPrice,
-      saved
-    };
-  }
-
-  createTiffin(): void {
-    if (this.tiffinForm.invalid) {
-      this.message = '⚠️ Please complete tiffin details';
-      return;
-    }
-
-    const calc = this.tiffinCalculation;
-    if (!calc) {
-      this.message = '⚠️ Invalid Menu Selection';
-      return;
-    }
-
-    const today = new Date();
-    const startDate = today.toISOString().split('T')[0];
-
-    // Logic: 30 days per month
-    const totalDays = 30 * calc.months;
-    const endDateObj = new Date(today);
-    endDateObj.setDate(today.getDate() + totalDays);
-
-    // Max Extension: 5 days per month
-    const maxDays = totalDays + (5 * calc.months);
-    const maxEndDateObj = new Date(today);
-    maxEndDateObj.setDate(today.getDate() + maxDays);
-
-    const payload: TiffinModel = {
-      customerName: this.tiffinForm.value.customerName || '',
-      customerPhone: this.tiffinForm.value.customerPhone || '',
-      address: this.tiffinForm.value.address || '',
-
-      startDate: startDate,
-      endDate: endDateObj.toISOString().split('T')[0],
-      maxEndDate: maxEndDateObj.toISOString().split('T')[0],
-
-      frequency: 'DAILY',
-      durationMonths: calc.months,
-      menuItemId: Number(this.tiffinForm.value.menuItemId) || 0,
-      menuItemName: this.menuItems.find(m => m.id == Number(this.tiffinForm.value.menuItemId))?.name || 'Tiffin',
-
-      pricePerDay: calc.dailyPrice,
-      billedDays: calc.billedDays,
-      discountAmount: calc.saved,
-      finalAmount: calc.finalPrice,
-
-      status: 'ACTIVE',
-      totalPausedDays: 0
-    };
+  createSubscription(payload: TiffinModel): void {
+    if (!payload) return;
 
     this.pendingTiffinPayload = payload;
 
@@ -568,7 +504,6 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       id: 'NEW-SUB',
       customerName: payload.customerName,
       total: payload.finalAmount,
-      // Metadata for display if needed
     });
     this.message = '💰 Proceeding to Payment...';
   }
@@ -640,7 +575,13 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   openEdit(order: any): void {
     this.editOrder = JSON.parse(JSON.stringify(order || {}));
-    this.editOrder.items = (this.editOrder.items || []).map((it: any) => ({ ...it, qty: it.qty || 1 }));
+    // Fix: Normalize existing items for Frontend form usage (pricePerUnit -> price)
+    this.editOrder.items = (this.editOrder.items || []).map((it: any) => ({
+      ...it,
+      name: it.itemName || it.name, // Ensure 'name' exists for UI
+      price: it.pricePerUnit || it.price, // Ensure 'price' exists for Total Calc
+      qty: it.qty || it.quantity || 1
+    }));
     this.showEditModal = true;
     setTimeout(() => {
       const el = document.querySelector('.modal-backdrop');
@@ -679,9 +620,20 @@ export class StaffPosComponent implements OnInit, OnDestroy {
   saveEdit(): void {
     if (!this.editOrder || !this.editOrder.id) return;
 
+    // Fix: Normalize Payload for Backend (name -> itemName, price -> pricePerUnit)
+    const normalizedItems = (this.editOrder.items || []).map((it: any) => ({
+      menuItemId: it.menuItemId || it.id, // Ensure ID
+      itemName: it.name || it.itemName,   // Ensure Name (Validation)
+      quantity: it.qty || it.quantity || 1,
+      pricePerUnit: it.price || it.pricePerUnit, // Ensure Price
+      subtotal: (it.qty || 1) * (it.price || it.pricePerUnit || 0),
+      status: it.status // Preserve status
+    }));
+
     const payload: any = {
-      items: this.editOrder.items,
-      total: (this.editOrder.items || []).reduce((s: number, it: any) => s + (it.price || 0) * (it.qty || 0), 0),
+      items: normalizedItems,
+      // Fix: Calculate total using whatever price field is available
+      totalAmount: normalizedItems.reduce((s: number, it: any) => s + (it.subtotal || 0), 0),
       updatedBy: this.auth.currentUser()?.name || 'Staff',
       updatedAt: new Date().toISOString()
     };
@@ -850,12 +802,9 @@ export class StaffPosComponent implements OnInit, OnDestroy {
           this.pendingTiffinPayload = null;
           this.closePayment();
 
-          // Reset Form
-          this.tiffinForm.reset({
-            durationMonths: 1,
-            frequency: 'DAILY',
-            pricePerMeal: 100
-          });
+          this.closePayment();
+
+          // Form reset handled by child or user
           this.loadSubscriptions();
         },
         error: (err: any) => {

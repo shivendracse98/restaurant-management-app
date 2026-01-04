@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -7,6 +7,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ConfigService } from '../../../core/services/config.service';
 import { ImageService } from '../../../core/services/image.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { FeatureFlagStore } from '../../../core/feature-flag/feature-flag.store';
 
 @Component({
     selector: 'app-admin-settings',
@@ -24,6 +25,8 @@ export class AdminSettingsComponent implements OnInit {
 
     logoPreview: string | null = null;
     qrPreview: string | null = null;
+
+    readonly featureFlagStore = inject(FeatureFlagStore);
 
     constructor(
         private fb: FormBuilder,
@@ -54,6 +57,17 @@ export class AdminSettingsComponent implements OnInit {
             minOrderAmount: [0, [Validators.min(0)]],
             freeDeliveryThreshold: [0, [Validators.min(0)]]
         });
+
+        // Load flags on init to sync state
+        this.featureFlagStore.loadFlags();
+
+        // Effect to sync store state with form if needed (optional, but good for reactivity)
+        effect(() => {
+            const isDeliveryEnabled = this.featureFlagStore.isFeatureEnabled('DELIVERY_MANAGEMENT');
+            // We might want to patch form here, but usually form is master for editing.
+            // However, if we want to show current server state:
+            // this.configForm.patchValue({ isDeliveryEnabled }, { emitEvent: false });
+        });
     }
 
     ngOnInit(): void {
@@ -82,6 +96,8 @@ export class AdminSettingsComponent implements OnInit {
                     address: data?.restaurantAddress || '',
 
                     // Delivery
+                    // We still read from Config API because the backend 'TenantConfigResponse' 
+                    // is strictly bridged to FeatureFlags now.
                     isDeliveryEnabled: data?.isDeliveryEnabled !== undefined ? data.isDeliveryEnabled : false,
                     isAcceptingDelivery: data?.isAcceptingDelivery !== undefined ? data.isAcceptingDelivery : true,
                     serviceablePincodes: data?.serviceablePincodes || '',
@@ -161,9 +177,10 @@ export class AdminSettingsComponent implements OnInit {
             restaurantAddress: formValue.address,
 
             // Delivery
+            // This will trigger the backend bridge to update Feature Flags
             isDeliveryEnabled: formValue.isDeliveryEnabled,
             isAcceptingDelivery: formValue.isAcceptingDelivery,
-            serviceablePincodes: formValue.serviceablePincodes,
+            serviceablePincodes: formValue.serviceablePincodes ? formValue.serviceablePincodes.trim() : '',
             deliveryFee: formValue.deliveryFee,
             minOrderAmount: formValue.minOrderAmount,
             freeDeliveryThreshold: formValue.freeDeliveryThreshold
@@ -172,8 +189,11 @@ export class AdminSettingsComponent implements OnInit {
         this.configService.updateConfig(payload).subscribe({
             next: () => {
                 this.toastr.success('Settings saved successfully!');
+
+                // Reload flags to reflect changes immediately in UI
+                this.featureFlagStore.loadFlags();
+
                 this.loading = false;
-                // Optionally update Auth User locally if name changed
             },
             error: (err: any) => {
                 console.error('Save failed', err);

@@ -11,6 +11,8 @@ import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+declare var Razorpay: any; // Declare Razorpay global
+
 import { PaymentService } from 'src/app/core/services/payment.service';
 import { ConfigService } from 'src/app/core/services/config.service';
 import { OrderService } from 'src/app/core/services/order.service'; // ✅ Imported
@@ -151,6 +153,102 @@ export class PaymentModalComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.callPayOrderEndpoint(false);
     }, 1500);
+  }
+
+  /**
+   * Submit Online Payment (Razorpay)
+   */
+  submitOnlinePayment(): void {
+    console.log(`${this.LOG} ========== STARTING ONLINE PAYMENT ==========`);
+    this.processing = true;
+    this.paymentMessage = 'Initiating Secure Payment...';
+
+    // 1. Initiate at Backend
+    this.paymentService.initiateTransaction(this.data.orderId, this.data.amount)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          console.log(`${this.LOG} Init Response:`, res);
+
+          const options = {
+            key: res.keyId,
+            amount: this.data.amount * 100, // Paice
+            currency: res.currency || 'INR',
+            name: 'TasteTown',
+            description: `Order #${this.data.orderId}`,
+            order_id: res.gatewayOrderId,
+            handler: (response: any) => {
+              console.log(`${this.LOG} Razorpay Handler:`, response);
+              this.verifyOnlinePayment(response.razorpay_order_id, response.razorpay_payment_id, response.razorpay_signature);
+            },
+            prefill: {
+              name: this.data.customerName,
+              email: this.data.customerEmail,
+              contact: this.data.customerPhone
+            },
+            theme: {
+              color: '#d32f2f'
+            },
+            modal: {
+              ondismiss: () => {
+                console.log(`${this.LOG} Payment Modal Dismissed`);
+                this.processing = false;
+                this.toastr.info('Payment cancelled');
+              }
+            }
+          };
+
+          // MOCK CHECK: If keyId looks like a mock key
+          if (res.keyId.includes('MOCK')) {
+            console.warn(`${this.LOG} MOCK MODE DETECTED. Auto-verifying...`);
+            // Simulate user flow
+            setTimeout(() => {
+              this.verifyOnlinePayment(res.gatewayOrderId, 'pay_mock_' + new Date().getTime(), 'mock_signature');
+            }, 1000);
+          } else {
+            const rzp = new Razorpay(options);
+            rzp.open();
+          }
+        },
+        error: (err) => {
+          console.error(`${this.LOG} Init Failed:`, err);
+          this.processing = false;
+          this.toastr.error('Failed to initiate payment');
+        }
+      });
+  }
+
+  /**
+   * Verify Online Payment
+   */
+  verifyOnlinePayment(orderId: string, paymentId: string, signature: string) {
+    this.paymentMessage = 'Verifying Payment...';
+
+    this.paymentService.verifyTransaction(orderId, paymentId, signature)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          console.log(`${this.LOG} Verification Success:`, res);
+          this.paymentStatus = 'SUCCESS';
+          this.paymentMessage = '✓ Payment Successful!';
+          this.toastr.success('Payment Verified!');
+
+          setTimeout(() => {
+            this.dialogRef.close({
+              paymentId: paymentId,
+              paymentMethod: 'RAZORPAY',
+              status: 'SUCCESS'
+            });
+          }, 1000);
+        },
+        error: (err) => {
+          console.error(`${this.LOG} Verification Failed:`, err);
+          this.paymentStatus = 'FAILED';
+          this.paymentMessage = 'Payment Verification Failed.';
+          this.toastr.error('Verification failed. Please contact staff.');
+          this.processing = false;
+        }
+      });
   }
 
   /**

@@ -8,8 +8,22 @@ export const adminGuard: CanActivateFn = () => {
   const router = inject(Router);
   const user = auth.currentUser();
 
-  if (!user || user.role !== 'ADMIN') {
-    router.navigate(['/home']);
+  if (!user) {
+    router.navigate(['/login']);
+    return false;
+  }
+
+  if (user.role === 'SUPER_ADMIN') {
+    // Allow Super Admin to peek if needed, or redirect to super-admin
+    router.navigate(['/super-admin']);
+    return false;
+  }
+
+  if (user.role !== 'ADMIN') {
+    // Redirect to their specific dashboard instead of generic home
+    if (user.role === 'STAFF') router.navigate(['/staff/pos']);
+    else if (user.role === 'CUSTOMER') router.navigate(['/customer/dashboard']);
+    else router.navigate(['/home']);
     return false;
   }
   return true;

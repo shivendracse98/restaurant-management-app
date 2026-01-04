@@ -1,9 +1,10 @@
 <div class="analytics-container">
 
     <div class="header">
-        <h2>
-            Analytics & Reports
-        </h2>
+        <div>
+            <h2>🚀 Business Overview</h2>
+            <p class="subtitle">Track your restaurant's performance and growth.</p>
+        </div>
 
         <div class="period-selector">
             <button *ngFor="let p of periods" [class.active]="currentPeriod === p" (click)="setPeriod(p)">
@@ -12,33 +13,49 @@
         </div>
     </div>
 
-    <!-- MAIN CHART CARD -->
-    <div class="chart-container" *ngIf="!loading && data.length > 0">
-        <div class="chart">
-            <div class="bar-group" *ngFor="let point of data">
+    <!-- SUMMARY CARDS (KPIs) -->
+    <div class="kpi-grid" *ngIf="!loading && data.length > 0">
+        <div class="kpi-card revenue">
+            <div class="icon">💰</div>
+            <div class="info">
+                <span class="label">Total Revenue</span>
+                <span class="value">{{ summaryStats.totalRevenue | currency:'INR' }}</span>
+            </div>
+        </div>
 
-                <!-- Bar height is calculated as style percentage -->
-                <div class="bar" [style.height]="getBarHeight(point.revenue)">
+        <div class="kpi-card orders">
+            <div class="icon">📦</div>
+            <div class="info">
+                <span class="label">Total Orders</span>
+                <span class="value">{{ summaryStats.totalOrders }}</span>
+            </div>
+        </div>
 
-                    <div class="tooltip">
-                        {{ point.revenue | currency:'INR' }}
-                        <span class="orders-count">{{ point.orderCount }} Orders</span>
-                    </div>
-
-                </div>
-
-                <div class="label">{{ point.label }}</div>
+        <div class="kpi-card aov">
+            <div class="icon">📉</div>
+            <div class="info">
+                <span class="label">Avg. Order Value</span>
+                <span class="value">{{ summaryStats.avgOrderValue | currency:'INR' }}</span>
             </div>
         </div>
     </div>
 
+    <!-- START: Chart JS Canvas -->
+    <div class="chart-container" *ngIf="!loading && data.length > 0">
+        <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType">
+        </canvas>
+    </div>
+
     <!-- LOADING STATE -->
     <div class="loading" *ngIf="loading">
-        <p>Crunching the numbers...</p>
+        <div class="spinner"></div>
     </div>
 
     <!-- EMPTY STATE -->
     <div class="empty" *ngIf="!loading && data.length === 0">
-        <p>No sales data available for this {{ currentPeriod | lowercase }}.</p>
+        <div class="empty-icon">📊</div>
+        <h3>No Data Found</h3>
+        <p>There are no sales records for this {{ currentPeriod | lowercase }}.</p>
     </div>
+
 </div>

@@ -1,0 +1,153 @@
+/* ================= POS ONGOING ORDERS COMPONENT ================= */
+.pos-ongoing-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    height: 100%;
+}
+
+/* ========== TABLE WRAPPER ========== */
+.table-wrapper {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+/* ========== ORDERS TABLE ========== */
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+
+    th,
+    td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    th {
+        background: #f9f9f9;
+        font-weight: 700;
+        color: #555;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+}
+
+/* ========== ITEMS SUMMARY ========== */
+.items-summary {
+    position: relative;
+    cursor: pointer;
+    color: #2c3e50;
+    font-weight: 600;
+
+    &:hover .items-tooltip {
+        display: block;
+    }
+}
+
+.items-tooltip {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 10px;
+    border-radius: 6px;
+    z-index: 10;
+    min-width: 200px;
+    font-size: 0.85rem;
+    font-weight: normal;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* ========== TOTAL CELL ========== */
+.total-cell {
+    font-weight: 800;
+    color: #27AE60;
+    font-size: 1rem;
+}
+
+/* ========== BADGES ========== */
+.badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #eee;
+    color: #666;
+    white-space: nowrap;
+
+    &.table-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #bbdefb;
+    }
+
+    /* Status Colors */
+    &.badge-pending {
+        background: #FFF3E0;
+        color: #E67E22;
+    }
+
+    &.badge-ready {
+        background: #E8F5E9;
+        color: #27AE60;
+    }
+
+    &.badge-delivered {
+        background: #E3F2FD;
+        color: #2980B9;
+    }
+}
+
+/* ========== BUTTONS ========== */
+.btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    font-weight: 600;
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    &:active {
+        transform: scale(0.96);
+    }
+
+    &.primary-btn {
+        background: #27AE60;
+        color: white;
+        border: 1px solid #27AE60;
+
+        &:hover {
+            background: #219150;
+        }
+    }
+
+    &.share-btn {
+        /* Custom style passed inline usually, but base here */
+    }
+}
+
+.no-data {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+    font-style: italic;
+}

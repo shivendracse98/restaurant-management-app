@@ -1,0 +1,186 @@
+/* ================= POS TIFFIN COMPONENT ================= */
+.pos-tiffin-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    height: 100%;
+
+    h3 {
+        color: #222;
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin: 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #FFF1DE;
+    }
+}
+
+/* ========== TIFFIN WORKSPACE (Form & Pricing) ========== */
+.tiffin-workspace {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    align-items: start;
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========== TIFFIN FORM ========== */
+.tiffin-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+
+    .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+
+        label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            width: 100%;
+
+            &:focus {
+                outline: none;
+                border-color: #E67E22;
+                box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
+            }
+        }
+
+        textarea {
+            resize: vertical;
+        }
+    }
+}
+
+/* ========== PRICING CARD ========== */
+.pricing-card {
+    background: #e3f2fd;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #90caf9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    h4 {
+        margin-top: 0;
+        color: #1565c0;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    hr {
+        border: 0;
+        border-top: 1px solid #bbdefb;
+        margin: 1rem 0;
+    }
+}
+
+/* ========== TABLE STYLES (Reused) ========== */
+/* Note: Consider importing a shared SCSS file if moving to a real design system.
+   For now, we duplicate the basic table styles to keep component standalone. */
+.table-wrapper {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+
+    th,
+    td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    th {
+        background: #f9f9f9;
+        font-weight: 700;
+        color: #555;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+}
+
+/* ========== BADGES ========== */
+.badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #eee;
+    color: #666;
+    white-space: nowrap;
+
+    &.badge-ready {
+        background: #E8F5E9;
+        color: #27AE60;
+    }
+
+    &.badge-pending {
+        background: #FFF3E0;
+        color: #E67E22;
+    }
+}
+
+/* ========== BUTTONS ========== */
+.btn {
+    padding: 0.65rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    &:active {
+        transform: scale(0.96);
+    }
+
+    &.primary-btn {
+        background: #27AE60;
+        color: white;
+
+        &:hover {
+            background: #219150;
+        }
+    }
+}
+
+.no-data {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+    font-style: italic;
+}

@@ -1,0 +1,47 @@
+<div class="zomato-card" (click)="onCardClick()">
+
+    <!-- 1. Image Section -->
+    <div class="img-container">
+        <div class="img-wrapper">
+            <img [ngSrc]="imageUrl()" fill priority class="card-img" alt="{{ data().name }}">
+        </div>
+
+        <!-- Promotion/Status Badges -->
+        <div class="badges-overlay">
+            <span class="badge prompt" *ngIf="data().promoted">Promoted</span>
+            <span class="badge discount" *ngIf="true">50% OFF</span> <!-- Mock Discount -->
+        </div>
+
+        <!-- Duration Badge on Image -->
+        <div class="time-badge">
+            ⏱ {{ deliveryTime() }}
+        </div>
+    </div>
+
+    <!-- 2. Content Details -->
+    <div class="content-details">
+
+        <!-- Name & Rating Row -->
+        <div class="row-header">
+            <h3 class="res-name">{{ data().name }}</h3>
+            <div class="rating-badge">
+                {{ rating() }} <span class="star">★</span>
+            </div>
+        </div>
+
+        <!-- Cuisines & Price -->
+        <div class="row-meta">
+            <span class="cuisine-text">{{ cuisines() }}</span>
+            <span class="price-text">{{ costForTwo() }}</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Footer Action (Safety/Live Tracking) -->
+        <div class="row-footer">
+            <img src="assets/icons/safety.png" class="icon-safety" onerror="this.style.display='none'">
+            <span class="safety-text">Follows best safety standards</span>
+        </div>
+
+    </div>
+</div>

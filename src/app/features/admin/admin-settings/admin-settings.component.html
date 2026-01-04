@@ -127,6 +127,7 @@
 
 
             <!-- CARD 4: DELIVERY MANAGEMENT -->
+            @if (featureFlagStore.isFeatureEnabled('DELIVERY_MANAGEMENT')) {
             <div class="card mb-4">
                 <div class="card-header">
                     <h2>🚚 Delivery Settings</h2>
@@ -190,6 +191,7 @@
 
                 </div>
             </div>
+            }
 
             <!-- ACTIONS -->
             <div class="actions">

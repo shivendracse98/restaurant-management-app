@@ -1,0 +1,61 @@
+<div class="pos-order-container">
+    <!-- 1. Search & Manage Bar -->
+    <div class="menu-header">
+        <div class="search-bar">
+            <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)"
+                placeholder="🔍 Search menu or category..." class="search-input" />
+        </div>
+
+        <button class="btn manage-btn" [style.background-color]="isManageMode() ? '#E74C3C' : '#3498DB'"
+            (click)="placeOrderTrigger.emit()" *ngIf="false"> <!-- Hidden action button if needed -->
+        </button>
+    </div>
+
+    <!-- 2. Manage Mode Warning -->
+    <div *ngIf="isManageMode()" class="manage-warning">
+        ⚠️ <strong>Manage Mode Active</strong>: Tap items to toggle In Stock / Out of Stock
+    </div>
+
+    <!-- 3. Menu Grid -->
+    <div class="menu-grid">
+        <div class="menu-item" *ngFor="let item of filteredMenu" [class.out-of-stock]="item.isAvailable === false"
+            [style.opacity]="item.isAvailable === false ? '0.6' : '1'">
+
+            <!-- Out of Stock Overlay -->
+            <div *ngIf="item.isAvailable === false" class="oos-overlay">
+                <span>OUT OF STOCK</span>
+            </div>
+
+            <img [src]="item.imageUrl" [alt]="item.name" />
+
+            <div class="meta">
+                <div class="name">{{ item.name }}</div>
+                <div class="category">{{ item.category }}</div>
+                <div class="price">₹{{ item.price }}</div>
+            </div>
+
+            <button class="btn add" (click)="onAddItem(item)"
+                [style.background-color]="isManageMode() ? (item.isAvailable !== false ? '#E74C3C' : '#27AE60') : ''">
+                {{ isManageMode() ? (item.isAvailable !== false ? '🚫 Disable' : '✅ Enable') : '+ Add' }}
+            </button>
+        </div>
+    </div>
+
+    <!-- 4. Floating Cart Bar (Visible when items in cart) -->
+    <div class="fab-cart-bar" *ngIf="cartItems.length > 0" (click)="placeOrderTrigger.emit()">
+        <div class="fab-info">
+            <span class="count">{{ cartItems.length }} Item(s)</span>
+            <span class="pipe">|</span>
+            <span class="total">₹{{ getTotal() }}</span>
+        </div>
+        <div class="fab-action">
+            View Cart 🛒
+        </div>
+    </div>
+</div>
+
+<!-- 5. Cart Details (Actually, the parent handles the Modal for now per design, 
+     but wait, the request was to move Cart Logic here? 
+     Let's keep the Cart Modal in the Parent for now as it contains the FORM 
+     which is shared. But the FAB is here.) 
+-->
