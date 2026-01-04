@@ -9,9 +9,25 @@ export const guestGuard: CanActivateFn = () => {
 
   const user = auth.currentUser();
   if (user) {
-    // If logged in, redirect by role
-    const target = user.role === 'ADMIN' ? '/admin/dashboard' : '/menu';
-    router.navigate([target]);
+    // If logged in, redirect based on role immediately
+    let target = '/home';
+
+    switch (user.role) {
+      case 'SUPER_ADMIN':
+        target = '/super-admin';
+        break;
+      case 'ADMIN':
+        target = '/admin/dashboard';
+        break;
+      case 'STAFF':
+        target = '/staff/pos?tab=order';
+        break;
+      default:
+        target = '/customer/dashboard';
+        break;
+    }
+
+    router.navigateByUrl(target);
     return false;
   }
 

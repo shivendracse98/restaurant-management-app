@@ -123,3 +123,36 @@
         }
     }
 }
+
+// ==== RESPONSIVE ====
+@media (max-width: 768px) {
+    .onboard-container {
+        padding: 1rem;
+
+        .card {
+            padding: 1.5rem;
+
+            .card-header {
+                h2 {
+                    font-size: 1.4rem;
+                }
+            }
+
+            .form-section {
+                h3 {
+                    font-size: 1rem;
+                }
+            }
+
+            .actions {
+                flex-direction: column-reverse;
+                /* Stack buttons, cancel at bottom */
+                gap: 0.8rem;
+
+                button {
+                    padding: 0.8rem;
+                }
+            }
+        }
+    }
+}

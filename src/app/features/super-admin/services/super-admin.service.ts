@@ -33,4 +33,13 @@ export class SuperAdminService {
     reactivateTenant(tenantId: string): Observable<string> {
         return this.http.post(`${this.apiUrl}/tenants/${tenantId}/reactivate`, {}, { responseType: 'text' });
     }
+
+    // Feature Flags
+    enableFeature(tenantId: string, feature: string): Observable<string> {
+        return this.http.post(`${environment.apiBaseUrl}/api/feature-flags/enable?feature=${feature}&tenantId=${tenantId}`, {}, { responseType: 'text' });
+    }
+
+    disableFeature(tenantId: string, feature: string): Observable<string> {
+        return this.http.post(`${environment.apiBaseUrl}/api/feature-flags/disable?feature=${feature}&tenantId=${tenantId}`, {}, { responseType: 'text' });
+    }
 }

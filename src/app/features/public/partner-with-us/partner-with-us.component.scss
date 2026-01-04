@@ -1,0 +1,233 @@
+// ==== PARTNER ONBOARDING PAGE SCSS ====
+
+.partner-page-container {
+    min-height: 100vh;
+    background-image: url('https://b.zmtcdn.com/merchant-onboarding/43fa6935cc114d5917208479e18b87731604561042.png'); // Generic Zomato/Swiggy background
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+    color: #333;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6); // Dark Overlay
+        z-index: 1;
+    }
+
+    // Ensure content is above overlay
+    .partner-nav,
+    .content-wrapper {
+        position: relative;
+        z-index: 2;
+    }
+}
+
+.partner-nav {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .logo {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: white;
+        font-style: italic;
+        cursor: pointer;
+
+        .badge {
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: white;
+            color: #333;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-style: normal;
+            vertical-align: middle;
+        }
+    }
+}
+
+.content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: calc(100vh - 80px);
+
+    @media (max-width: 900px) {
+        flex-direction: column;
+        gap: 40px;
+        padding-top: 20px;
+    }
+}
+
+// Left Section
+.hero-text {
+    max-width: 500px;
+    color: white;
+
+    h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        line-height: 1.2;
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 40px;
+    }
+
+    .benefits-list {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+
+        .benefit-item {
+            display: flex;
+            gap: 15px;
+
+            .icon {
+                font-size: 2rem;
+                background: rgba(255, 255, 255, 0.1);
+                width: 60px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+            }
+
+            .text {
+                h3 {
+                    font-size: 1.1rem;
+                    margin-bottom: 5px;
+                }
+
+                p {
+                    font-size: 0.9rem;
+                    opacity: 0.8;
+                }
+            }
+        }
+    }
+}
+
+// Right Section (Form)
+.form-card {
+    background: white;
+    width: 100%;
+    max-width: 450px;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+
+    h2 {
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .form-sub {
+        color: #666;
+        margin-bottom: 25px;
+        font-size: 0.95rem;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.2s;
+
+            &:focus {
+                border-color: #2563EB;
+                outline: none;
+            }
+        }
+    }
+
+    .row-group {
+        display: flex;
+        gap: 15px;
+
+        .form-group {
+            flex: 1;
+        }
+    }
+
+    .btn-primary {
+        background: #E67E22; // Primary Brand Color
+        color: white;
+        border: none;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background 0.2s;
+
+        &:hover {
+            background: #D35400;
+        }
+
+        &:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    }
+
+    .full-width {
+        width: 100%;
+    }
+
+    .disclaimer {
+        font-size: 0.75rem;
+        color: #999;
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    // Success State
+    .success-message {
+        text-align: center;
+        padding: 40px 20px;
+
+        .check-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #27AE60;
+        }
+
+        p {
+            margin-bottom: 30px;
+            line-height: 1.5;
+            color: #555;
+        }
+    }
+}

@@ -8,8 +8,16 @@ export const customerGuard: CanActivateFn = () => {
   const router = inject(Router);
   const user = auth.currentUser();
 
-  if (!user || user.role !== 'CUSTOMER') {
-    router.navigate(['/home']);
+  if (!user) {
+    router.navigate(['/login']);
+    return false;
+  }
+
+  if (user.role !== 'CUSTOMER') {
+    if (user.role === 'ADMIN') router.navigate(['/admin/dashboard']);
+    else if (user.role === 'STAFF') router.navigate(['/staff/pos']);
+    else if (user.role === 'SUPER_ADMIN') router.navigate(['/super-admin']);
+    else router.navigate(['/home']);
     return false;
   }
   return true;

@@ -17,6 +17,7 @@ import { StaffTodayOrdersComponent } from './features/staff/staff-today-orders/s
 import { MenuManagementComponent } from './features/admin/menu-management/menu-management.component';
 import { PendingPaymentsComponent } from './features/admin/payments/pending-payments.component';
 import { superAdminGuard } from './core/guards/super-admin.guard';
+import { guestGuard } from './core/guards/guest.guard';
 
 
 export const routes: Routes = [
@@ -139,10 +140,23 @@ export const routes: Routes = [
     canActivate: [authGuard, superAdminGuard]
   },
   { path: 'dashboard', component: CustomerDashboardComponent, canActivate: [authGuard, customerGuard] },
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'forgot-password', loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
   { path: 'reset-password', loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent) },
-  { path: 'register', component: RegisterComponent },
+  { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
+  // ✅ NEW: Public Partner Onboarding
+  {
+    path: 'partner-with-us',
+    loadComponent: () => import('./features/public/partner-with-us/partner-with-us.component').then(m => m.PartnerWithUsComponent)
+  },
+  // ✅ NEW: Static Pages (SEO/Footer Links)
+  { path: 'about', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'about' } },
+  { path: 'careers', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'careers' } },
+  { path: 'team', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'team' } },
+  { path: 'contact', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'contact' } },
+  { path: 'help', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'help' } },
+  { path: 'terms', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'terms' } },
+  { path: 'privacy', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'privacy' } },
   // ✅ Catch-all wildcard route (must be last)
   { path: '**', redirectTo: 'home' }
 ];

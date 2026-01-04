@@ -1,103 +1,140 @@
 <div class="home-container">
 
-  <!-- HERO SECTION -->
-  <div class="hero">
-    <h1>Welcome to <span class="brand-accent">TasteTown</span> 🍔</h1>
-    <p>Discover the best local flavors, delivered straight to your table or doorstep. Select a restaurant below to start
-      your culinary journey.</p>
-  </div>
+  <!-- 1. HERO SECTION (Zomato Style) -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1 class="brand-title">TasteTown</h1>
+      <p class="brand-subtitle">Discover the best food & drinks in your city</p>
 
-  <!-- LOADER -->
-  <div *ngIf="loading" class="loading">
-    <div class="spinner"></div>
-    <p>Loading our partner kitchens...</p>
-  </div>
-
-  <!-- RESTAURANTS GRID (FLIP CARDS) -->
-  <div class="restaurants-section" *ngIf="!loading">
-    <div class="restaurant-grid">
-      <div class="restaurant-card" *ngFor="let tenant of tenants" (click)="selectTenant(tenant.tenantId)">
-        <div class="flip-inner">
-
-          <!-- FRONT FACE -->
-          <div class="flip-front">
-            <div class="img-wrapper">
-              <div class="card-img"
-                [style.background-image]="'url(' + (tenant.imageUrl || 'assets/default-restaurant.jpg') + ')'"></div>
-            </div>
-            <div class="card-content">
-              <h3>{{ tenant.name }}</h3>
-              <p>{{ tenant.description }}</p>
-            </div>
-          </div>
-
-          <!-- BACK FACE -->
-          <div class="flip-back">
-            <h3>{{ tenant.name }}</h3>
-            <p>{{ tenant.detailedDescription || tenant.description }}</p>
-            <button class="btn-enter">View Menu ➔</button>
-          </div>
-
+      <!-- Smart Search Bar -->
+      <div class="search-bar-wrapper">
+        <div class="location-box">
+          <span class="icon">📍</span>
+          <input type="text" value="Bhopal, India" readonly class="loc-input">
+        </div>
+        <div class="divider"></div>
+        <div class="search-box">
+          <span class="icon">🔍</span>
+          <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+            placeholder="Search for restaurant, cuisine or a dish" class="search-input">
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MEET THE DEVELOPER SECTION -->
-  <section class="developer-section">
-    <h2>Meet the Developer</h2>
-    <div class="dev-card-container">
-      <div class="dev-inner">
-        <!-- Front -->
-        <div class="dev-front">
-          <div class="avatar">👨‍💻</div>
-          <h3>Shivendra</h3>
-          <span class="role">Software Engineer</span>
-        </div>
-        <!-- Back -->
-        <div class="dev-back">
-          <h3>Shivendra</h3>
-          <p>Software engineer having 5 years of industry experience. Worked for product-based companies like Manhattan
-            Associates, TCS, and Papa John's.</p>
-          <div class="contact-info">
-            <div>📞 +91 62675 26722</div>
-            <div>✉️ shivendra.cse.98&#64;gmail.com</div>
-          </div>
-        </div>
-      </div>
+  <!-- 2. CATEGORY FILTERS (Chips) -->
+  <div class="filters-section">
+    <div class="chips-scroll">
+      <button *ngFor="let cat of categories" class="chip-btn" (click)="filterByCategory(cat.name)">
+        {{ cat.icon }} {{ cat.name }}
+      </button>
     </div>
-  </section>
+  </div>
 
-  <!-- FOOTER -->
-  <footer class="site-footer">
-    <div class="footer-content">
+  <!-- 3. RESTAURANT GRID -->
+  <div class="content-section">
+    <h2 class="section-title">
+      {{ searchQuery() ? 'Search Results' : 'Delivery Restaurants in Bhopal' }}
+    </h2>
 
-      <!-- About -->
-      <div class="footer-col">
-        <h4>About TasteTown</h4>
-        <p>Your one-stop destination for multi-cuisine delights. Whether you crave a homely Tiffin or a gourmet Feast,
-          we connect you with the best kitchens in town.</p>
-      </div>
-
-      <!-- Address -->
-      <div class="footer-col">
-        <h4>Visit Us</h4>
-        <p>Shop No 12, Fortune Pride<br>
-          Trilanga, Bhopal<br>
-          Madhya Pradesh 462039</p>
-      </div>
-
-      <!-- Contact -->
-      <div class="footer-col">
-        <h4>Get in Touch</h4>
-        <p>Email: <a href="mailto:shivendra.cse.98@gmail.com">shivendra.cse.98&#64;gmail.com</a></p>
-        <p>Phone: +91 62675 26722</p>
-      </div>
-
+    <!-- Loading State -->
+    <div *ngIf="loading()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Finding the best kitchens...</p>
     </div>
 
-    <div class="copyright">
-      &copy; 2025 TasteTown. All rights reserved. Made with ❤️ in Bhopal.
+    <!-- Empty State -->
+    <div *ngIf="!loading() && filteredRestaurants().length === 0" class="empty-state">
+      <p>😞 No restaurants found matching "{{ searchQuery() }}"</p>
+      <button class="btn-clear" (click)="searchQuery.set('')">Clear Search</button>
+    </div>
+
+    <!-- The Grid -->
+    <div class="restaurants-grid" *ngIf="!loading()">
+      <app-restaurant-card *ngFor="let res of filteredRestaurants()" [data]="res"
+        (cardClick)="onRestaurantSelect($event)">
+      </app-restaurant-card>
+    </div>
+  </div>
+
+  <!-- 4. WHY TASTETOWN (Value Props) -->
+  <div class="value-props-section">
+    <div class="props-grid">
+      <div class="prop-card">
+        <div class="icon-circle">⚡</div>
+        <h3>Super Fast Delivery</h3>
+        <p>Doorstep delivery within 45 mins.</p>
+      </div>
+      <div class="prop-card">
+        <div class="icon-circle">🛡️</div>
+        <h3>Safe & Hygienic</h3>
+        <p>100% sanitized kitchens & riders.</p>
+      </div>
+      <div class="prop-card">
+        <div class="icon-circle">💰</div>
+        <h3>Best Prices</h3>
+        <p>No hidden fees. Honest pricing.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. FOOTER (Detailed & Concise) -->
+  <footer class="pro-footer">
+    <div class="footer-inner">
+
+      <!-- Brand & About -->
+      <div class="col-section">
+        <h2 class="brand-name">TasteTown</h2>
+        <p class="copyright">© 2025 All rights reserved</p>
+        <p class="desc-text mt-2">
+          A modern restaurant tech platform simplifying operations from orders to billing.
+        </p>
+      </div>
+
+      <!-- Company -->
+      <div class="col-section">
+        <h4>Company</h4>
+        <div class="info-block">
+          <strong>Careers</strong>
+          <p>Building practical tech. Join us if you love food-tech & solving real problems.</p>
+        </div>
+        <div class="info-block">
+          <strong>Team</strong>
+          <p>Built by experts in operations, engineering, and design.</p>
+        </div>
+      </div>
+
+      <!-- Contact & Support -->
+      <div class="col-section">
+        <h4>Contact & Support</h4>
+        <div class="info-block">
+          <strong>Help</strong>
+          <p>Onboarding & setup support available.</p>
+        </div>
+        <div class="info-block">
+          <strong>Partner</strong>
+          <p>Restaurant or delivery partner? Grow with us.</p>
+        </div>
+        <div class="contact-details">
+          <p>📧 shivendra.cse.98&#64;gmail.com</p>
+          <p>📞 6267526722</p>
+          <p>📍 India</p>
+        </div>
+      </div>
+
+      <!-- Legal -->
+      <div class="col-section">
+        <h4>Legal</h4>
+        <div class="info-block">
+          <strong>Terms</strong>
+          <p>Governs platform usage & subscriptions.</p>
+        </div>
+        <div class="info-block">
+          <strong>Privacy</strong>
+          <p>We protect your data responsibly.</p>
+        </div>
+      </div>
+
     </div>
   </footer>
 

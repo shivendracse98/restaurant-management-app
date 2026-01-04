@@ -59,4 +59,34 @@ export class SuperAdminDashboardComponent implements OnInit {
     const diff = end.getTime() - now.getTime();
     return Math.ceil(diff / (1000 * 3600 * 24));
   }
+
+  // Feature Management
+  readonly availableFeatures = ['DELIVERY_MANAGEMENT'];
+
+  toggleFeature(tenant: TenantDetail, feature: string, event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    const action = isChecked ? 'Enable' : 'Disable';
+
+    if (confirm(`${action} ${feature} for ${tenant.restaurantName}?`)) {
+      if (isChecked) {
+        this.superAdminService.enableFeature(tenant.tenantId, feature).subscribe({
+          next: () => alert('Feature Enabled!'),
+          error: () => {
+            alert('Failed to enable feature');
+            (event.target as HTMLInputElement).checked = !isChecked; // Revert
+          }
+        });
+      } else {
+        this.superAdminService.disableFeature(tenant.tenantId, feature).subscribe({
+          next: () => alert('Feature Disabled!'),
+          error: () => {
+            alert('Failed to disable feature');
+            (event.target as HTMLInputElement).checked = !isChecked; // Revert
+          }
+        });
+      }
+    } else {
+      (event.target as HTMLInputElement).checked = !isChecked; // Cancelled
+    }
+  }
 }

@@ -1,7 +1,50 @@
 <div class="reviews-container">
     <div class="header">
-        <h1>⭐ Customer Reviews</h1>
-        <p class="subtitle">Monitor and respond to customer feedback</p>
+        <div>
+            <h1>⭐ Customer Reviews</h1>
+            <p class="subtitle">Monitor and respond to customer feedback</p>
+        </div>
+        <div class="stats-card" *ngIf="!loading && reviews.length > 0">
+            <div class="big-stat">
+                <span class="number">{{ stats.average }}</span>
+                <span class="stars">⭐</span>
+                <span class="label">Average Rating</span>
+            </div>
+            <div class="total-stat">
+                <strong>{{ stats.total }}</strong>
+                <span>Total Reviews</span>
+            </div>
+            <div class="breakdown">
+                <!-- Simple visual bars for 5 to 1 stars -->
+                <div class="bar-row" *ngFor="let count of stats.breakdown.slice().reverse(); let i = index">
+                    <span class="star-label">{{ 5 - i }}★</span>
+                    <div class="bar-track">
+                        <div class="bar-fill" [style.width.%]="(count / stats.total) * 100"></div>
+                    </div>
+                    <span class="count">{{ count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar" *ngIf="!loading">
+        <div class="filter-group">
+            <label>Rating:</label>
+            <button [class.active]="filterRating === 'ALL'" (click)="setRatingFilter('ALL')">All</button>
+            <button [class.active]="filterRating === 5" (click)="setRatingFilter(5)">5★</button>
+            <button [class.active]="filterRating === 4" (click)="setRatingFilter(4)">4★</button>
+            <button [class.active]="filterRating === 3" (click)="setRatingFilter(3)">3★</button>
+            <button [class.active]="filterRating === 2" (click)="setRatingFilter(2)">2★</button>
+            <button [class.active]="filterRating === 1" (click)="setRatingFilter(1)">1★</button>
+        </div>
+        <div class="filter-group">
+            <label>Status:</label>
+            <button [class.active]="filterStatus === 'ALL'" (click)="setFilterStatus('ALL')">All</button>
+            <button [class.active]="filterStatus === 'UNREPLIED'" (click)="setFilterStatus('UNREPLIED')">Needs
+                Reply</button>
+            <button [class.active]="filterStatus === 'REPLIED'" (click)="setFilterStatus('REPLIED')">Replied</button>
+        </div>
     </div>
 
     <!-- Loading Spinner -->
@@ -10,55 +53,62 @@
     </div>
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="!loading && reviews.length === 0">
+    <div class="empty-state" *ngIf="!loading && filteredReviews.length === 0">
         <div class="icon">📝</div>
-        <h3>No Reviews Yet</h3>
-        <p>Wait for customers to rate their experience.</p>
+        <h3>No Reviews Found</h3>
+        <p>Try adjusting your filters or wait for new feedback.</p>
     </div>
 
     <!-- Reviews List -->
     <div class="reviews-list" *ngIf="!loading">
-        <div class="review-card" *ngFor="let review of reviews" [class.hidden-review]="review.isHidden">
+        <div class="review-card" *ngFor="let review of filteredReviews" [class.hidden-review]="review.isHidden">
 
             <div class="review-header">
                 <div class="user-info">
-                    <span class="avatar">{{ review.customerName.charAt(0) | uppercase }}</span>
+                    <div class="avatar"
+                        [style.background-color]="review.rating >= 4 ? '#2ecc71' : (review.rating >= 3 ? '#f1c40f' : '#e74c3c')">
+                        {{ review.customerName.charAt(0) | uppercase }}
+                    </div>
                     <div>
-                        <h4>{{ review.customerName }}</h4>
-                        <span class="date">Customer #{{ review.customerId }}</span>
-                        <!-- Format date if available -->
+                        <h4>{{ review.customerName }} <span class="badge-verified">Verified Customer</span></h4>
+                        <span class="date">{{ review.createdAt | date:'mediumDate' }} • Customer #{{ review.customerId
+                            }}</span>
                     </div>
                 </div>
-                <div class="rating">
-                    <span *ngFor="let s of getStars(review.rating)">⭐</span>
+                <div class="rating-badge" [class.high]="review.rating >= 4" [class.med]="review.rating === 3"
+                    [class.low]="review.rating < 3">
+                    {{ review.rating }} ⭐
                 </div>
             </div>
 
             <div class="review-content">
-                <p>"{{ review.comment }}"</p>
+                <p>{{ review.comment }}</p>
             </div>
 
             <!-- Admin Reply Display -->
             <div class="admin-reply" *ngIf="review.adminReply && activeReplyId !== review.id">
-                <strong>↪️ Response:</strong> {{ review.adminReply }}
+                <div class="reply-header">
+                    <strong>↪️ Response from Restaurant:</strong>
+                </div>
+                <p>{{ review.adminReply }}</p>
             </div>
 
             <!-- Reply Form -->
             <div class="reply-form" *ngIf="activeReplyId === review.id">
-                <textarea [(ngModel)]="replyText" placeholder="Write your response..."></textarea>
+                <textarea [(ngModel)]="replyText" placeholder="Write your response to this customer..."></textarea>
                 <div class="actions">
                     <button class="btn-cancel" (click)="cancelReply()">Cancel</button>
-                    <button class="btn-submit" (click)="submitReply(review.id!)">Send Reply</button>
+                    <button class="btn-submit" (click)="submitReply(review.id!)">Post Reply</button>
                 </div>
             </div>
 
             <div class="card-footer">
                 <button class="btn-link" (click)="openReply(review)" *ngIf="activeReplyId !== review.id">
-                    {{ review.adminReply ? 'Edit Reply' : '↩️ Reply' }}
+                    {{ review.adminReply ? '✏️ Edit Reply' : '↩️ Reply' }}
                 </button>
 
                 <button class="btn-link danger" (click)="toggleHide(review)">
-                    {{ review.isHidden ? '👁️ Unhide' : '🚫 Hide' }}
+                    {{ review.isHidden ? '👁️ Unhide Review' : '🚫 Hide Review' }}
                 </button>
             </div>
 

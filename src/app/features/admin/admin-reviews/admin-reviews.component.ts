@@ -26,11 +26,23 @@ export class AdminReviewsComponent implements OnInit {
         this.loadReviews();
     }
 
+    // Filtering
+    filterRating: number | 'ALL' = 'ALL';
+    filterStatus: 'ALL' | 'REPLIED' | 'UNREPLIED' = 'ALL';
+
+    // Stats
+    stats = {
+        average: 0,
+        total: 0,
+        breakdown: [0, 0, 0, 0, 0] // 1-5 stars
+    };
+
     loadReviews(): void {
         this.loading = true;
         this.reviewService.getAllReviews().subscribe({
             next: (data) => {
                 this.reviews = data;
+                this.calculateStats();
                 this.loading = false;
             },
             error: (err) => {
@@ -38,6 +50,39 @@ export class AdminReviewsComponent implements OnInit {
                 this.loading = false;
             }
         });
+    }
+
+    calculateStats() {
+        if (this.reviews.length === 0) return;
+
+        this.stats.total = this.reviews.length;
+        this.stats.breakdown = [0, 0, 0, 0, 0];
+        const sum = this.reviews.reduce((acc, r) => {
+            const ratingIndex = Math.max(0, Math.min(4, Math.floor(r.rating) - 1));
+            this.stats.breakdown[ratingIndex]++;
+            return acc + r.rating;
+        }, 0);
+
+        this.stats.average = +(sum / this.reviews.length).toFixed(1);
+    }
+
+    get filteredReviews(): Review[] {
+        return this.reviews.filter(r => {
+            const matchRating = this.filterRating === 'ALL' || Math.floor(r.rating) === this.filterRating;
+            const matchStatus = this.filterStatus === 'ALL' ||
+                (this.filterStatus === 'REPLIED' && !!r.adminReply) ||
+                (this.filterStatus === 'UNREPLIED' && !r.adminReply);
+
+            return matchRating && matchStatus;
+        });
+    }
+
+    setRatingFilter(rating: number | 'ALL') {
+        this.filterRating = rating;
+    }
+
+    setFilterStatus(status: 'ALL' | 'REPLIED' | 'UNREPLIED') {
+        this.filterStatus = status;
     }
 
     getStars(rating: number): number[] {
