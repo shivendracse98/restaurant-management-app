@@ -32,10 +32,93 @@ export class SuperAdminDashboardComponent implements OnInit {
     });
   }
 
+  // Dashboard Logic
+  searchTerm = '';
+  filterStatus = 'ALL'; // ALL, ACTIVE, PENDING, SUSPENDED, EXPIRED
+
+  // Pagination
+  currentPage = 1;
+  pageSize = 5;
+
+  get filteredTenants(): TenantDetail[] {
+    let result = this.tenants;
+
+    // 1. Filter by Status
+    if (this.filterStatus !== 'ALL') {
+      result = result.filter(t => t.status === this.filterStatus);
+    }
+
+    // 2. Filter by Search
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase();
+      result = result.filter(t =>
+        t.restaurantName.toLowerCase().includes(term) ||
+        t.ownerEmail.toLowerCase().includes(term) ||
+        t.tenantId.toLowerCase().includes(term)
+      );
+    }
+
+    return result;
+  }
+
+  get paginatedTenants(): TenantDetail[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredTenants.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredTenants.length / this.pageSize);
+  }
+
+  setPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  get pagesArray(): number[] {
+    return Array(this.totalPages).fill(0).map((x, i) => i + 1);
+  }
+
+  // Stats
+  get totalTenantsCount(): number { return this.tenants.length; }
+  get activeTenantsCount(): number { return this.tenants.filter(t => t.status === 'ACTIVE').length; }
+  get pendingTenantsCount(): number {
+    return this.tenants.filter(t => t.status === 'TRIAL' || t.status === 'SUSPENDED').length;
+  }
+  // Mock Revenue Calculation
+  get estimatedRevenue(): number {
+    return this.tenants.reduce((acc, t) => {
+      if (t.planType === 'MONTHLY') return acc + 29; // Mock $29/mo
+      if (t.planType === 'YEARLY') return acc + 290; // Mock $290/yr
+      if (t.planType === 'LIFETIME') return acc + 999;
+      return acc;
+    }, 0);
+  }
+
+  // Helpers
+  getInitials(name: string): string {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  }
+
+  getDaysRemaining(endDate: string): number {
+    if (!endDate) return 0;
+    const end = new Date(endDate);
+    const now = new Date();
+    const diff = end.getTime() - now.getTime();
+    return Math.ceil(diff / (1000 * 3600 * 24));
+  }
+
+  // Actions
   extendSubscription(tenant: TenantDetail): void {
     if (confirm(`Extend subscription for ${tenant.restaurantName} by 1 month?`)) {
       this.superAdminService.extendSubscription(tenant.tenantId, 1).subscribe(() => {
-        alert('Extended!');
+        // alert('Extended!'); // Replace with toast if available
         this.loadTenants();
       });
     }
@@ -53,40 +136,30 @@ export class SuperAdminDashboardComponent implements OnInit {
     }
   }
 
-  getDaysRemaining(endDate: string): number {
-    const end = new Date(endDate);
-    const now = new Date();
-    const diff = end.getTime() - now.getTime();
-    return Math.ceil(diff / (1000 * 3600 * 24));
-  }
-
   // Feature Management
   readonly availableFeatures = ['DELIVERY_MANAGEMENT'];
 
   toggleFeature(tenant: TenantDetail, feature: string, event: Event): void {
     const isChecked = (event.target as HTMLInputElement).checked;
-    const action = isChecked ? 'Enable' : 'Disable';
 
-    if (confirm(`${action} ${feature} for ${tenant.restaurantName}?`)) {
-      if (isChecked) {
-        this.superAdminService.enableFeature(tenant.tenantId, feature).subscribe({
-          next: () => alert('Feature Enabled!'),
-          error: () => {
-            alert('Failed to enable feature');
-            (event.target as HTMLInputElement).checked = !isChecked; // Revert
-          }
-        });
-      } else {
-        this.superAdminService.disableFeature(tenant.tenantId, feature).subscribe({
-          next: () => alert('Feature Disabled!'),
-          error: () => {
-            alert('Failed to disable feature');
-            (event.target as HTMLInputElement).checked = !isChecked; // Revert
-          }
-        });
-      }
+    // Optimistic update
+    if (!tenant.features) tenant.features = {};
+    tenant.features[feature] = isChecked;
+
+    if (isChecked) {
+      this.superAdminService.enableFeature(tenant.tenantId, feature).subscribe({
+        error: () => {
+          if (tenant.features) tenant.features[feature] = !isChecked; // Revert
+          alert('Failed to enable feature');
+        }
+      });
     } else {
-      (event.target as HTMLInputElement).checked = !isChecked; // Cancelled
+      this.superAdminService.disableFeature(tenant.tenantId, feature).subscribe({
+        error: () => {
+          if (tenant.features) tenant.features[feature] = !isChecked; // Revert
+          alert('Failed to disable feature');
+        }
+      });
     }
   }
 }

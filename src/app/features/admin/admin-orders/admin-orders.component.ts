@@ -1,19 +1,22 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Added for ngModel binding
 import { OrderService } from '../../../core/services/order.service';
 import { Subject, timer } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
 import { FeatureFlagStore } from '../../../core/feature-flag/feature-flag.store';
+import { AssignDriverModalComponent } from './components/assign-driver-modal/assign-driver-modal.component';
 
 @Component({
   selector: 'app-admin-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AssignDriverModalComponent],
   templateUrl: './admin-orders.component.html',
   styleUrls: ['./admin-orders.component.scss']
 })
 export class AdminOrdersComponent implements OnInit, OnDestroy {
+  @ViewChild(AssignDriverModalComponent) driverModal!: AssignDriverModalComponent;
+
   orders: any[] = [];
   loading = false;
   errorMsg = '';
@@ -120,6 +123,18 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
         alert('Verification failed.');
       }
     });
+  }
+
+  openAssignDriver(order: any) {
+    this.driverModal.open(order.id);
+  }
+
+  onDriverAssigned() {
+    // Refresh orders to show updated status (OUT_FOR_DELIVERY)
+    this.pollOrders(); // Actually, just triggering one refresh is better than restarting polling
+    // But pollOrders restarts the timer. Let's just do a manual refresh or let the polling catch it.
+    // For immediate feedback:
+    this.orderService.refreshOrders().subscribe(data => this.orders = data);
   }
 
   formatDate(dateStr?: string): string {

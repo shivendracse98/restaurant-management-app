@@ -89,6 +89,14 @@
                 ✅ Verify
               </button>
 
+              <!-- Assign Driver Button (Feature Flagged) -->
+              @if (featureFlagStore.isFeatureEnabled('DELIVERY_MANAGEMENT')) {
+              <button *ngIf="order.status === 'READY' || order.status === 'PREPARING'" class="btn-assign"
+                (click)="openAssignDriver(order)" title="Assign Delivery Driver">
+                🚚 Assign Driver
+              </button>
+              }
+
               <select class="status-select" [value]="order.status" (change)="onStatusChange(order, $event)">
                 <option value="PENDING">Pending</option>
                 <option value="CONFIRMED">Confirmed</option>
@@ -112,6 +120,10 @@
       <p>No orders found yet! 🍔</p>
     </div>
   </ng-template>
+
+  <!-- Modals -->
+  <app-assign-driver-modal (assigned)="onDriverAssigned()">
+  </app-assign-driver-modal>
 
 </div>
 

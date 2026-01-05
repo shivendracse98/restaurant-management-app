@@ -101,7 +101,8 @@
           <form [formGroup]="orderForm" class="order-form">
             <div class="form-row two-col">
               <div>
-                <label>Table # <span style="color:red">*</span></label>
+                <label>Table # <span *ngIf="orderForm.get('orderType')?.value === 'DINE_IN'"
+                    style="color:red">*</span></label>
                 <input type="number" formControlName="tableNumber" placeholder="0 = Standing" class="highlight-input" />
                 <small style="color: #888; display: block; margin-top: 2px; font-size: 0.75rem;">
                   (0: Walk-in, >0: Append)
@@ -112,7 +113,22 @@
                 <select formControlName="orderType">
                   <option value="DINE_IN">Dine In</option>
                   <option value="TAKEAWAY">Takeaway</option>
+                  @if (featureFlagStore.isFeatureEnabled('DELIVERY_MANAGEMENT')) {
+                  <option value="DELIVERY">Delivery 🚚</option>
+                  }
                 </select>
+              </div>
+            </div>
+
+            <!-- Conditional Address for Delivery -->
+            <div class="form-row two-col" *ngIf="orderForm.get('orderType')?.value === 'DELIVERY'">
+              <div>
+                <label>Delivery Address <span style="color:red">*</span></label>
+                <textarea formControlName="address" rows="1" placeholder="Address..."></textarea>
+              </div>
+              <div>
+                <label>Pincode <span style="color:red">*</span></label>
+                <input type="text" formControlName="pincode" placeholder="e.g. 560001" />
               </div>
             </div>
 

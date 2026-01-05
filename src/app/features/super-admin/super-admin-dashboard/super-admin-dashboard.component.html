@@ -1,73 +1,151 @@
 <div class="sa-container">
+
+  <!-- Header -->
   <div class="header">
-    <h1>👑 TasteTown Command Center</h1>
+    <div>
+      <h1>Super Admin Dashboard</h1>
+      <p class="subtitle">Manage all restaurant tenants</p>
+    </div>
     <div class="actions">
-      <button class="btn-onboard" routerLink="/super-admin/onboard">➕ Onboard New Restaurant</button>
+      <button class="btn-onboard" routerLink="/super-admin/onboard">➕ Onboard New</button>
     </div>
   </div>
 
-  <div *ngIf="loading" class="loading">Loading Tenants...</div>
+  <!-- Metric Cards -->
+  <div class="metrics-grid">
+    <div class="card metric-card">
+      <div class="icon-circle blue"><i class="fas fa-store"></i></div>
+      <div class="metric-info">
+        <span class="label">Total Restaurants</span>
+        <span class="value">{{ totalTenantsCount }}</span>
+      </div>
+    </div>
 
-  <div *ngIf="!loading" class="table-responsive">
-    <table class="tenant-table">
-      <thead>
-        <tr>
-          <th>Restaurant</th>
-          <th>Owner</th>
-          <th>Plan</th>
-          <th>Status</th>
-          <th>Expiry</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let tenant of tenants">
-          <td>
-            <strong>{{ tenant.restaurantName }}</strong><br>
-            <small class="text-muted">{{ tenant.tenantId }}</small>
-          </td>
-          <td>
-            {{ tenant.ownerName }}<br>
-            <small class="text-muted">{{ tenant.ownerEmail }}</small>
-          </td>
-          <td>{{ tenant.planType }}</td>
-          <td>
-            <span class="badge" [ngClass]="tenant.status.toLowerCase()">
-              {{ tenant.status }}
-            </span>
-          </td>
-          <td>
-            {{ tenant.endDate | date:'mediumDate' }}
-            <div *ngIf="tenant.status !== 'EXPIRED'" class="days-left"
-              [ngClass]="{'critical': getDaysRemaining(tenant.endDate) < 5}">
-              ({{ getDaysRemaining(tenant.endDate) }} days left)
-            </div>
-          </td>
-          <td>
-            <!-- Existing Actions -->
-            <button class="btn-action btn-extend" (click)="extendSubscription(tenant)">
-              +1 Month
-            </button>
-            <button *ngIf="tenant.status !== 'SUSPENDED'" class="btn-action btn-suspend" (click)="toggleStatus(tenant)">
-              Suspend
-            </button>
-            <button *ngIf="tenant.status === 'SUSPENDED'" class="btn-action btn-reactivate"
-              (click)="toggleStatus(tenant)">
-              Reactivate
-            </button>
+    <div class="card metric-card">
+      <div class="icon-circle green"><i class="fas fa-check-circle"></i></div>
+      <div class="metric-info">
+        <span class="label">Active Tenants</span>
+        <span class="value">{{ activeTenantsCount }}</span>
+      </div>
+    </div>
 
-            <!-- Feature Flags Section -->
-            <div class="feature-toggles" style="margin-top: 8px; border-top: 1px dashed #ccc; padding-top: 5px;">
-              <div *ngFor="let feature of availableFeatures"
-                style="display: flex; align-items: center; gap: 5px; font-size: 0.85em;">
-                <input type="checkbox" [id]="'feature-' + tenant.tenantId + '-' + feature"
-                  (change)="toggleFeature(tenant, feature, $event)">
-                <label [for]="'feature-' + tenant.tenantId + '-' + feature">{{ feature.replace('_', ' ') }}</label>
+    <div class="card metric-card">
+      <div class="icon-circle orange"><i class="fas fa-clock"></i></div>
+      <div class="metric-info">
+        <span class="label">Pending/Trial</span>
+        <span class="value">{{ pendingTenantsCount }}</span>
+      </div>
+    </div>
+
+    <div class="card metric-card">
+      <div class="icon-circle cyan"><i class="fas fa-dollar-sign"></i></div>
+      <div class="metric-info">
+        <span class="label">Est. Revenue</span>
+        <span class="value">{{ estimatedRevenue | currency }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Card -->
+  <div class="card content-card">
+
+    <!-- Controls Bar -->
+    <div class="controls-bar">
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" placeholder="Search..." [(ngModel)]="searchTerm">
+      </div>
+
+      <div class="filters">
+        <button class="filter-pill" [class.active]="filterStatus === 'ALL'" (click)="filterStatus = 'ALL'">All</button>
+        <button class="filter-pill" [class.active]="filterStatus === 'ACTIVE'"
+          (click)="filterStatus = 'ACTIVE'">Active</button>
+        <button class="filter-pill" [class.active]="filterStatus === 'TRIAL'"
+          (click)="filterStatus = 'TRIAL'">Pending</button>
+        <button class="filter-pill" [class.active]="filterStatus === 'EXPIRED'"
+          (click)="filterStatus = 'EXPIRED'">Expired</button>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-responsive">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Logo</th>
+            <th>Restaurant Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Subscription</th>
+            <th>Delivery Mode</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tenant of paginatedTenants">
+            <td>
+              <div class="logo-circle">{{ getInitials(tenant.restaurantName) }}</div>
+            </td>
+            <td>
+              <div class="name-col">
+                <span class="primary-text">{{ tenant.restaurantName }}</span>
+                <span class="secondary-text">{{ tenant.tenantId }}</span>
               </div>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+            <td>{{ tenant.ownerEmail }}</td>
+            <td>
+              <span class="status-pill" [ngClass]="tenant.status.toLowerCase()">
+                {{ tenant.status }}
+              </span>
+            </td>
+            <td>
+              <div class="name-col">
+                <span class="primary-text">{{ tenant.endDate | date:'mediumDate' }}</span>
+                <span class="secondary-text" [class.urgent]="getDaysRemaining(tenant.endDate) < 7">
+                  {{ getDaysRemaining(tenant.endDate) }} days left
+                </span>
+              </div>
+            </td>
+            <td>
+              <!-- Fancy Switch -->
+              <label class="switch">
+                <input type="checkbox" [checked]="tenant.features?.['DELIVERY_MANAGEMENT'] === true"
+                  (change)="toggleFeature(tenant, 'DELIVERY_MANAGEMENT', $event)">
+                <span class="slider round"></span>
+              </label>
+            </td>
+            <td>
+              <div class="action-menu">
+                <button class="btn-icon" (click)="extendSubscription(tenant)" title="Extend Subscription">
+                  +1M
+                </button>
+                <button *ngIf="tenant.status !== 'SUSPENDED'" class="btn-icon danger" (click)="toggleStatus(tenant)"
+                  title="Suspend">
+                  🚫
+                </button>
+                <button *ngIf="tenant.status === 'SUSPENDED'" class="btn-icon success" (click)="toggleStatus(tenant)"
+                  title="Reactivate">
+                  ✅
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filteredTenants.length === 0">
+            <td colspan="7" class="empty-state">No tenants found matching your search.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-bar" *ngIf="totalPages > 1">
+      <span class="page-info">Showing page {{ currentPage }} of {{ totalPages }}</span>
+      <div class="page-controls">
+        <button (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+        <button *ngFor="let p of pagesArray" (click)="setPage(p)" [class.active]="p === currentPage">{{ p }}</button>
+        <button (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+      </div>
+    </div>
+
   </div>
 </div>

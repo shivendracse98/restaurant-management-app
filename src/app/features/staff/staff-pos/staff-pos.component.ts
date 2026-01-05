@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 // Re-trigger compile
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -22,6 +22,7 @@ import { ChartConfiguration } from 'chart.js';
 import { PosOrderTakingComponent } from './components/pos-order-taking/pos-order-taking.component';
 import { PosOngoingOrdersComponent } from './components/pos-ongoing-orders/pos-ongoing-orders.component';
 import { PosTiffinComponent } from './components/pos-tiffin/pos-tiffin.component';
+import { FeatureFlagStore } from '../../../core/feature-flag/feature-flag.store';
 
 @Component({
   selector: 'app-staff-pos',
@@ -76,8 +77,9 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     customerName: ['Walk-in Guest', Validators.required],
     customerPhone: ['0000000000'],
     address: ['Restaurant'],
+    pincode: [''], // Added pincode control
     orderType: ['DINE_IN', Validators.required],
-    tableNumber: ['', Validators.required], // ✅ REQUIRED
+    tableNumber: ['', Validators.required], // Default to required (matches default DINE_IN)
     items: [[] as FoodItem[]]
   });
 
@@ -126,7 +128,12 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private toastr: ToastrService,
     private leaveService: LeaveService
-  ) { }
+  ) {
+    this.featureFlagStore.loadFlags(); // Load flags on init
+  }
+
+  readonly featureFlagStore = inject(FeatureFlagStore); // Correct injection for SignalStore
+
 
   ngOnInit(): void {
     this.loadMenu();
@@ -138,6 +145,20 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     });
 
     // ✅ Active Polling: Fetch new data every 5s (Near Real-time)
+    this.orderForm.get('orderType')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(type => {
+      const tableCtrl = this.orderForm.get('tableNumber');
+      if (type === 'DELIVERY' || type === 'TAKEAWAY') {
+        // Optional for Delivery/Takeaway
+        tableCtrl?.clearValidators();
+        // If empty, maybe set default to 0 to avoid backend issues if it expects a number?
+        // But for now clear validators is enough for frontend.
+      } else {
+        // Mandatory for Dine In
+        tableCtrl?.setValidators([Validators.required]);
+      }
+      tableCtrl?.updateValueAndValidity();
+    });
+
     timer(0, 5000)
       .pipe(
         takeUntil(this.destroy$),
@@ -326,13 +347,17 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const type = this.orderForm.value.orderType;
     const tableNumStr = this.orderForm.value.tableNumber;
-    if (tableNumStr === null || tableNumStr === undefined || tableNumStr === '') {
-      this.message = '⚠️ Table Number is Required (Use 0 for No Table)';
+
+    // Validation: Table Number is strict only for DINE_IN
+    if (type === 'DINE_IN' && (tableNumStr === null || tableNumStr === undefined || tableNumStr === '')) {
+      this.message = '⚠️ Table Number is Required for Dine In';
       return;
     }
 
-    const tableNum = Number(tableNumStr);
+    // Default to 0 if empty (for Delivery/Takeaway)
+    const tableNum = (tableNumStr === null || tableNumStr === undefined || tableNumStr === '') ? 0 : Number(tableNumStr);
 
     // Map items to payload format
     this.pendingNewItems = items.map((i: FoodItem) => ({
@@ -401,6 +426,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
       customerName: this.orderForm.value.customerName || 'Walk-in Guest',
       customerPhone: this.orderForm.value.customerPhone || '0000000000',
       address: this.orderForm.value.address || 'Restaurant',
+      deliveryPincode: this.orderForm.value.pincode || '', // ✅ Map to backend field
       orderType: this.orderForm.value.orderType || 'DINE_IN',
       tableNumber: tableNum.toString(),
       items: this.pendingNewItems,

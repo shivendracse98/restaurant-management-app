@@ -35,7 +35,7 @@
 
   <!-- Category Navigation (Scroll Spy) -->
   <div class="category-nav" *ngIf="categories.length > 0">
-    <button *ngFor="let cat of categories" (click)="scrollToCategory(cat)">
+    <button *ngFor="let cat of categories" (click)="scrollToCategory(cat)" [class.active]="cat === activeCategory">
       {{ cat }}
     </button>
   </div>

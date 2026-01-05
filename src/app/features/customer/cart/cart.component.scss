@@ -171,6 +171,31 @@
   margin-top: 1.5rem;
   gap: 15px;
   flex-wrap: wrap;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 12px;
+
+    .btn {
+      width: 100%;
+      flex: none;
+      /* Disable flex-grow/shrink to enforce 100% width block */
+    }
+
+    /* Order: Proceed(1), Add Items(2), Clear(3) for better thumb reach? 
+       Or keep standard flow. Standard flow is Clear, Add, Proceed. 
+       Let's use order to prioritize 'Proceed' at top if desired, but visual order usually matches code order.
+       Code order: Clear, Add, Proceed.
+       On mobile, usually 'Proceed' should be accessible. 
+    */
+    .btn.primary {
+      order: -1;
+      /* Make 'Proceed' show first on mobile? 
+                    Actually, stick to bottom is standard, or top if stickied. 
+                    Let's just stack them naturally but ensure they are full width. */
+      order: 0;
+    }
+  }
 }
 
 .btn {
@@ -201,6 +226,16 @@
   color: white;
   border: none;
   box-shadow: 0 4px 15px rgba(255, 107, 74, 0.3);
+}
+
+.btn.secondary {
+  background: #fff;
+  color: #ff6b4a;
+  border: 2px solid #ff6b4a;
+
+  &:hover {
+    background: #fff5f2;
+  }
 }
 
 .empty-cart {

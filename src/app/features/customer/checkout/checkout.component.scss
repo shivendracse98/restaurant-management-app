@@ -155,18 +155,41 @@
       border: 2px solid #E67E22;
       border-left: 6px solid #E67E22;
 
-      h3 {
-        color: #E67E22;
-        margin: 0 0 1rem 0;
-        font-size: 1.1rem;
-        font-weight: 700;
+      .summary-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 0.5rem;
+        margin-bottom: 1rem;
 
-        &::before {
-          content: "📋";
-          font-size: 1.3rem;
+        h3 {
+          margin: 0;
+          color: #E67E22;
+          font-size: 1.1rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          &::before {
+            content: "📋";
+            font-size: 1.3rem;
+          }
+        }
+
+        .edit-link {
+          font-size: 0.85rem;
+          color: #E67E22;
+          text-decoration: none;
+          font-weight: 600;
+          border: 1px solid #E67E22;
+          padding: 4px 12px;
+          border-radius: 20px;
+          transition: all 0.2s;
+
+          &:hover {
+            background: #E67E22;
+            color: white;
+          }
         }
       }
 

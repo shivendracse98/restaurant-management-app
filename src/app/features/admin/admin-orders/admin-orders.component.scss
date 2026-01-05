@@ -142,6 +142,27 @@
       }
     }
 
+    .btn-verify {
+      background: #00b894;
+      color: white;
+
+      &:hover {
+        background: darken(#00b894, 5%);
+        transform: translateY(-1px);
+      }
+    }
+
+    .btn-assign {
+      background: #0984e3; // Blue for info/action
+      color: white;
+      margin-right: 0.5rem;
+
+      &:hover {
+        background: darken(#0984e3, 5%);
+        transform: translateY(-1px);
+      }
+    }
+
     tbody tr {
       transition: background 0.2s ease;
 

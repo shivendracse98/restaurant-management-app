@@ -13,7 +13,11 @@ export interface FeatureFlagConfig {
 })
 export class FeatureFlagService {
     private http = inject(HttpClient);
-    private apiUrl = `${environment.apiBaseUrl}/api/feature-flags`;
+    // Ensure we don't duplicate /api if it's already in the base URL
+    private get apiUrl(): string {
+        const base = environment.apiBaseUrl.replace(/\/api\/?$/, '');
+        return `${base}/api/feature-flags`;
+    }
     // Note: Backend endpoint may need adjustment based on final controller implementation.
     // Assuming a simplistic endpoint that returns a map of { "FEATURE_NAME": true/false }
 

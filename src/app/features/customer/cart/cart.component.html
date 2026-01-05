@@ -64,6 +64,7 @@
 
     <div class="actions">
       <button class="btn clear" (click)="cart.clear()">Clear Cart</button>
+      <button class="btn secondary" routerLink="/menu">Add More Items +</button>
       <button class="btn primary" (click)="goToCheckout()" [disabled]="cart.getCount() === 0">
         Proceed to Checkout
       </button>

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { SuperAdminRoutingModule } from './super-admin-routing.module';
 
@@ -12,7 +13,8 @@ import { SuperAdminDashboardComponent } from './super-admin-dashboard/super-admi
   ],
   imports: [
     CommonModule,
-    SuperAdminRoutingModule
+    SuperAdminRoutingModule,
+    FormsModule
   ]
 })
 export class SuperAdminModule { }

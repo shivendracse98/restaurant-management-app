@@ -35,11 +35,17 @@ export class SuperAdminService {
     }
 
     // Feature Flags
+    private get featureFlagBaseUrl(): string {
+        // Ensure we don't duplicate /api if it's already in the base URL
+        const base = environment.apiBaseUrl.replace(/\/api\/?$/, '');
+        return `${base}/api/feature-flags`;
+    }
+
     enableFeature(tenantId: string, feature: string): Observable<string> {
-        return this.http.post(`${environment.apiBaseUrl}/api/feature-flags/enable?feature=${feature}&tenantId=${tenantId}`, {}, { responseType: 'text' });
+        return this.http.post(`${this.featureFlagBaseUrl}/enable?feature=${feature}&tenantId=${tenantId}`, {}, { responseType: 'text' });
     }
 
     disableFeature(tenantId: string, feature: string): Observable<string> {
-        return this.http.post(`${environment.apiBaseUrl}/api/feature-flags/disable?feature=${feature}&tenantId=${tenantId}`, {}, { responseType: 'text' });
+        return this.http.post(`${this.featureFlagBaseUrl}/disable?feature=${feature}&tenantId=${tenantId}`, {}, { responseType: 'text' });
     }
 }

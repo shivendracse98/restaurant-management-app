@@ -1,5 +1,5 @@
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MenuService } from '../../../core/services/menu.service';
 import { FoodItem } from '../../../models/food-item.model';
@@ -19,7 +19,7 @@ export type MenuViewMode = 'customer' | 'admin';
   templateUrl: './menu-list.component.html',
   styleUrls: ['./menu-list.component.scss']
 })
-export class MenuListComponent implements OnInit {
+export class MenuListComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() viewMode: MenuViewMode = 'customer';
 
   foodItems: FoodItem[] = [];
@@ -28,6 +28,9 @@ export class MenuListComponent implements OnInit {
   filterType: 'ALL' | 'VEG' | 'NON_VEG' = 'ALL';
   currentTenantName = '';
   searchQuery = ''; // 🔍 New Search Query
+
+  activeCategory: string | null = null;
+  private observer: IntersectionObserver | null = null;
 
   constructor(
     private menuService: MenuService,
@@ -38,6 +41,12 @@ export class MenuListComponent implements OnInit {
     public authService: AuthService,
     private configService: ConfigService
   ) { }
+
+  ngOnDestroy(): void {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
 
   ngOnInit(): void {
     // 1. Check for QR Code Context (restaurantId, tableId)
@@ -125,7 +134,40 @@ export class MenuListComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit(): void {
+    this.setupObserver();
+  }
+
+  setupObserver(): void {
+    const options = {
+      root: null,
+      rootMargin: '-100px 0px -50% 0px', // Trigger when section hits top
+      threshold: 0
+    };
+
+    this.observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          if (id && id.startsWith('cat-')) {
+            this.activeCategory = id.replace('cat-', '');
+          }
+        }
+      });
+    }, options);
+
+    // Observe all category sections
+    // Note: We use setTimeout to ensure DOM is rendered if data comes async
+    setTimeout(() => {
+      const sections = document.querySelectorAll('.category-section');
+      sections.forEach(section => {
+        this.observer?.observe(section);
+      });
+    }, 500);
+  }
+
   scrollToCategory(category: string): void {
+    this.activeCategory = category;
     const element = document.getElementById('cat-' + category);
     if (element) {
       const yOffset = -120; // Adjust based on header height
