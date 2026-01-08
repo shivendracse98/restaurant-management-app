@@ -1,4 +1,5 @@
 
+
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -7,6 +8,8 @@ import { Order } from '../../../models/order.model';
 import { ToastrService } from 'ngx-toastr';
 import { Subject, timer } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
+import { WebSocketService } from '../../../core/services/websocket.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-kitchen',
@@ -16,7 +19,7 @@ import { takeUntil, switchMap } from 'rxjs/operators';
     <div class="kitchen-container">
       <div class="header">
         <div style="display: flex; gap: 15px; align-items: center;">
-          <h2>👨‍🍳 Kitchen Display System (KDS)</h2>
+          <h2>👨‍🍳 Kitchen Display System (KDS) <span class="live-badge" *ngIf="isLive">⚡ LIVE</span></h2>
           <a routerLink="/staff/pos" class="btn" style="width: auto; background: #e5e7eb; color: #374151; text-decoration: none;">
             ⬅️ Back to POS
           </a>
@@ -119,7 +122,16 @@ import { takeUntil, switchMap } from 'rxjs/operators';
       align-items: center;
       margin-bottom: 20px;
     }
-    h2 { margin: 0; color: #1f2937; }
+    h2 { margin: 0; color: #1f2937; display: flex; align-items: center; gap: 10px; }
+    .live-badge {
+        font-size: 0.8rem;
+        background: #10b981;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 999px;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     .last-updated { color: #6b7280; font-size: 0.9rem; }
 
     .board {
@@ -232,28 +244,99 @@ export class KitchenComponent implements OnInit, OnDestroy {
   preparingOrders: Order[] = [];
   readyOrders: Order[] = [];
   lastUpdated = new Date();
+  isLive = false;
 
   private destroy$ = new Subject<void>();
 
   constructor(
     private orderService: OrderService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private webSocketService: WebSocketService,
+    private auth: AuthService
   ) { }
 
   ngOnInit() {
-    // Poll every 5 seconds
-    timer(0, 5000)
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(() => this.orderService.refreshOrders()) // Re-fetch orders
-      )
-      .subscribe({
-        next: (orders) => {
-          this.processOrders(orders);
-          this.lastUpdated = new Date();
-        },
-        error: (err) => console.error('KDS polling error', err)
+    // 1. Initial Load
+    this.refreshOrders();
+    // 2. Setup WebSocket Live Stream
+    this.setupWebSocket();
+
+    // 3. Keep Slow Poll as Safety Net (Every 60s instead of 5s)
+    timer(60000, 60000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        console.log('🔄 Safety Poll KDS');
+        this.refreshOrders();
       });
+  }
+
+  setupWebSocket() {
+    const user = this.auth.currentUser();
+    if (user && user.restaurantId) {
+      this.webSocketService.connect();
+
+      // Bind Live Status to actual connection
+      this.webSocketService.isConnected()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(connected => {
+          this.isLive = connected;
+          if (connected) console.log('🟢 KDS is Online');
+          else console.warn('🔴 KDS is Offline');
+        });
+
+      this.webSocketService.subscribe('/topic/restaurant/' + user.restaurantId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((payload) => {
+          if (payload) {
+            console.log('⚡ KDS Update:', payload);
+
+            // Only beep for New Orders (CONFIRMED)
+            if (payload.status === 'CONFIRMED') {
+              this.playNotificationSound();
+            }
+
+            this.handleRealtimeUpdate(payload);
+          }
+        });
+    }
+  }
+
+  refreshOrders() {
+    this.orderService.refreshOrders().subscribe({
+      next: (orders) => {
+        this.processOrders(orders);
+        this.lastUpdated = new Date();
+      },
+      error: (err) => console.error('KDS load error', err)
+    });
+  }
+
+  handleRealtimeUpdate(payload: any) {
+    if (!payload || !payload.id) return;
+
+    // 1. Map Backend DTO -> Frontend Model
+    // (The payload has 'quantity'/'itemName', but view expects 'qty'/'name')
+    const mappedOrder: Order = {
+      ...payload,
+      items: (payload.items || []).map((i: any) => ({
+        menuItemId: i.menuItemId,
+        qty: i.quantity || i.qty,        // Map backend 'quantity' to frontend 'qty'
+        name: i.itemName || i.name,      // Map backend 'itemName' to frontend 'name'
+        price: i.pricePerUnit || i.price,
+        status: i.status
+      }))
+    };
+
+    console.log('⚡ Mapped Order for KDS:', mappedOrder);
+
+    this.moveOrderLocally(mappedOrder, mappedOrder.status);
+    this.lastUpdated = new Date();
+    // Removed redundant "Order Updated" toast
+  }
+
+  playNotificationSound(): void {
+    const audio = new Audio('assets/notification.mp3');
+    audio.play().catch(e => console.warn('Audio play blocked', e));
   }
 
   processOrders(allOrders: Order[]) {
@@ -262,10 +345,8 @@ export class KitchenComponent implements OnInit, OnDestroy {
     // Filter out served/cancelled
     const active = allOrders.filter(o => o.status !== 'CANCELLED' && o.status !== 'DELIVERED');
 
-    // Kitchen should ONLY see orders that are CONFIRMED by staff (Payment Verified)
-    // PENDING orders (Online/Counter) are waiting for verification and should NOT be in kitchen yet.
+    // Mismatched type workaround for strict checking if any
     this.pendingOrders = active.filter(o => (o.status as any) === 'CONFIRMED');
-
     this.preparingOrders = active.filter(o => o.status === 'PREPARING');
     this.readyOrders = active.filter(o => o.status === 'READY');
   }
@@ -274,7 +355,7 @@ export class KitchenComponent implements OnInit, OnDestroy {
     if (!order.id) return;
     this.orderService.updateOrderStatus(order.id, newStatus).subscribe({
       next: () => {
-        this.toastr.success(`Order #${order.id} moved to ${newStatus}`);
+        this.toastr.success(`Order #${order.id} moved to ${newStatus}`, '', { timeOut: 1500 });
         // Optimistic update locally to feel instant
         this.moveOrderLocally(order, newStatus);
       },
@@ -289,13 +370,13 @@ export class KitchenComponent implements OnInit, OnDestroy {
     this.readyOrders = this.readyOrders.filter(o => o.id !== order.id);
 
     // Update status
-    const updated = { ...order, status: newStatus as any }; // Cast to any to avoid enum type mismatch if string
+    const updated = { ...order, status: newStatus as any };
 
     // Add to new list
-    if (newStatus === 'PENDING') this.pendingOrders.push(updated);
+    if (newStatus === 'CONFIRMED') this.pendingOrders.push(updated); // Backend 'CONFIRMED' = Kitchen 'New'
+    else if (newStatus === 'PENDING') { /* Do nothing, wait for verification */ }
     else if (newStatus === 'PREPARING') this.preparingOrders.push(updated);
     else if (newStatus === 'READY') this.readyOrders.push(updated);
-    // If DELIVERED, it's just removed from KDS
   }
 
   ngOnDestroy() {

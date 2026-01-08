@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>Add Restaurant to Group</h2>
+
+<mat-dialog-content>
+    <div *ngIf="errorMessage" class="error-banner">
+        {{ errorMessage }}
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Search Restaurants</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [(ngModel)]="searchTerm" (keyup)="filter()" placeholder="Name or ID...">
+    </mat-form-field>
+
+    <div class="list-container">
+        <div *ngIf="isLoading" class="loading-spinner">
+            <mat-spinner diameter="30"></mat-spinner>
+        </div>
+
+        <mat-list *ngIf="!isLoading">
+            <mat-list-item *ngFor="let restaurant of filteredRestaurants" (click)="select(restaurant)"
+                [class.selected]="selectedRestaurant?.tenantId === restaurant.tenantId" class="restaurant-item">
+                <mat-icon matListItemIcon>store</mat-icon>
+                <div matListItemTitle>{{ restaurant.restaurantName }}</div>
+                <div matListItemLine>{{ restaurant.ownerName }} ({{ restaurant.tenantId }})</div>
+                <mat-icon *ngIf="selectedRestaurant?.tenantId === restaurant.tenantId"
+                    class="check-icon">check_circle</mat-icon>
+            </mat-list-item>
+
+            <div *ngIf="!isLoading && filteredRestaurants.length === 0" class="empty-state">
+                No available restaurants found.
+            </div>
+        </mat-list>
+    </div>
+</mat-dialog-content>
+
+<div mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="primary" (click)="assign()" [disabled]="!selectedRestaurant || isAssigning">
+        <mat-spinner diameter="20" *ngIf="isAssigning"></mat-spinner>
+        <span *ngIf="!isAssigning">Add Selected</span>
+    </button>
+</div>

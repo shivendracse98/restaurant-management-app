@@ -248,13 +248,38 @@ export class OrderService {
     );
   }
 
+  /**
+   * ✅ Handle Real-time Update from WebSocket
+   * Merges the payload into local cache immediately, avoiding Refetch Race Conditions.
+   */
+  upsertOrderFromWebSocket(backendOrder: any): void {
+    const order = this.mapBackendOrderToFrontend(backendOrder);
+    const current = this.ordersSubject.value;
+    const index = current.findIndex(o => o.id === order.id);
+
+    if (index > -1) {
+      // Update existing
+      current[index] = order;
+      this.ordersSubject.next([...current]);
+    } else {
+      // Add new
+      this.ordersSubject.next([order, ...current]);
+    }
+  }
+
   updateOrderStatus(id: number, status: string): Observable<any> {
     return this.http.patch<any>(`${this.apiUrl}/${id}/status`, null, { params: { status } }).pipe(
       tap(() => {
         const current = this.ordersSubject.value;
         const index = current.findIndex(o => o.id == id);
         if (index > -1) {
-          current[index].status = status as any;
+          const updatedOrder = { ...current[index] };
+          updatedOrder.status = status as any;
+          // ✅ Propagate status to items to match Backend Bridge Logic
+          if (updatedOrder.items) {
+            updatedOrder.items = updatedOrder.items.map((i: any) => ({ ...i, status: status }));
+          }
+          current[index] = updatedOrder;
           this.ordersSubject.next([...current]);
         }
       })

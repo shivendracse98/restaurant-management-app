@@ -8,4 +8,5 @@ export interface FoodItem {
     category: string;
     isAvailable?: boolean;
     isVeg?: boolean;
+    masterItemId?: string;
 }

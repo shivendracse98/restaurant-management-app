@@ -687,6 +687,80 @@
   }
 }
 
+// --- Mobile Responsiveness ---
+@media (max-width: 768px) {
+
+  /* Stack Header: Title Top, Tabs Bottom */
+  .header-row {
+    flex-direction: column;
+    /* Force vertical stack */
+    align-items: stretch;
+    /* Full width children */
+    gap: 1rem;
+    padding: 1rem;
+    /* More breathing room */
+
+    /* Ensure title row is flexible */
+    >div:first-child {
+      justify-content: space-between;
+      width: 100%;
+
+      h2 {
+        font-size: 1.5rem;
+        /* Slightly smaller on mobile */
+      }
+    }
+
+    .kitchen-link {
+      padding: 0.4rem 0.8rem;
+    }
+  }
+
+  /* Scrollable Tabs - VISIBLE SCROLLBAR for Affordance */
+  .header-row .tab-buttons {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    /* Space for scrollbar */
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    scrollbar-width: thin;
+    /* Firefox: show thin scrollbar */
+
+    /* Show Scrollbar on Chrome/Safari for visual cue */
+    &::-webkit-scrollbar {
+      display: block;
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 4px;
+    }
+
+    .tab-btn {
+      flex-shrink: 0;
+      white-space: nowrap;
+      padding: 0.5rem 0.8rem;
+      /* Compact padding */
+      font-size: 0.85rem;
+    }
+  }
+
+  /* Responsive Tiffin Form */
+  .tab-content .tiffin-form {
+    min-width: unset !important;
+    width: 100%;
+    grid-template-columns: 1fr;
+    /* Stack inputs */
+  }
+}
+
 .items-tooltip {
   display: none;
   position: absolute;

@@ -1,0 +1,31 @@
+<h2 mat-dialog-title>Change Subscription Plan</h2>
+
+<mat-dialog-content>
+    <p class="subtitle">Select a new plan for this group. Billing will be updated immediately.</p>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Select New Plan</mat-label>
+        <mat-select [(value)]="selectedPlanSlug">
+            <mat-option *ngFor="let plan of plans" [value]="plan.slug" [disabled]="plan.id === data.currentPlanId">
+                {{ plan.name }} - {{ plan.basePrice | currency:plan.currency }} / mo
+                <span *ngIf="plan.id === data.currentPlanId">(Current)</span>
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <div class="warning-box" *ngIf="selectedPlanSlug">
+        <mat-icon>info</mat-icon>
+        <span>
+            This change will update the group's billing model and feature access.
+        </span>
+    </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close [disabled]="loading">Cancel</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!selectedPlanSlug || loading">
+        <span *ngIf="!loading">Confirm Change</span>
+        <span *ngIf="loading">Processing...</span>
+    </button>
+</mat-dialog-actions>

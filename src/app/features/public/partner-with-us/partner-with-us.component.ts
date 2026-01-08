@@ -1,7 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
     selector: 'app-partner-with-us',
@@ -23,17 +25,35 @@ export class PartnerWithUsComponent {
     submitted = signal(false);
     loading = signal(false);
 
-    constructor(private router: Router) { }
+    // ROI Calculator Stats
+    dailyOrders = signal(20);
+    avgOrderValue = signal(400);
+
+    // Competitor Commission (e.g. 25%) vs TasteTown (10%)
+    competitorCost = computed(() => (this.dailyOrders() * this.avgOrderValue() * 30) * 0.25);
+    ourCost = computed(() => (this.dailyOrders() * this.avgOrderValue() * 30) * 0.10);
+    monthlySavings = computed(() => this.competitorCost() - this.ourCost());
+
+    constructor(
+        private router: Router,
+        private http: HttpClient
+    ) { }
 
     onSubmit() {
         this.loading.set(true);
+        const url = `${environment.apiBaseUrl}/public/contact/restaurant`;
 
-        // Simulate API Call
-        setTimeout(() => {
-            this.loading.set(false);
-            this.submitted.set(true);
-            // In real app: Call Backend Service here
-        }, 1500);
+        this.http.post(url, this.formData()).subscribe({
+            next: (res) => {
+                this.loading.set(false);
+                this.submitted.set(true);
+            },
+            error: (err) => {
+                console.error('Submission failed', err);
+                this.loading.set(false);
+                alert('Something went wrong. Please try again.');
+            }
+        });
     }
 
     goHome() {

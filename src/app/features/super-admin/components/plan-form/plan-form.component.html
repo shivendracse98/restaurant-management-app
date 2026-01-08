@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>{{ isEditMode ? 'Edit' : 'Create' }} Subscription Plan</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="form" class="plan-form">
+
+        <!-- Row 1: Name & Slug -->
+        <div class="form-row">
+            <mat-form-field appearance="outline">
+                <mat-label>Plan Name</mat-label>
+                <input matInput formControlName="name" placeholder="e.g. Gold Tier">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Slug (Optional, Auto-generated)</mat-label>
+                <input matInput formControlName="slug" placeholder="e.g. gold-tier">
+            </mat-form-field>
+        </div>
+
+        <!-- Row 2: Price & Order -->
+        <div class="form-row">
+            <mat-form-field appearance="outline">
+                <mat-label>Base Price (INR)</mat-label>
+                <input matInput type="number" formControlName="basePrice">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Sort Order</mat-label>
+                <input matInput type="number" formControlName="sortOrder">
+            </mat-form-field>
+        </div>
+
+        <!-- Description -->
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="3"></textarea>
+        </mat-form-field>
+
+        <!-- Features Checkboxes -->
+        <h3 class="section-title">Enable Features</h3>
+        <div class="features-grid">
+            <mat-checkbox *ngFor="let feat of features" [formControlName]="feat.key" color="primary">
+                {{feat.name}}
+            </mat-checkbox>
+        </div>
+
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="form.invalid">
+        {{ isEditMode ? 'Update Plan' : 'Create Plan' }}
+    </button>
+</mat-dialog-actions>

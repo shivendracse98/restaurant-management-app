@@ -1,7 +1,7 @@
 <!-- ============================
      NAVIGATION BAR
 ============================ -->
-<nav class="navbar">
+<nav class="navbar" *ngIf="!isLandingPage">
   <div class="nav-left">
     <a class="logo" (click)="goHome()">
       <ng-container
@@ -9,12 +9,22 @@
         {{ auth.currentUser()?.restaurantName }}
       </ng-container>
       <ng-template #defaultLogo>
-        🍴 TasteTown
+        🍴 {{ platformConfig.platformName }}
       </ng-template>
     </a>
   </div>
 
   <div class="nav-right" *ngIf="auth.isLoggedIn()">
+    <!-- 🔀 Context Switcher (Group Admin) -->
+    <div class="context-switcher" *ngIf="isGroupAdmin()">
+      <!-- Refactored to ngModel for reliable change detection -->
+      <select class="form-select form-select-sm" [ngModel]="auth.currentUser()?.restaurantId"
+        (ngModelChange)="switchContext($event)">
+        <option *ngFor="let r of availableRestaurants" [value]="r.id">
+          {{ r.name }}
+        </option>
+      </select>
+    </div>
     <!-- Desktop Welcome Msg -->
     <span class="welcome d-none-mobile">
       👋 {{ auth.currentUser()?.name || auth.currentUser()?.email }}

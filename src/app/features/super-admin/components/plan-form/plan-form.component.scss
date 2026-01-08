@@ -1,0 +1,41 @@
+.plan-form {
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+
+    mat-form-field {
+        flex: 1;
+    }
+}
+
+.full-width {
+    width: 100%;
+}
+
+.section-title {
+    margin: 10px 0 5px;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+
+    mat-checkbox {
+        font-size: 14px;
+    }
+}

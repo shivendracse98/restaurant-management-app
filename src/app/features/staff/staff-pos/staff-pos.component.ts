@@ -15,6 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LeaveService, LeaveResponse } from '../../../core/services/leave.service';
 import { ConfigService, PaymentConfig } from '../../../core/services/config.service';
+import { WebSocketService } from '../../../core/services/websocket.service';
 import { FoodItem } from '../../../models/food-item.model';
 import { Subscription as TiffinModel } from '../../../models/subscription.model';
 import { NgChartsModule } from 'ng2-charts';
@@ -23,6 +24,7 @@ import { PosOrderTakingComponent } from './components/pos-order-taking/pos-order
 import { PosOngoingOrdersComponent } from './components/pos-ongoing-orders/pos-ongoing-orders.component';
 import { PosTiffinComponent } from './components/pos-tiffin/pos-tiffin.component';
 import { FeatureFlagStore } from '../../../core/feature-flag/feature-flag.store';
+import { StaffTodayOrdersComponent } from '../staff-today-orders/staff-today-orders.component';
 
 @Component({
   selector: 'app-staff-pos',
@@ -30,14 +32,15 @@ import { FeatureFlagStore } from '../../../core/feature-flag/feature-flag.store'
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgChartsModule,
     PosOrderTakingComponent,
     PosOngoingOrdersComponent,
-    PosTiffinComponent
+    PosTiffinComponent,
+    StaffTodayOrdersComponent
   ],
   templateUrl: './staff-pos.component.html',
   styleUrls: ['./staff-pos.component.scss']
 })
 export class StaffPosComponent implements OnInit, OnDestroy {
   // Tabs
-  activeTab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' | 'LEAVES' | 'UNPAID' = 'ORDER';
+  activeTab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' | 'LEAVES' | 'UNPAID' | 'TODAY' = 'ORDER';
 
   // Data
   menuItems: FoodItem[] = [];
@@ -127,7 +130,8 @@ export class StaffPosComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private route: ActivatedRoute,
     private toastr: ToastrService,
-    private leaveService: LeaveService
+    private leaveService: LeaveService,
+    private webSocketService: WebSocketService
   ) {
     this.featureFlagStore.loadFlags(); // Load flags on init
   }
@@ -137,7 +141,9 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadMenu();
+    this.loadMenu();
     this.loadSubscriptions();
+    this.setupWebSocket();
 
     // ✅ Reactively update lists whenever Orders change
     this.orderService.orders$.pipe(takeUntil(this.destroy$)).subscribe(orders => {
@@ -193,8 +199,36 @@ export class StaffPosComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.webSocketService.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  setupWebSocket(): void {
+    const user = this.auth.currentUser();
+    if (user && user.restaurantId) {
+      this.webSocketService.connect();
+
+      this.webSocketService.subscribe('/topic/restaurant/' + user.restaurantId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((payload) => {
+          console.log('⚡ New Real-time Order:', payload);
+          this.playNotificationSound();
+          this.toastr.info('New Order Received! 🔔', '', { timeOut: 3000 });
+          // ✅ Use payload directly to avoid Race Condition with GET / orders
+          if (payload && payload.id) {
+            this.orderService.upsertOrderFromWebSocket(payload);
+          } else {
+            // Fallback if payload is partial
+            this.orderService.refreshOrders().subscribe();
+          }
+        });
+    }
+  }
+
+  playNotificationSound(): void {
+    const audio = new Audio('assets/sounds/notification.mp3');
+    audio.play().catch(e => console.warn('Audio play blocked', e));
   }
 
   loadMenu(): void {
@@ -776,7 +810,7 @@ export class StaffPosComponent implements OnInit, OnDestroy {
 
   // ========== SWITCH TAB ==========
 
-  switchTab(tab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' | 'LEAVES' | 'UNPAID'): void {
+  switchTab(tab: 'ORDER' | 'TIFFIN' | 'ONGOING' | 'REVENUE' | 'ONLINE' | 'LEAVES' | 'UNPAID' | 'TODAY'): void {
     this.activeTab = tab;
     this.message = '';
     if (tab === 'REVENUE') this.loadTodayOrders();

@@ -17,6 +17,7 @@ export interface DeliveryJob {
     driverPhone?: string;
     driverVehicle?: string;
     deliveryMode: 'SELF' | 'DAAS';
+    locationLink?: string;
 }
 
 @Injectable({
@@ -28,8 +29,8 @@ export class DeliveryService {
     constructor(private http: HttpClient) { }
 
     // Get delivery job associated with an order
-    getJobForOrder(orderId: number): Observable<DeliveryJob> {
-        return this.http.get<DeliveryJob>(`${this.apiUrl}/orders/${orderId}/job`);
+    getJobForOrder(orderId: number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/order/${orderId}`);
     }
 
     // Assign a driver (Self Delivery)

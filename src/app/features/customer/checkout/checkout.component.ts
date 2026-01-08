@@ -163,7 +163,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       customerEmail: ['', [Validators.email]],
       address: [''],
       orderType: ['DELIVERY', Validators.required],
-      deliveryPincode: ['']
+      deliveryPincode: [''],
+      locationLink: ['']
     });
 
     // Add dynamic validator for Address and Pincode
@@ -294,6 +295,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       customerEmail: formValue.customerEmail,
       deliveryAddress: formValue.address, // ✅ Map local 'address' to 'deliveryAddress'
       deliveryPincode: formValue.deliveryPincode, // ✅ Now mapped from form
+      locationLink: formValue.locationLink, // ✅ Added Location Link
       orderType: formValue.orderType,
       items: orderItems,
       total: this.total, // ✅ Use calculated total (includes fee)

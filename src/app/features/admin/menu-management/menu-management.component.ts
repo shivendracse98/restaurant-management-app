@@ -7,6 +7,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MasterMenuComponent } from '../master-menu/master-menu.component';
+import { MenuOverridesComponent } from '../menu-overrides/menu-overrides.component';
+import { AuthService } from '../../../core/services/auth.service';
 import { MenuService } from '../../../core/services/menu.service';
 import { ImageService } from '../../../core/services/image.service';
 import { FoodItem } from 'src/app/models/food-item.model';
@@ -23,7 +27,10 @@ import { ToastrService } from 'ngx-toastr';
     MatInputModule,
     MatFormFieldModule,
     MatIconModule,
-    MatCardModule
+    MatCardModule,
+    MatTabsModule,
+    MasterMenuComponent,
+    MenuOverridesComponent
   ],
   templateUrl: './menu-management.component.html',
   styleUrls: ['./menu-management.component.scss']
@@ -51,22 +58,46 @@ export class MenuManagementComponent implements OnInit {
   isUploading = false;
   uploadError = '';
 
+  canViewConsolidated = false;
+  hasGroup = false;
+
   constructor(
     private menuService: MenuService,
     private imageService: ImageService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    public auth: AuthService
   ) { }
 
   ngOnInit(): void {
+    this.checkAccess();
     this.loadMenuItems();
+  }
+
+  checkAccess(): void {
+    const user = this.auth.currentUser();
+    // Allow Consolidated view if user has > 1 restaurant available AND is not on STARTER plan
+    const hasMultiple = !!(user?.availableRestaurants && user.availableRestaurants.length > 1);
+    const isPlanEligible = user?.packageType !== 'STARTER';
+
+    this.canViewConsolidated = hasMultiple && isPlanEligible;
+    this.hasGroup = isPlanEligible; // Show Overrides if eligible for group features
   }
 
   loadMenuItems(): void {
     this.loading = true;
     console.log('Loading menu items...');
 
-    // Use getAllMenuItems instead of getMenu
-    this.menuService.getAllMenuItems().subscribe({
+    const user = this.auth.currentUser();
+    const currentRestaurantId = user?.restaurantId;
+
+    if (!currentRestaurantId) {
+      console.error('No restaurant ID found for user');
+      this.loading = false;
+      return;
+    }
+
+    // Use getAllMenuItems with explicit ID
+    this.menuService.getAllMenuItems(currentRestaurantId).subscribe({
       next: (items) => {
         console.log('Menu items loaded:', items.length, items);
         this.menuItems = items;

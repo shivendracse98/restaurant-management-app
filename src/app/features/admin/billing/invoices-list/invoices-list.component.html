@@ -1,0 +1,63 @@
+<div class="invoices-container">
+
+    <header>
+        <div class="header-left">
+            <button class="btn-back" routerLink="/admin/billing">
+                <mat-icon>arrow_back</mat-icon> Back
+            </button>
+            <h1>Invoices</h1>
+        </div>
+        <div class="actions">
+            <button class="btn-secondary">Filter ▼</button>
+            <button class="btn-secondary">Export</button>
+        </div>
+    </header>
+
+    <div class="card table-card">
+        <div class="card-header">
+            <h3>Invoice History - Last 12 Months</h3>
+        </div>
+
+        <table *ngIf="!loading; else loadingTpl">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Invoice #</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let inv of invoices">
+                    <td>{{ inv.date }}</td>
+                    <td>{{ inv.invoiceNumber }}</td>
+                    <td>{{ inv.amount | currency:'INR' }}</td>
+                    <td>
+                        <span class="badge" [class.success]="inv.status === 'PAID'"
+                            [class.warning]="inv.status === 'PENDING'">
+                            {{ inv.status === 'PAID' ? '✓ PAID' : '⏳ ' + inv.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-link" (click)="downloadInvoice(inv.id)">↓ PDF</button>
+                    </td>
+                </tr>
+                <tr *ngIf="invoices.length === 0">
+                    <td colspan="5" class="empty-state">No invoices found.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="card-footer" *ngIf="invoices.length > 0">
+            <p>Showing {{ invoices.length }} invoices • Older invoices available on request</p>
+        </div>
+    </div>
+
+</div>
+
+<ng-template #loadingTpl>
+    <div class="loading-state">
+        <p>Loading Invoices...</p>
+    </div>
+</ng-template>

@@ -31,6 +31,10 @@
       <button class="tab-btn" [class.active]="activeTab === 'LEAVES'" (click)="switchTab('LEAVES')">
         🏖️ My Leaves
       </button>
+      <button class="tab-btn" [class.active]="activeTab === 'TODAY'" (click)="switchTab('TODAY')"
+        style="background: #2d3436; color: white;">
+        📋 Manage Orders
+      </button>
     </div>
   </div>
 
@@ -79,6 +83,12 @@
       </table>
     </div>
     <p *ngIf="unpaidOrders.length === 0" class="no-data">No unpaid orders! All clear. 🎉</p>
+  </div>
+
+  <!-- ========== TODAY'S ORDERS (MANAGE DELIVERY) TAB ========== -->
+  <div *ngIf="activeTab === 'TODAY'" class="tab-content" style="padding: 0;">
+    <!-- Embedding the Staff Today Orders Component -->
+    <app-staff-today-orders></app-staff-today-orders>
   </div>
 
   <!-- ========== TAKE ORDER TAB ========== -->

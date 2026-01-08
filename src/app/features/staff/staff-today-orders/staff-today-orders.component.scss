@@ -21,7 +21,8 @@
     border-radius: 12px;
     overflow: hidden;
 
-    th, td {
+    th,
+    td {
       padding: 0.85rem 1rem;
       border-bottom: 1px solid #333;
       text-align: left;
@@ -69,5 +70,105 @@
     font-size: 1.1rem;
     color: #999;
     margin-top: 2rem;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #333;
+    padding-bottom: 0.5rem;
+
+    button {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #999;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #333;
+        color: #ffb84d;
+      }
+
+      &.active {
+        color: #fff;
+        background: #0984e3;
+      }
+    }
+  }
+
+  /* Badges */
+  .badge-pill {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-right: 4px;
+    color: #121212;
+    /* Dark text for contrast on light badges */
+  }
+
+  .badge-delivery {
+    background: #90caf9;
+  }
+
+  .badge-dinein {
+    background: #a5d6a7;
+  }
+
+  .badge-pickup {
+    background: #ffe0b2;
+  }
+
+  /* Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+
+  .btn-verify {
+    background: #00b894;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+
+    &:hover {
+      background: #00a884;
+    }
+  }
+
+  .btn-assign {
+    background: #0984e3;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+
+    &:hover {
+      background: #0076c8;
+    }
+  }
+
+  .empty-tab {
+    padding: 2rem;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    background: #1e1e1e;
+    border-radius: 8px;
   }
 }

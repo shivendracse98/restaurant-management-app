@@ -17,6 +17,16 @@ export interface User {
   restaurantId?: string;
   restaurantName?: string;
   logoUrl?: string;
+  availableRestaurants?: RestaurantSummary[];
+  packageType?: string;
+}
+
+export interface RestaurantSummary {
+  id: string;
+  name: string;
+  address: string;
+  logoUrl: string;
+  groupId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -183,5 +193,56 @@ export class AuthService {
   resetPassword(token: string, password: string): Observable<any> {
     // Note: API expects confirmPassword as well
     return this.http.post(`${environment.apiBaseUrl}/auth/reset-password`, { token, newPassword: password, confirmPassword: password });
+  }
+
+  /**
+   * Switch Context to another restaurant (Group feature)
+   */
+  switchRestaurant(targetRestaurantId: string): void {
+    const user = this.currentUser();
+    if (!user) {
+      console.error('❌ Switch Failed: No Current User.');
+      return;
+    }
+    if (!user.availableRestaurants) {
+      console.error('❌ Switch Failed: user.availableRestaurants is missing/empty.');
+      return;
+    }
+
+    console.log('🔍 Searching for:', targetRestaurantId, 'in', user.availableRestaurants);
+
+    const target = user.availableRestaurants.find(r => r.id === targetRestaurantId);
+    if (target) {
+      console.log('🔄 Switching context to:', target.name, target.id);
+
+      // Update User Object
+      const updatedUser: User = {
+        ...user,
+        restaurantId: target.id,
+        restaurantName: target.name,
+        logoUrl: target.logoUrl
+      };
+
+      // Determine where the user is currently stored to overwrite correct location
+      // MIRROR loadUserFromStorage priority: Session > Local
+      if (sessionStorage.getItem(this.storageKey)) {
+        console.log('📝 Updating Session Storage');
+        sessionStorage.setItem(this.storageKey, JSON.stringify(updatedUser));
+      } else if (localStorage.getItem(this.storageKey)) {
+        console.log('📝 Updating Local Storage');
+        localStorage.setItem(this.storageKey, JSON.stringify(updatedUser));
+      } else {
+        // Fallback: Default to Session
+        console.log('📝 Defaulting to Session Storage');
+        sessionStorage.setItem(this.storageKey, JSON.stringify(updatedUser));
+      }
+
+      this.currentUserSubject.next(updatedUser);
+
+      // Force reload to reset all states/services with new ID
+      window.location.reload();
+    } else {
+      console.error('❌ Target restaurant not found in available list:', targetRestaurantId);
+    }
   }
 }

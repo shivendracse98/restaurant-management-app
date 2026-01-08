@@ -18,10 +18,20 @@ import { MenuManagementComponent } from './features/admin/menu-management/menu-m
 import { PendingPaymentsComponent } from './features/admin/payments/pending-payments.component';
 import { superAdminGuard } from './core/guards/super-admin.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { financeGuard } from './core/guards/finance.guard';
 
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  // ✅ NEW: Main Landing / About Page (Cinematic)
+  {
+    path: '',
+    loadComponent: () => import('./features/public/about-us/about-us.component').then(m => m.AboutUsComponent),
+    canActivate: [guestGuard]
+  },
+
+  // Marketing Links (Aliases)
+  { path: 'for-restaurants', redirectTo: 'partner-with-us', pathMatch: 'full' },
+  { path: 'legal', redirectTo: 'terms', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
   { path: 'menu', component: MenuListComponent },
   { path: 'menu/:id', component: FoodDetailComponent },
@@ -61,6 +71,7 @@ export const routes: Routes = [
     component: MenuManagementComponent,
     canActivate: [authGuard, adminGuard],
   },
+
   {
     path: 'admin/payments',
     component: PendingPaymentsComponent,
@@ -116,6 +127,27 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
   },
   {
+    path: 'admin/billing',
+    loadComponent: () =>
+      import('./features/admin/billing/billing-dashboard/billing-dashboard.component')
+        .then(m => m.BillingDashboardComponent),
+    canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'admin/billing/invoices',
+    loadComponent: () =>
+      import('./features/admin/billing/invoices-list/invoices-list.component')
+        .then(m => m.InvoicesListComponent),
+    canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'admin/billing/payment-methods',
+    loadComponent: () =>
+      import('./features/admin/billing/payment-methods/payment-methods.component')
+        .then(m => m.PaymentMethodsComponent),
+    canActivate: [authGuard, adminGuard],
+  },
+  {
     path: 'staff/pos',
     loadComponent: () =>
       import('./features/staff/staff-pos/staff-pos.component').then(m => m.StaffPosComponent),
@@ -139,6 +171,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/super-admin/super-admin.module').then(m => m.SuperAdminModule),
     canActivate: [authGuard, superAdminGuard]
   },
+  {
+    path: 'finance',
+    loadComponent: () => import('./features/finance/finance-dashboard/finance-dashboard.component').then(m => m.FinanceDashboardComponent),
+    canActivate: [authGuard] // TODO: Add financeGuard
+  },
   { path: 'dashboard', component: CustomerDashboardComponent, canActivate: [authGuard, customerGuard] },
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'forgot-password', loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
@@ -149,8 +186,11 @@ export const routes: Routes = [
     path: 'partner-with-us',
     loadComponent: () => import('./features/public/partner-with-us/partner-with-us.component').then(m => m.PartnerWithUsComponent)
   },
+
+  // ✅ NEW: Premium About Us Page (Redirects to Root now)
+  { path: 'about', redirectTo: '', pathMatch: 'full' },
+
   // ✅ NEW: Static Pages (SEO/Footer Links)
-  { path: 'about', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'about' } },
   { path: 'careers', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'careers' } },
   { path: 'team', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'team' } },
   { path: 'contact', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'contact' } },

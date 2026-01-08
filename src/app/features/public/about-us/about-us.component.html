@@ -1,0 +1,1014 @@
+<div class="tastetown-landing">
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar" [class.scrolled]="isScrolled">
+        <div class="navbar-container">
+            <div class="logo" routerLink="/">
+                <span class="logo-icon">🍔</span>
+                <span class="logo-text">TasteTown</span>
+            </div>
+
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+                <a href="#contact" class="nav-link">Contact</a>
+                <a routerLink="/login" class="btn btn-login">Login</a>
+                <a routerLink="/login" [queryParams]="{role: 'restaurant'}" class="btn btn-partner-login">Partner
+                    Login</a>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+                <span class="bar" [class.open]="isMobileMenuOpen"></span>
+                <span class="bar" [class.open]="isMobileMenuOpen"></span>
+                <span class="bar" [class.open]="isMobileMenuOpen"></span>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" [class.open]="isMobileMenuOpen">
+            <div class="mobile-menu-content">
+                <a href="#features" (click)="closeMobileMenu()">Features</a>
+                <a href="#pricing" (click)="closeMobileMenu()">Pricing</a>
+                <a href="#contact" (click)="closeMobileMenu()">Contact</a>
+                <div class="mobile-auth-buttons">
+                    <a routerLink="/login" (click)="closeMobileMenu()" class="btn btn-login">Login</a>
+                    <a routerLink="/login" [queryParams]="{role: 'restaurant'}" (click)="closeMobileMenu()"
+                        class="btn btn-partner-login">Partner Login</a>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- ========== HERO SECTION ========== -->
+    <header class="hero">
+        <div class="hero-background">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+        </div>
+
+        <div class="hero-container">
+            <div class="hero-content">
+                <span class="badge">🎯 Building India's Fairest Food Platform</span>
+                <h1 class="hero-title">
+                    Fair Food, <br>
+                    <span class="gradient-text">Flourishing Restaurants</span>
+                </h1>
+                <p class="hero-subtitle">
+                    10% commission. 24/7 support. Real growth.
+                    2,500+ restaurants trust TasteTown.
+                </p>
+                <div class="hero-ctas">
+                    <a routerLink="/home" class="btn btn-primary btn-lg">
+                        🛒 Order Food Now
+                    </a>
+                    <a routerLink="/for-restaurants" class="btn btn-secondary btn-lg">
+                        📈 Grow Your Restaurant
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-num">2,500+</div>
+                    <div class="stat-label">Restaurants</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">₹250Cr+</div>
+                    <div class="stat-label">Orders Processed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">150k+</div>
+                    <div class="stat-label">Happy Customers</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== STORY SECTION ========== -->
+    <section class="story-section">
+        <div class="container">
+            <div class="story-grid">
+                <div class="story-content">
+                    <h2>Our Story</h2>
+                    <p class="lead">
+                        <strong>Started in 2024, TasteTown was born from one simple observation:</strong>
+                    </p>
+                    <p>
+                        Local restaurants were being crushed by 25-30% commissions from big platforms.
+                        Owners couldn't invest in quality. Customers got mediocre food. Nobody won.
+                    </p>
+                    <p>
+                        <strong>We decided to change that.</strong> We built a platform that's genuinely fair:
+                    </p>
+                    <ul class="story-list">
+                        <li>✅ Restaurants keep 90% of earnings (10% commission only)</li>
+                        <li>✅ Customers get better food, fresher, faster</li>
+                        <li>✅ No hidden fees or surprise charges</li>
+                        <li>✅ Support that actually cares</li>
+                    </ul>
+                </div>
+
+                <div class="story-stats">
+                    <div class="big-stat">
+                        <div class="big-stat-num">2.5k+</div>
+                        <div class="big-stat-label">Restaurants Trust Us</div>
+                    </div>
+                    <div class="big-stat">
+                        <div class="big-stat-num">₹250Cr</div>
+                        <div class="big-stat-label">Orders Processed</div>
+                    </div>
+                    <div class="big-stat">
+                        <div class="big-stat-num">4.8★</div>
+                        <div class="big-stat-label">Restaurant Rating</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== VALUES SECTION ========== -->
+    <section class="values-section">
+        <div class="container">
+            <h2>What We Stand For</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">⚖️</div>
+                    <h3>Fairness First</h3>
+                    <p>We only succeed when our partners succeed. That's why we capped our commission at 10% and
+                        eliminated hidden fees.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">⚡</div>
+                    <h3>Speed Matters</h3>
+                    <p>Nobody likes cold food. Our logistics engine is optimized for fastest delivery times in the
+                        industry.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🤝</div>
+                    <h3>Community First</h3>
+                    <p>We're more than an app. We're a network of local businesses supporting each other to grow
+                        together.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== TRUST BAR ========== -->
+    <section class="trust-bar">
+        <div class="container">
+            <p class="trust-label">🏆 TRUSTED BY TOP LOCAL BRANDS</p>
+            <div class="logos-scroll">
+                <div class="logo-item">Maa Ashtabhuja</div>
+                <div class="logo-item">Shree Café</div>
+                <div class="logo-item">Krishna Hotel</div>
+                <div class="logo-item">Burger Junction</div>
+                <div class="logo-item">Taj Biryani</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FEATURES OVERVIEW ========== -->
+    <section class="features-overview" id="features">
+        <div class="container">
+            <h2>Why Restaurants Love TasteTown</h2>
+            <div class="features-grid-3">
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <h3>30-Min Delivery</h3>
+                    <p>Hot food. Every time. Optimized logistics network.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">💰</div>
+                    <h3>Lowest Commission</h3>
+                    <p>Only 10%. Keep 90% of your earnings. Fair from day 1.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <h3>Real Analytics</h3>
+                    <p>See orders, revenue, trends in real-time. Make smart decisions.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Bank-Level Security</h3>
+                    <p>Your data is encrypted. Backups daily. GDPR compliant.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Operations</h3>
+                    <p>POS integration. Kitchen display system. Staff management.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">24/7</div>
+                    <h3>Always Available</h3>
+                    <p>Real support humans. Not bots. Helping you succeed.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== RESTAURANT SHOWCASE ========== -->
+    <section class="restaurant-showcase">
+        <div class="container">
+            <h2>Restaurant Success Stories</h2>
+            <p class="section-subtitle">Real restaurants. Real growth. Real earnings.</p>
+
+            <div class="showcase-grid">
+                <!-- Card 1 -->
+                <div class="showcase-card">
+                    <div class="card-header">
+                        <div class="restaurant-badge">North Indian</div>
+                        <h3>Maa Ashtabhuja</h3>
+                        <p class="location">📍 Bhopal</p>
+                    </div>
+
+                    <div class="metrics-row">
+                        <div class="metric-box">
+                            <span class="metric-icon">📈</span>
+                            <span class="metric-value">+40%</span>
+                            <span class="metric-label">Growth</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-icon">⭐</span>
+                            <span class="metric-value">4.8</span>
+                            <span class="metric-label">Rating</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-icon">💰</span>
+                            <span class="metric-value">₹18L+</span>
+                            <span class="metric-label">Monthly</span>
+                        </div>
+                    </div>
+
+                    <blockquote>
+                        "TasteTown gave us fair pricing. We now focus on cooking, not survival.
+                        Our customers love the consistency."
+                        <footer>— Anil Sharma, Owner</footer>
+                    </blockquote>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="showcase-card">
+                    <div class="card-header">
+                        <div class="restaurant-badge">Multi-Cuisine</div>
+                        <h3>Krishna Hotel</h3>
+                        <p class="location">📍 Indore</p>
+                    </div>
+
+                    <div class="metrics-row">
+                        <div class="metric-box">
+                            <span class="metric-icon">📈</span>
+                            <span class="metric-value">+65%</span>
+                            <span class="metric-label">Growth</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-icon">⭐</span>
+                            <span class="metric-value">4.9</span>
+                            <span class="metric-label">Rating</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-icon">💰</span>
+                            <span class="metric-value">₹25L+</span>
+                            <span class="metric-label">Monthly</span>
+                        </div>
+                    </div>
+
+                    <blockquote>
+                        "Best platform for restaurant growth. Support is responsive, technology
+                        is reliable, margins are decent. What else do you need?"
+                        <footer>— Priya Sharma, Manager</footer>
+                    </blockquote>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="showcase-card">
+                    <div class="card-header">
+                        <div class="restaurant-badge">Café & Bakery</div>
+                        <h3>Shree Café</h3>
+                        <p class="location">📍 Jabalpur</p>
+                    </div>
+
+                    <div class="metrics-row">
+                        <div class="metric-box">
+                            <span class="metric-icon">📈</span>
+                            <span class="metric-value">+52%</span>
+                            <span class="metric-label">Growth</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-icon">⭐</span>
+                            <span class="metric-value">4.7</span>
+                            <span class="metric-label">Rating</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-icon">💰</span>
+                            <span class="metric-value">₹12L+</span>
+                            <span class="metric-label">Monthly</span>
+                        </div>
+                    </div>
+
+                    <blockquote>
+                        "Amazing platform for growing a café business. Delivery system is
+                        efficient and customers keep coming back."
+                        <footer>— Raj Patel, Owner</footer>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ENTERPRISE FEATURES ========== -->
+    <section class="enterprise-features">
+        <div class="container">
+            <h2>Enterprise-Grade Technology</h2>
+            <p class="section-subtitle">Designed for restaurants that want to scale without limits</p>
+
+            <div class="enterprise-grid">
+                <div class="enterprise-card">
+                    <div class="card-icon">📊</div>
+                    <h3>Real-Time Analytics</h3>
+                    <p>Live order dashboard. Revenue tracking. Customer insights. Peak hour analysis. Make data-driven
+                        decisions instantly.</p>
+                    <ul class="feature-bullets">
+                        <li>Order analytics</li>
+                        <li>Revenue insights</li>
+                        <li>Customer behavior</li>
+                        <li>Peak time analysis</li>
+                    </ul>
+                </div>
+
+                <div class="enterprise-card">
+                    <div class="card-icon">👥</div>
+                    <h3>Multi-User Management</h3>
+                    <p>Add staff, managers, owners. Control permissions. Perfect for growing teams.</p>
+                    <ul class="feature-bullets">
+                        <li>Role-based access</li>
+                        <li>Staff tracking</li>
+                        <li>Order assignment</li>
+                        <li>Audit logs</li>
+                    </ul>
+                </div>
+
+                <div class="enterprise-card">
+                    <div class="card-icon">🍽️</div>
+                    <h3>Smart Menu Management</h3>
+                    <p>Organize items, set prices, manage inventory. Bulk upload and dynamic pricing.</p>
+                    <ul class="feature-bullets">
+                        <li>Category management</li>
+                        <li>Variant control</li>
+                        <li>Inventory tracking</li>
+                        <li>Seasonal menus</li>
+                    </ul>
+                </div>
+
+                <div class="enterprise-card">
+                    <div class="card-icon">🔌</div>
+                    <h3>API Integration</h3>
+                    <p>Connect to your POS, accounting, delivery partners. Automate everything.</p>
+                    <ul class="feature-bullets">
+                        <li>REST API</li>
+                        <li>Webhook support</li>
+                        <li>POS integration</li>
+                        <li>Custom workflows</li>
+                    </ul>
+                </div>
+
+                <div class="enterprise-card">
+                    <div class="card-icon">📱</div>
+                    <h3>Kitchen Display System</h3>
+                    <p>Modern kitchen screen shows orders as they come. Reduce wait times, increase quality.</p>
+                    <ul class="feature-bullets">
+                        <li>Real-time display</li>
+                        <li>Status tracking</li>
+                        <li>Timer management</li>
+                        <li>Custom workflows</li>
+                    </ul>
+                </div>
+
+                <div class="enterprise-card">
+                    <div class="card-icon">🛡️</div>
+                    <h3>Enterprise Security</h3>
+                    <p>Bank-level security. Data encryption. GDPR compliant. Your business is protected.</p>
+                    <ul class="feature-bullets">
+                        <li>SSL encryption</li>
+                        <li>Daily backups</li>
+                        <li>Access control</li>
+                        <li>Compliance certified</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== COMPARISON TABLE ========== -->
+    <section class="comparison-section">
+        <div class="container">
+            <h2>Why Smart Restaurants Choose TasteTown</h2>
+
+            <div class="table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th class="tastetown-col">
+                                <span class="tt-badge">🏆 TasteTown</span>
+                            </th>
+                            <th>Zomato</th>
+                            <th>Swiggy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Commission Rate</strong></td>
+                            <td class="winner">10%</td>
+                            <td>25-30%</td>
+                            <td>25-30%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Setup Cost</strong></td>
+                            <td class="winner">Free</td>
+                            <td>Free</td>
+                            <td>Free</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Support Quality</strong></td>
+                            <td class="winner">24/7 Personal</td>
+                            <td>Chatbot</td>
+                            <td>Email Only</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Analytics</strong></td>
+                            <td class="winner">Real-time ✓</td>
+                            <td>Delayed</td>
+                            <td>Basic</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Multi-User Access</strong></td>
+                            <td class="winner">Unlimited ✓</td>
+                            <td>Limited</td>
+                            <td>Limited</td>
+                        </tr>
+                        <tr>
+                            <td><strong>API Access</strong></td>
+                            <td class="winner">Yes ✓</td>
+                            <td>No</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Kitchen Display</strong></td>
+                            <td class="winner">Included ✓</td>
+                            <td>Extra Cost</td>
+                            <td>Extra Cost</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Local Focus</strong></td>
+                            <td class="winner">100% Local ✓</td>
+                            <td>Global</td>
+                            <td>Global</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Transparent Pricing</strong></td>
+                            <td class="winner">Always ✓</td>
+                            <td>Hidden Fees</td>
+                            <td>Hidden Fees</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== IMPACT METRICS ========== -->
+    <section class="impact-metrics">
+        <div class="container">
+            <h2>The TasteTown Impact</h2>
+
+            <div class="metrics-grid-6">
+                <div class="metric-card">
+                    <div class="metric-number">2,500+</div>
+                    <div class="metric-label">Active Restaurants</div>
+                    <div class="metric-desc">Growing daily across India</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-number">₹250Cr+</div>
+                    <div class="metric-label">Orders Processed</div>
+                    <div class="metric-desc">Last 12 months</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-number">+45%</div>
+                    <div class="metric-label">Average Growth</div>
+                    <div class="metric-desc">First year for restaurants</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-number">4.8★</div>
+                    <div class="metric-label">Restaurant Rating</div>
+                    <div class="metric-desc">1,200+ verified reviews</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-number">₹15L+</div>
+                    <div class="metric-label">Avg Monthly Revenue</div>
+                    <div class="metric-desc">For Pro plan restaurants</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-number">24/7</div>
+                    <div class="metric-label">Support Available</div>
+                    <div class="metric-desc">Real humans, real solutions</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ROI CALCULATOR ========== -->
+    <section class="roi-calculator" id="calculator">
+        <div class="container">
+            <h2>Calculate Your Restaurant Earnings</h2>
+            <p class="section-subtitle">See how much you'll earn with TasteTown vs competitors</p>
+
+            <div class="calculator-card">
+                <div class="calc-inputs">
+                    <div class="input-group">
+                        <label>Orders per day</label>
+                        <input type="range" min="10" max="500" value="50" id="ordersSlider"
+                            (change)="calculateROI($event)">
+                        <span class="input-value">{{ ordersPerDay }} orders/day</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Average order value</label>
+                        <input type="number" value="250" (change)="calculateROI($event)" id="avgOrderValue"
+                            placeholder="₹">
+                        <span class="input-value">₹{{ avgOrderValue }}/order</span>
+                    </div>
+                </div>
+
+                <div class="calc-results">
+                    <div class="result-card tastetown">
+                        <h3>💚 With TasteTown</h3>
+                        <div class="earning">
+                            <span class="label">Your Monthly Earnings</span>
+                            <span class="amount">₹{{ tastetownEarning | number }}</span>
+                            <p class="breakdown">
+                                {{ ordersPerMonth }} orders × ₹{{ avgOrderValue }} × 90%<br>
+                                + ₹4,999 Professional subscription
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="result-card competitor">
+                        <h3>❌ Zomato (30% Commission)</h3>
+                        <div class="earning">
+                            <span class="label">Your Monthly Earnings</span>
+                            <span class="amount">₹{{ zomatoEarning | number }}</span>
+                            <p class="breakdown">
+                                {{ ordersPerMonth }} orders × ₹{{ avgOrderValue }} × 70%<br>
+                                (30% commission, no subscription shown)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="savings-box">
+                    <h4>💰 You Save With TasteTown</h4>
+                    <span class="savings-amount">+₹{{ savings | number }}/month</span>
+                    <p class="savings-desc">That's ₹{{ annualSavings | number }} per year!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== PRICING SECTION ========== -->
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <h2>Simple, Transparent Pricing</h2>
+            <p class="section-subtitle">Choose the plan that's right for your restaurant</p>
+
+            <div class="pricing-grid">
+                <!-- Basic Plan -->
+                <div class="pricing-card">
+                    <div class="plan-badge">Starter</div>
+                    <h3>Basic</h3>
+                    <div class="price">
+                        <span class="amount">₹999</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <p class="plan-desc">Perfect for new restaurants starting their online journey</p>
+
+                    <ul class="features-list">
+                        <li>✓ Online ordering</li>
+                        <li>✓ Order management</li>
+                        <li>✓ Basic dashboard</li>
+                        <li>✓ Email support</li>
+                        <li>✓ 1 user account</li>
+                        <li>✗ Analytics</li>
+                        <li>✗ Multi-user</li>
+                        <li>✗ API access</li>
+                    </ul>
+
+                    <button class="btn btn-outline" (click)="selectPlan('Basic')">Choose Plan</button>
+                </div>
+
+                <!-- Starter Plan -->
+                <div class="pricing-card">
+                    <div class="plan-badge">Popular</div>
+                    <h3>Starter</h3>
+                    <div class="price">
+                        <span class="amount">₹1,599</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <p class="plan-desc">Most popular for growing restaurants</p>
+
+                    <ul class="features-list">
+                        <li>✓ Everything in Basic</li>
+                        <li>✓ Real-time analytics</li>
+                        <li>✓ Staff management</li>
+                        <li>✓ Priority support</li>
+                        <li>✓ 5 user accounts</li>
+                        <li>✓ Custom menu</li>
+                        <li>✗ Multi-location</li>
+                        <li>✗ API access</li>
+                    </ul>
+
+                    <button class="btn btn-primary" (click)="selectPlan('Starter')">Get Started</button>
+                </div>
+
+                <!-- Professional Plan -->
+                <div class="pricing-card">
+                    <div class="plan-badge">Best Value</div>
+                    <h3>Professional</h3>
+                    <div class="price">
+                        <span class="amount">₹2,499</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <p class="plan-desc">For established restaurants scaling fast</p>
+
+                    <ul class="features-list">
+                        <li>✓ Everything in Starter</li>
+                        <li>✓ Advanced analytics</li>
+                        <li>✓ Unlimited staff users</li>
+                        <li>✓ Kitchen display system</li>
+                        <li>✓ Inventory management</li>
+                        <li>✓ 24/7 phone support</li>
+                        <li>✓ Multi-location</li>
+                        <li>✗ API access</li>
+                    </ul>
+
+                    <button class="btn btn-primary" (click)="selectPlan('Professional')">Get Started</button>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="pricing-card">
+                    <div class="plan-badge">Enterprise</div>
+                    <h3>Enterprise</h3>
+                    <div class="price">
+                        <span class="amount">₹4,999+</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <p class="plan-desc">Custom solutions for restaurant groups</p>
+
+                    <ul class="features-list">
+                        <li>✓ Everything in Professional</li>
+                        <li>✓ Full API access</li>
+                        <li>✓ Custom integrations</li>
+                        <li>✓ Dedicated account manager</li>
+                        <li>✓ Custom branding</li>
+                        <li>✓ Multi-location unlimited</li>
+                        <li>✓ Advanced reporting</li>
+                        <li>✓ SLA guarantee</li>
+                    </ul>
+
+                    <button class="btn btn-secondary" (click)="contactSales()">Contact Sales</button>
+                </div>
+            </div>
+
+            <div class="pricing-note">
+                <p>💡 Plus 10% commission on every order. No hidden fees. Ever.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== RESOURCES SECTION ========== -->
+    <section class="resources-section">
+        <div class="container">
+            <h2>Resources to Help You Succeed</h2>
+            <p class="section-subtitle">Free tools and guides to grow your restaurant</p>
+
+            <div class="resources-grid">
+                <a href="#" class="resource-card">
+                    <div class="resource-icon">📖</div>
+                    <h3>Restaurant Growth Guide</h3>
+                    <p>Learn how to optimize menu, pricing, and operations for maximum profitability.</p>
+                    <span class="cta">Read Guide →</span>
+                </a>
+
+                <a href="#" class="resource-card">
+                    <div class="resource-icon">🎥</div>
+                    <h3>Video Tutorials</h3>
+                    <p>Step-by-step videos on dashboard usage, order management, and operations.</p>
+                    <span class="cta">Watch Videos →</span>
+                </a>
+
+                <a href="#" class="resource-card">
+                    <div class="resource-icon">📊</div>
+                    <h3>Financial Templates</h3>
+                    <p>Free Excel templates for expense tracking and profit analysis.</p>
+                    <span class="cta">Download →</span>
+                </a>
+
+                <a href="#" class="resource-card">
+                    <div class="resource-icon">💬</div>
+                    <h3>Community Forum</h3>
+                    <p>Connect with 2,500+ restaurant owners. Share tips and best practices.</p>
+                    <span class="cta">Join Community →</span>
+                </a>
+
+                <a href="#" class="resource-card">
+                    <div class="resource-icon">🎤</div>
+                    <h3>Success Webinars</h3>
+                    <p>Monthly webinars with successful restaurant owners sharing growth journeys.</p>
+                    <span class="cta">Join Webinar →</span>
+                </a>
+
+                <a href="#" class="resource-card">
+                    <div class="resource-icon">🤝</div>
+                    <h3>Personal Onboarding</h3>
+                    <p>Our team guides you through setup, menu upload, and first orders personally.</p>
+                    <span class="cta">Schedule Call →</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== SECURITY SECTION ========== -->
+    <section class="security-section">
+        <div class="container">
+            <h2>Enterprise-Grade Security</h2>
+            <p class="section-subtitle">Your data is safe with bank-level protection</p>
+
+            <div class="security-grid">
+                <div class="security-item">
+                    <div class="security-icon">🔒</div>
+                    <h3>256-Bit Encryption</h3>
+                    <p>Bank-level SSL encryption. Your data travels through secure channels.</p>
+                </div>
+
+                <div class="security-item">
+                    <div class="security-icon">💾</div>
+                    <h3>Automatic Backups</h3>
+                    <p>Daily redundant backups. Zero data loss. 99.9% uptime guarantee.</p>
+                </div>
+
+                <div class="security-item">
+                    <div class="security-icon">🔐</div>
+                    <h3>Two-Factor Auth</h3>
+                    <p>Protect accounts with 2FA. Only authorized users access sensitive data.</p>
+                </div>
+
+                <div class="security-item">
+                    <div class="security-icon">✅</div>
+                    <h3>GDPR Compliant</h3>
+                    <p>Meet international data protection standards. Privacy is our priority.</p>
+                </div>
+
+                <div class="security-item">
+                    <div class="security-icon">🛡️</div>
+                    <h3>Security Audits</h3>
+                    <p>Third-party audits. Penetration testing. Continuous monitoring.</p>
+                </div>
+
+                <div class="security-item">
+                    <div class="security-icon">📋</div>
+                    <h3>RBI Compliant</h3>
+                    <p>Meet RBI, NPCI, and regulatory standards. 100% legal compliance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== TESTIMONIALS ========== -->
+    <section class="testimonials-section">
+        <div class="container">
+            <h2>What Successful Restaurants Say</h2>
+
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">
+                        "TasteTown helped us increase orders by 40% in the first 3 months.
+                        The commission is fair and support is always helpful."
+                    </p>
+                    <div class="testimonial-author">
+                        <strong>Anil Sharma</strong>
+                        <span>Owner, Maa Ashtabhuja</span>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">
+                        "Best platform for restaurant growth. Support is responsive,
+                        technology is reliable, and margins are actually decent."
+                    </p>
+                    <div class="testimonial-author">
+                        <strong>Priya Sharma</strong>
+                        <span>Manager, Krishna Hotel</span>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">
+                        "Amazing platform for growing a café business. Delivery system is
+                        efficient and customers keep coming back because food is hot."
+                    </p>
+                    <div class="testimonial-author">
+                        <strong>Raj Patel</strong>
+                        <span>Owner, Shree Café</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FAQ SECTION ========== -->
+    <section class="faq-section">
+        <div class="container">
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3 (click)="toggleFaq(0)" [class.active]="activeFaq === 0">
+                        How much is the commission?
+                        <span class="toggle">{{ activeFaq === 0 ? '−' : '+' }}</span>
+                    </h3>
+                    <div class="faq-answer" [class.active]="activeFaq === 0">
+                        <p>
+                            Just 10%! That's the lowest in the industry. Other platforms
+                            charge 25-30%. Keep 90% of your earnings with us.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 (click)="toggleFaq(1)" [class.active]="activeFaq === 1">
+                        What's the setup process?
+                        <span class="toggle">{{ activeFaq === 1 ? '−' : '+' }}</span>
+                    </h3>
+                    <div class="faq-answer" [class.active]="activeFaq === 1">
+                        <p>
+                            Simple and fast: (1) Fill the contact form, (2) We review and call you,
+                            (3) Upload your menu, (4) Start receiving orders. Usually done in 1-2 days.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 (click)="toggleFaq(2)" [class.active]="activeFaq === 2">
+                        Can I change my plan later?
+                        <span class="toggle">{{ activeFaq === 2 ? '−' : '+' }}</span>
+                    </h3>
+                    <div class="faq-answer" [class.active]="activeFaq === 2">
+                        <p>
+                            Yes! Upgrade or downgrade anytime. No lock-in contracts.
+                            Flexible and simple billing.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 (click)="toggleFaq(3)" [class.active]="activeFaq === 3">
+                        Do you handle delivery?
+                        <span class="toggle">{{ activeFaq === 3 ? '−' : '+' }}</span>
+                    </h3>
+                    <div class="faq-answer" [class.active]="activeFaq === 3">
+                        <p>
+                            Yes! Our delivery network ensures 30-minute delivery windows.
+                            Or you can use your own delivery partners.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 (click)="toggleFaq(4)" [class.active]="activeFaq === 4">
+                        What support is available?
+                        <span class="toggle">{{ activeFaq === 4 ? '−' : '+' }}</span>
+                    </h3>
+                    <div class="faq-answer" [class.active]="activeFaq === 4">
+                        <p>
+                            24/7 phone, email, and chat support. Real humans. No bots.
+                            Our team is here to help you succeed.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <h3 (click)="toggleFaq(5)" [class.active]="activeFaq === 5">
+                        Is there a contract or lock-in?
+                        <span class="toggle">{{ activeFaq === 5 ? '−' : '+' }}</span>
+                    </h3>
+                    <div class="faq-answer" [class.active]="activeFaq === 5">
+                        <p>
+                            No contracts. No lock-in. Cancel anytime with 30 days notice.
+                            We want to earn your trust every month.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== NEWSLETTER ========== -->
+    <section class="newsletter-section">
+        <div class="container">
+            <h2>Get Free Restaurant Growth Tips</h2>
+            <p>Weekly insights, strategies, and product updates delivered to your inbox.</p>
+
+            <form class="newsletter-form" (submit)="subscribeNewsletter($event)">
+                <input type="email" placeholder="Your restaurant email" [(ngModel)]="newsletterEmail" name="email"
+                    required>
+                <button type="submit" class="btn btn-primary">Subscribe Free</button>
+            </form>
+            <p class="newsletter-note">No spam. Unsubscribe anytime. Privacy guaranteed.</p>
+        </div>
+    </section>
+
+    <!-- ========== TWO CTA CARDS ========== -->
+    <section class="cta-cards-section" id="contact">
+        <div class="container">
+            <h2>Ready to Grow?</h2>
+            <p class="section-subtitle">Choose your path. Start your success story today.</p>
+
+            <div class="cta-cards-container">
+                <a routerLink="/home" class="cta-card customer-cta">
+                    <div class="cta-icon">🍔</div>
+                    <h3>Order Food</h3>
+                    <p>Experience the best local food from 2,500+ restaurants</p>
+                    <span class="cta-btn">Order Now →</span>
+                </a>
+
+                <a routerLink="/for-restaurants" class="cta-card partner-cta">
+                    <div class="cta-icon">📈</div>
+                    <h3>Grow Your Restaurant</h3>
+                    <p>Join 2,500+ restaurants earning more with TasteTown</p>
+                    <span class="cta-btn">Get Started →</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h4>TasteTown</h4>
+                    <p>Building India's fairest food platform.</p>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="#">Instagram</a>
+                        <a href="#">LinkedIn</a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a routerLink="/home">Order Food</a></li>
+                        <li><a routerLink="/for-restaurants">For Restaurants</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#features">Features</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a routerLink="/legal">Contact Us</a></li>
+                        <li><a routerLink="/legal">FAQ</a></li>
+                        <li><a routerLink="/legal">Blog</a></li>
+                        <li><a routerLink="/legal">Careers</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a routerLink="/legal">Terms of Service</a></li>
+                        <li><a routerLink="/legal">Privacy Policy</a></li>
+                        <li><a routerLink="/legal">Refund Policy</a></li>
+                        <li><a routerLink="/legal">Compliance</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 TasteTown Technologies. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+</div>

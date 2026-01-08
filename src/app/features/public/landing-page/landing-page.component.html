@@ -1,0 +1,102 @@
+<div class="landing-container">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">TasteTown</div>
+        <div class="nav-links">
+            <a routerLink="/login" class="login-link">Login</a>
+            <a routerLink="/login" [queryParams]="{role: 'restaurant'}" class="partner-link">Partner Login</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="animate-up">Delicious Food, <br> <span class="highlight">Delivered.</span></h1>
+            <p class="subtitle animate-up delay-1">The best local restaurants, delivered to your doorstep. Or grow your
+                own business with us.</p>
+
+            <div class="cta-group animate-up delay-2">
+                <!-- Customer CTA -->
+                <a routerLink="/home" class="cta-card customer">
+                    <div class="icon">🍔</div>
+                    <div class="text">
+                        <h3>Order Food</h3>
+                        <p>Hungry? Explore menus nearby.</p>
+                    </div>
+                    <div class="arrow">→</div>
+                </a>
+
+                <!-- Restaurant CTA -->
+                <a routerLink="/for-restaurants" class="cta-card business">
+                    <div class="icon">📈</div>
+                    <div class="text">
+                        <h3>For Restaurants</h3>
+                        <p>Grow your sales with TasteTown.</p>
+                    </div>
+                    <div class="arrow">→</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trust Bar (Social Proof) -->
+    <div class="trust-bar">
+        <p>Trusted by top local favorites</p>
+        <div class="logos">
+            <!-- Placeholders for now -->
+            <span class="logo-item">Maa Ashtabhuja</span>
+            <span class="logo-item">Burger King</span>
+            <span class="logo-item">Subway</span>
+            <span class="logo-item">La Pino'z</span>
+        </div>
+    </div>
+
+    <!-- Features Section (New) -->
+    <div class="features-section">
+        <div class="feature">
+            <div class="f-icon">⚡</div>
+            <h3>Super Fast Delivery</h3>
+            <p>Hot food delivered to your doorstep in 30 minutes or less.</p>
+        </div>
+        <div class="feature">
+            <div class="f-icon">🛡️</div>
+            <h3>Safe & Hygienic</h3>
+            <p>We ensure contactless delivery and strict hygiene standards.</p>
+        </div>
+        <div class="feature">
+            <div class="f-icon">💰</div>
+            <h3>Best Prices</h3>
+            <p>No hidden fees. Just fair prices and great food.</p>
+        </div>
+    </div>
+
+    <!-- Testimonials Section (New) -->
+    <div class="testimonials-section">
+        <h2>What People Say</h2>
+        <div class="review-grid">
+            <div class="review-card">
+                <p>"The best app for ordering from my favorite local spots. Super fast!"</p>
+                <cite>- Amit, Customer</cite>
+            </div>
+            <div class="review-card">
+                <p>"TasteTown helped us grow our sales by 40% in just one month."</p>
+                <cite>- Rahul, Restaurant Owner</cite>
+            </div>
+            <div class="review-card">
+                <p>"Finally a fair platform that doesn't eat up all our profits."</p>
+                <cite>- Priya, Café Owner</cite>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a routerLink="/about">About</a>
+            <a routerLink="/contact">Contact</a>
+            <a routerLink="/terms">Terms</a>
+            <a routerLink="/privacy">Privacy</a>
+        </div>
+        <p class="copyright">© 2026 TasteTown Technologies</p>
+    </footer>
+</div>

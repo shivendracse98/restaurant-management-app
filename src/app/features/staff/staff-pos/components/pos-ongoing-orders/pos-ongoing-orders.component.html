@@ -45,6 +45,7 @@
                                         {{ i.qty || i.quantity }}x {{ i.name || i.itemName }}
                                         <small *ngIf="i.status === 'PREPARING'"> (🕒 Prep)</small>
                                         <small *ngIf="i.status === 'READY'"> (✅ Ready)</small>
+                                        <small *ngIf="i.status === 'DELIVERED'"> (✅ Served)</small>
                                     </span>
                                 </div>
                             </span>

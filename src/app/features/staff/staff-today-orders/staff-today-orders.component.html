@@ -7,8 +7,15 @@
     No orders yet today 😋
   </div>
 
+  <!-- TABS -->
+  <div class="tabs">
+    <button [class.active]="activeTab === 'ALL'" (click)="setTab('ALL')">All Orders</button>
+    <button [class.active]="activeTab === 'DINE_IN'" (click)="setTab('DINE_IN')">🍽️ Dine-In / Pickup</button>
+    <button [class.active]="activeTab === 'DELIVERY'" (click)="setTab('DELIVERY')">🛵 Delivery</button>
+  </div>
+
   <div class="table-wrapper">
-    <table *ngIf="!loading && todayOrders.length > 0">
+    <table *ngIf="!loading && filteredOrders.length > 0">
       <thead>
         <tr>
           <th>Order ID</th>
@@ -20,9 +27,18 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let order of todayOrders" [ngClass]="getStatusClass(order.status)">
+        <tr *ngFor="let order of filteredOrders" [ngClass]="getStatusClass(order.status)">
           <td>#{{ order.id }}</td>
-          <td>{{ order.customerName || 'Walk-in' }}</td>
+          <td>
+            {{ order.customerName || 'Walk-in' }}
+
+            <!-- Type Badges -->
+            <div style="margin-top: 4px;">
+              <span *ngIf="order.orderType === 'DELIVERY'" class="badge-pill badge-delivery">🛵 Delivery</span>
+              <span *ngIf="order.orderType === 'DINE_IN'" class="badge-pill badge-dinein">🍽️ Dine-In</span>
+              <span *ngIf="order.orderType === 'TAKEAWAY'" class="badge-pill badge-pickup">🥡 Pickup</span>
+            </div>
+          </td>
           <td>
             <ul>
               <li *ngFor="let item of order.items">{{ item.name }} × {{ item.qty }}</li>
@@ -37,14 +53,32 @@
             <div *ngIf="order.paymentProof" style="font-size: 0.8em">Proof: {{ order.paymentProof }}</div>
           </td>
           <td>
-            <button
-              *ngIf="order.paymentStatus === 'VERIFICATION_PENDING' || (order.paymentMode === 'CASH' && order.status === 'PENDING')"
-              (click)="verifyPayment(order)" class="btn-verify">✅ Verify</button>
+            <div class="action-buttons">
+              <button
+                *ngIf="order.paymentStatus === 'VERIFICATION_PENDING' || (order.paymentMode === 'CASH' && order.status === 'PENDING')"
+                (click)="verifyPayment(order)" class="btn-verify">✅ Verify</button>
+
+              <!-- Assign Driver Button (Staff) -->
+              @if (featureFlagStore.isFeatureEnabled('DELIVERY_MANAGEMENT')) {
+              <button
+                *ngIf="(order.status === 'READY' || order.status === 'PREPARING') && order.orderType === 'DELIVERY'"
+                class="btn-assign" (click)="openAssignDriver(order)" title="Assign Delivery Driver">
+                🚚 Driver
+              </button>
+              }
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <div *ngIf="!loading && filteredOrders.length === 0" class="empty-tab">
+      No orders in this tab.
+    </div>
   </div>
+
+  <!-- Modal -->
+  <app-assign-driver-modal (assigned)="onDriverAssigned()"></app-assign-driver-modal>
 
   <div class="summary-card">
     <h3>Total Orders: {{ todayOrders.length }}</h3>

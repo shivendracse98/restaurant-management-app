@@ -1,0 +1,244 @@
+.billing-container {
+    padding: 24px;
+    background-color: #F9FAFB;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h1 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #111827;
+        margin: 0;
+    }
+
+    .btn-text {
+        background: none;
+        border: none;
+        color: #6B7280;
+        font-weight: 500;
+        cursor: pointer;
+        margin-left: 16px;
+
+        &:hover {
+            color: #111827;
+        }
+    }
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 24px;
+
+    @media (max-width: 1024px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    border: 1px solid #E5E7EB;
+    margin-bottom: 24px;
+
+    h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #374151;
+        margin-top: 0;
+        margin-bottom: 16px;
+    }
+}
+
+/* Plan Card */
+.plan-card {
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .badge.enterprise {
+        background-color: #DBEAFE;
+        color: #1E40AF;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .cost-breakdown {
+        background-color: #F8FAFC;
+        padding: 16px;
+        border-radius: 6px;
+        margin-bottom: 24px;
+
+        h4 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: #64748B;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #E2E8F0;
+            margin: 12px 0;
+        }
+
+        .total {
+            font-weight: 700;
+            font-size: 16px;
+            color: #0F172A;
+            align-items: center;
+
+            .amount-group {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+        }
+    }
+
+    .cycle-info p {
+        margin: 8px 0;
+        font-size: 14px;
+        color: #475569;
+    }
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .stat-box {
+        background: white;
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid #E5E7EB;
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 4px;
+        }
+
+        .value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+        }
+    }
+}
+
+/* Recent Invoices Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+        text-align: left;
+        color: #6B7280;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 12px 16px;
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    td {
+        padding: 16px;
+        border-bottom: 1px solid #F3F4F6;
+        font-size: 14px;
+        color: #374151;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+}
+
+.badge {
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+
+    &.success {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    &.warning {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: #2563EB;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.card-footer {
+    padding-top: 16px;
+    border-top: 1px solid #E5E7EB;
+    text-align: center;
+
+    a {
+        color: #4B5563;
+        font-size: 14px;
+        text-decoration: none;
+
+        &:hover {
+            color: #111827;
+        }
+    }
+}
+
+.settings-teaser {
+    p {
+        font-size: 14px;
+        color: #4B5563;
+        margin: 8px 0;
+    }
+
+    .btn-small {
+        margin-top: 12px;
+        padding: 8px 12px;
+        background: white;
+        border: 1px solid #D1D5DB;
+        border-radius: 4px;
+        cursor: pointer;
+
+        &:hover {
+            background: #F9FAFB;
+        }
+    }
+}

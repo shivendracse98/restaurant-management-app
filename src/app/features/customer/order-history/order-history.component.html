@@ -5,50 +5,49 @@
         <p>Loading your orders...</p>
     </div>
 
-    <ng-container *ngIf="orders$ | async as orders">
-        <div *ngIf="!loading && orders.length === 0" class="empty-state">
-            <p>No orders found.</p>
-            <a routerLink="/menu" class="btn btn-primary">Start Ordering</a>
-        </div>
 
-        <div class="orders-list" *ngIf="orders.length > 0">
-            <div *ngFor="let order of orders; let i = index" class="order-card">
-                <div class="card-header">
-                    <span class="order-id">Order #{{ i + 1 }}</span>
-                    <span class="order-date">{{ order.createdAt | date:'medium' }}</span>
-                </div>
+    <div *ngIf="!loading && orders.length === 0" class="empty-state">
+        <p>No orders found.</p>
+        <a routerLink="/menu" class="btn btn-primary">Start Ordering</a>
+    </div>
 
-                <div class="card-body">
-                    <div class="items">
-                        <div *ngFor="let item of order.items" class="item-row">
-                            {{ item.qty }}x {{ item.name }}
-                        </div>
-                    </div>
-                    <div class="total-section">
-                        <span class="total-label">Total:</span>
-                        <span class="total-amount">₹{{ order.total }}</span>
+    <div class="orders-list" *ngIf="orders.length > 0">
+        <div *ngFor="let order of orders; let i = index" class="order-card">
+            <div class="card-header">
+                <span class="order-id">Order #{{ order.id }}</span>
+                <span class="order-date">{{ order.createdAt | date:'medium' }}</span>
+            </div>
+
+            <div class="card-body">
+                <div class="items">
+                    <div *ngFor="let item of order.items" class="item-row">
+                        {{ item.qty }}x {{ item.name }}
                     </div>
                 </div>
+                <div class="total-section">
+                    <span class="total-label">Total:</span>
+                    <span class="total-amount">₹{{ order.total }}</span>
+                </div>
+            </div>
 
-                <div class="card-footer">
-                    <span class="badge" [ngClass]="getStatusClass(order.status)">
-                        {{ order.status }}
-                    </span>
-                    <div class="actions">
-                        <button class="btn btn-sm btn-outline" *ngIf="order.status === 'DELIVERED'"
-                            (click)="openRateModal(order)">
-                            ⭐ Rate
-                        </button>
-                        <a [routerLink]="['/order-tracking', order.id]" class="btn btn-sm btn-outline">
-                            Track ➡️
-                        </a>
-                    </div>
+            <div class="card-footer">
+                <span class="badge" [ngClass]="getStatusClass(order.status)">
+                    {{ order.status }}
+                </span>
+                <div class="actions">
+                    <button class="btn btn-sm btn-outline" *ngIf="order.status === 'DELIVERED'"
+                        (click)="openRateModal(order)">
+                        ⭐ Rate
+                    </button>
+                    <a [routerLink]="['/order-tracking', order.id]" class="btn btn-sm btn-outline">
+                        Track ➡️
+                    </a>
                 </div>
             </div>
         </div>
-    </ng-container>
+    </div>
 
-    <!-- RATING MODAL -->
+
     <!-- RATING MODAL -->
     <div class="modal-backdrop" *ngIf="showRateModal" (click)="closeRateModal()">
         <div class="modal" (click)="$event.stopPropagation()">

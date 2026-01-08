@@ -1,0 +1,178 @@
+<div class="master-menu-container">
+
+    <!-- Header -->
+    <div class="header">
+        <h2>Master Menu</h2>
+        <p class="subtitle">Manage global items for your chain</p>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+
+        <!-- Search -->
+        <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search items...</mat-label>
+            <input matInput [(ngModel)]="searchValue" (keyup)="applyFilters()" placeholder="Name">
+            <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- Category Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Category</mat-label>
+            <mat-select [(ngModel)]="selectedCategory" (selectionChange)="applyFilters()">
+                <mat-option value="ALL">All Categories</mat-option>
+                <mat-option *ngFor="let cat of categories" [value]="cat">{{ cat }}</mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <!-- Actions -->
+        <div class="actions-group">
+            <button mat-button (click)="resetFilters()">Reset</button>
+            <button mat-raised-button color="primary" (click)="openModal()">
+                <mat-icon>add</mat-icon> Add Item
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading menu items...</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container" [class.hidden]="isLoading">
+        <table mat-table [dataSource]="dataSource" matSort>
+
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Item </th>
+                <td mat-cell *matCellDef="let row">
+                    <div class="item-cell">
+                        <img [src]="row.imageUrl || 'assets/placeholder-food.png'" class="row-thumb">
+                        <div class="item-info">
+                            <span class="item-name">{{ row.name }}</span>
+                            <span class="item-desc">{{ row.description }}</span>
+                        </div>
+                    </div>
+                </td>
+            </ng-container>
+
+            <!-- Category Column -->
+            <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Category </th>
+                <td mat-cell *matCellDef="let row">
+                    <span class="category-badge">{{ row.category || 'General' }}</span>
+                </td>
+            </ng-container>
+
+            <!-- Price Column -->
+            <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Price </th>
+                <td mat-cell *matCellDef="let row"> <strong>₹{{ row.basePrice }}</strong> </td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+                <td mat-cell *matCellDef="let row">
+                    <span class="status-badge" [class.active]="row.isAvailable" [class.inactive]="!row.isAvailable">
+                        {{ row.isAvailable ? 'Active' : 'Hidden' }}
+                    </span>
+                </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> Actions </th>
+                <td mat-cell *matCellDef="let row">
+                    <button mat-icon-button color="primary" (click)="editItem(row)" matTooltip="Edit">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button [color]="row.isAvailable ? 'warn' : 'accent'" (click)="toggleStatus(row)"
+                        [matTooltip]="row.isAvailable ? 'Deactivate' : 'Activate'">
+                        <mat-icon>{{ row.isAvailable ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+            <!-- No Data -->
+            <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="5" style="padding: 2rem; text-align: center; color: #666;">
+                    No items match "{{searchValue}}"
+                </td>
+            </tr>
+        </table>
+
+        <mat-paginator [pageSizeOptions]="[10, 20, 50]" showFirstLastButtons></mat-paginator>
+    </div>
+</div>
+
+<!-- EXISTING MODAL (Preserved exactly as is for compatibility) -->
+<div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>{{ isEditMode ? 'Edit Master Item' : 'New Master Item' }}</h2>
+            <button class="close-btn" (click)="closeModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <form [formGroup]="itemForm" (ngSubmit)="saveItem()">
+                <div class="form-group">
+                    <label>Item Name *</label>
+                    <input type="text" formControlName="name" placeholder="e.g. Classic Burger">
+                </div>
+
+                <div class="form-row modal-row-stack">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" formControlName="category" placeholder="e.g. Burgers">
+                    </div>
+                    <div class="form-group">
+                        <label>Base Price (₹) *</label>
+                        <input type="number" formControlName="basePrice" placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea formControlName="description" rows="3" placeholder="Describe the item..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <input type="file" (change)="onFileSelected($event)" accept="image/*">
+                    <p *ngIf="isUploading" style="color: #f97316; font-size: 12px; margin: 4px 0;">Uploading image...
+                    </p>
+
+                    <input type="text" formControlName="imageUrl" placeholder="Image URL will appear here" readonly
+                        style="background-color: #f1f5f9; color: #64748b; margin-top: 8px;">
+
+                    <div *ngIf="itemForm.get('imageUrl')?.value" style="margin-top: 10px;">
+                        <img [src]="itemForm.get('imageUrl')?.value" alt="Preview"
+                            style="height: 80px; width: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
+                    </div>
+                </div>
+
+                <div class="form-group toggle-group">
+                    <label>Availability</label>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="isAvailable">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-label">Available for Sale</span>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-submit" [disabled]="itemForm.invalid || isSaving">
+                        {{ isSaving ? 'Syncing...' : (isEditMode ? 'Update & Sync' : 'Create & Sync') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

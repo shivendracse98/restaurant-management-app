@@ -1,0 +1,118 @@
+<div class="billing-container" *ngIf="stats; else loadingTpl">
+
+    <header>
+        <h1>TasteTown Billing</h1>
+        <div class="actions">
+            <button class="btn-text">Settings</button>
+            <button class="btn-text">Support</button>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+
+        <!-- Left Column: Current Plan & Usage -->
+        <div class="card plan-card">
+            <div class="card-header">
+                <h3>Current Plan & Usage</h3>
+                <span class="badge enterprise">📊 ENTERPRISE PLAN</span>
+            </div>
+
+            <div class="cost-breakdown">
+                <h4>Monthly Cost Breakdown</h4>
+                <div class="row">
+                    <span>Base Fee</span>
+                    <span>{{ stats.baseFee | currency:'INR' }}</span>
+                </div>
+                <div class="row">
+                    <span>{{ stats.usageDescription }}</span>
+                    <span>{{ stats.usageFee | currency:'INR' }}</span>
+                </div>
+                <div class="divider"></div>
+                <div class="row total">
+                    <span>TOTAL THIS MONTH</span>
+                    <div class="amount-group">
+                        <span class="amount">{{ stats.currentMonthTotal | currency:'INR' }}</span>
+                        <span class="badge success">✓ PAID</span>
+                        <!-- Mocked status for current, likely PENDING in reality -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="cycle-info">
+                <p><strong>Billing Cycle:</strong> {{ stats.billingCycle }}</p>
+                <p><strong>Next Invoice:</strong> {{ stats.nextInvoiceDate | date }}</p>
+                <p><strong>Days Remaining:</strong> {{ stats.daysRemaining }}</p>
+            </div>
+        </div>
+
+        <!-- Right Column: Stats & History -->
+        <div class="stats-section">
+            <!-- Quick Stats -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <label>This Month</label>
+                    <span class="value">{{ stats.currentMonthTotal | currency:'INR' }}</span>
+                </div>
+                <div class="stat-box">
+                    <label>Last Month</label>
+                    <span class="value">{{ stats.lastMonthTotal | currency:'INR' }}</span>
+                </div>
+                <div class="stat-box">
+                    <label>This Year</label>
+                    <span class="value">{{ stats.yearToDateTotal | currency:'INR' }}</span>
+                </div>
+            </div>
+
+            <!-- Recent Invoices -->
+            <div class="card recent-invoices">
+                <h3>Recent Invoices</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let inv of stats.recentInvoices">
+                            <td>{{ inv.date }}</td>
+                            <td>{{ inv.amount | currency:'INR' }}</td>
+                            <td>
+                                <span class="badge" [class.success]="inv.status === 'PAID'"
+                                    [class.warning]="inv.status === 'PENDING'">
+                                    {{ inv.status === 'PAID' ? '✓ PAID' : '⏳ ' + inv.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn-link" (click)="downloadInvoice(inv.id)">Download PDF</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="card-footer">
+                    <a routerLink="/admin/billing/invoices">View All Invoices</a>
+                </div>
+            </div>
+
+            <!-- Billing Settings Teaser -->
+            <div class="card settings-teaser">
+                <h3>Billing Settings</h3>
+                <p><strong>Payment Method:</strong> VISA •••• 4242</p>
+                <p><strong>Billing Contact:</strong> finance&#64;spicybites.com</p>
+                <div class="actions">
+                    <button class="btn-small" routerLink="/admin/billing/payment-methods">Update Payment Method</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<ng-template #loadingTpl>
+    <div class="loading-state">
+        <p>Loading Billing Information...</p>
+    </div>
+</ng-template>

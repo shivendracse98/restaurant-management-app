@@ -1,0 +1,132 @@
+<h2 mat-dialog-title>
+    {{ isEditMode ? 'Edit Tenant Group' : 'Create Tenant Group' }}
+</h2>
+
+<mat-dialog-content [formGroup]="form">
+    <div *ngIf="errorMessage" class="error-banner">
+        {{ errorMessage }}
+    </div>
+
+    <mat-tab-group>
+        <!-- Tab 1: General Info -->
+        <mat-tab label="General Info">
+            <div class="tab-content">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Group Name</mat-label>
+                    <input matInput formControlName="name" placeholder="e.g. Spicy Bites Chain">
+                    <mat-error *ngIf="form.get('name')?.hasError('required')">Name is required</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput formControlName="description" rows="3"></textarea>
+                </mat-form-field>
+
+                <div class="row">
+                    <mat-form-field appearance="outline" class="half-width">
+                        <mat-label>Owner Name</mat-label>
+                        <input matInput formControlName="ownerName" placeholder="Primary Contact Name">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="half-width">
+                        <mat-label>Owner Email</mat-label>
+                        <input matInput formControlName="ownerEmail" placeholder="owner@example.com">
+                        <mat-error *ngIf="form.get('ownerEmail')?.hasError('email')">Invalid email address</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="row" *ngIf="isEditMode">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Status</mat-label>
+                        <mat-select formControlName="status">
+                            <mat-option [value]="GroupStatus.ACTIVE">Active</mat-option>
+                            <mat-option [value]="GroupStatus.INACTIVE">Inactive</mat-option>
+                            <mat-option [value]="GroupStatus.TRIAL">Trial</mat-option>
+                            <mat-option [value]="GroupStatus.SUSPENDED">Suspended</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+        </mat-tab>
+
+        <!-- Tab 2: Configuration -->
+        <mat-tab label="Configuration">
+            <div class="tab-content">
+                <div class="section-title">Billing Model</div>
+                <mat-radio-group formControlName="billingModel" class="radio-vertical">
+                    <mat-radio-button [value]="BillingModel.GROUP_LEVEL">
+                        <div class="radio-label">
+                            <strong>Group-Level (Consolidated)</strong>
+                            <p>One invoice for the entire group. Best for chains.</p>
+                        </div>
+                    </mat-radio-button>
+                    <mat-radio-button [value]="BillingModel.PER_RESTAURANT">
+                        <div class="radio-label">
+                            <strong>Per-Restaurant</strong>
+                            <p>Each restaurant gets a separate invoice.</p>
+                        </div>
+                    </mat-radio-button>
+                    <mat-radio-button [value]="BillingModel.HYBRID">
+                        <div class="radio-label">
+                            <strong>Hybrid</strong>
+                            <p>Flexible mix of billing strategies.</p>
+                        </div>
+                    </mat-radio-button>
+                </mat-radio-group>
+
+                <mat-divider></mat-divider>
+
+                <div class="section-title">Menu Management</div>
+                <mat-radio-group formControlName="menuModel" class="radio-vertical">
+                    <mat-radio-button [value]="MenuModel.MASTER_MENU">
+                        <div class="radio-label">
+                            <strong>Master Menu (Shared)</strong>
+                            <p>Centralized menu managed by the group.</p>
+                        </div>
+                    </mat-radio-button>
+                    <mat-radio-button [value]="MenuModel.INDEPENDENT">
+                        <div class="radio-label">
+                            <strong>Independent</strong>
+                            <p>Each restaurant manages its own menu.</p>
+                        </div>
+                    </mat-radio-button>
+                </mat-radio-group>
+            </div>
+        </mat-tab>
+        <!-- Tab 3: Restaurants (Edit Mode Only) -->
+        <mat-tab label="Restaurants" *ngIf="isEditMode">
+            <div class="tab-content">
+                <div class="tab-header">
+                    <div class="section-title">Manage Restaurants</div>
+                    <button mat-button color="primary" (click)="openAddRestaurantDialog()">
+                        <mat-icon>add</mat-icon> Add New Association
+                    </button>
+                </div>
+                <div class="linked-restaurants-list">
+                    <div *ngIf="linkedRestaurants.length === 0" class="empty-text">
+                        No restaurants linked to this group.
+                    </div>
+                    <mat-list>
+                        <mat-list-item *ngFor="let restaurant of linkedRestaurants">
+                            <mat-icon matListItemIcon>store</mat-icon>
+                            <div matListItemTitle>{{ restaurant.restaurantName }}</div>
+                            <div matListItemLine>{{ restaurant.status }} - {{ restaurant.ownerName }}</div>
+                            <button mat-icon-button color="warn" matListItemMeta
+                                (click)="unlinkRestaurant(restaurant.tenantId)">
+                                <mat-icon>link_off</mat-icon>
+                            </button>
+                        </mat-list-item>
+                    </mat-list>
+                </div>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</mat-dialog-content>
+
+<div mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="form.invalid || isLoading">
+        <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+        <span *ngIf="!isLoading">{{ isEditMode ? 'Save Changes' : 'Create Group' }}</span>
+    </button>
+</div>

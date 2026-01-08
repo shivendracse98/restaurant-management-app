@@ -4,14 +4,19 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { DeliveryService } from '../../../../../core/services/delivery.service';
 
 @Component({
-    selector: 'app-assign-driver-modal',
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
-    template: `
+  selector: 'app-assign-driver-modal',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  template: `
     <div class="modal-overlay" *ngIf="isOpen" (click)="close()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <h3>🚚 Assign Delivery Driver</h3>
         <p class="order-id">Order #{{ orderId }}</p>
+
+        <div *ngIf="locationLink" class="location-link-box">
+           <strong>📍 Location Link:</strong>
+           <a [href]="locationLink" target="_blank" rel="noopener noreferrer">{{ locationLink }}</a>
+        </div>
 
         <form [formGroup]="assignForm" (ngSubmit)="onSubmit()">
           
@@ -50,7 +55,7 @@ import { DeliveryService } from '../../../../../core/services/delivery.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.5);
@@ -82,74 +87,93 @@ import { DeliveryService } from '../../../../../core/services/delivery.service';
   `]
 })
 export class AssignDriverModalComponent {
-    @Input() orderId: number | null = null;
-    @Output() assigned = new EventEmitter<void>();
-    @Output() cancelled = new EventEmitter<void>();
+  @Input() orderId: number | null = null;
+  @Output() assigned = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
 
-    isOpen = false;
-    loading = false;
-    assignForm: FormGroup;
-    deliveryService = inject(DeliveryService);
+  isOpen = false;
+  loading = false;
+  assignForm: FormGroup;
+  deliveryService = inject(DeliveryService);
 
-    constructor(private fb: FormBuilder) {
-        this.assignForm = this.fb.group({
-            driverName: ['', Validators.required],
-            driverPhone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-            driverVehicle: ['', Validators.required]
-        });
+  constructor(private fb: FormBuilder) {
+    this.assignForm = this.fb.group({
+      driverName: ['', Validators.required],
+      driverPhone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      driverVehicle: ['', Validators.required]
+    });
+  }
+
+  open(orderId: number) {
+    this.orderId = orderId;
+    this.isOpen = true;
+    this.assignForm.reset();
+    this.locationLink = undefined;
+    this.loading = false; // Ensure loading is reset
+
+    // Fetch job immediately to show link
+    this.deliveryService.getJobForOrder(orderId).subscribe({
+      next: (response: any) => {
+        // Handle both direct object and ApiResponse wrapper
+        const job = response.data || response;
+        if (job) {
+          this.locationLink = job.locationLink;
+        }
+      },
+      error: (err) => console.error('Error pre-fetching job:', err)
+    });
+  }
+
+  close() {
+    this.isOpen = false;
+    this.cancelled.emit();
+  }
+
+  get f() { return this.assignForm.controls; }
+
+  locationLink: string | undefined;
+
+  onSubmit() {
+    if (this.assignForm.invalid || !this.orderId) return;
+
+    this.loading = true;
+
+    this.deliveryService.getJobForOrder(this.orderId).subscribe({
+      next: (response: any) => {
+        const job = response.data || response;
+        if (job) {
+          this.confirmAssignment(job.id);
+        } else {
+          alert('No delivery job found for this order. Ensure it is marked READY.');
+          this.loading = false;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to fetch job', err);
+        alert('Could not find delivery job. Is the order READY?');
+        this.loading = false;
+      }
+    });
+  }
+
+  private confirmAssignment(jobId: string) {
+    if (this.locationLink) {
+      console.log("Found location link: ", this.locationLink);
+      // In a real app we might show this to the user to copy
+      // For now we just log it or maybe append to notes?
     }
-
-    open(orderId: number) {
-        this.orderId = orderId;
-        this.isOpen = true;
-        this.assignForm.reset();
-    }
-
-    close() {
+    this.deliveryService.assignDriver(jobId, this.assignForm.value).subscribe({
+      next: () => {
+        this.loading = false;
         this.isOpen = false;
-        this.cancelled.emit();
-    }
-
-    get f() { return this.assignForm.controls; }
-
-    onSubmit() {
-        if (this.assignForm.invalid || !this.orderId) return;
-
-        this.loading = true;
-
-        // First, we need to find the job ID. 
-        // In a real flow, we might store job ID on the order or fetch it.
-        // For now, let's assume we fetch the job using order ID first.
-        this.deliveryService.getJobForOrder(this.orderId).subscribe({
-            next: (job) => {
-                if (job) {
-                    this.confirmAssignment(job.id);
-                } else {
-                    alert('No delivery job found for this order. Ensure it is marked READY.');
-                    this.loading = false;
-                }
-            },
-            error: (err) => {
-                console.error('Failed to fetch job', err);
-                alert('Could not find delivery job. Is the order READY?');
-                this.loading = false;
-            }
-        });
-    }
-
-    private confirmAssignment(jobId: string) {
-        this.deliveryService.assignDriver(jobId, this.assignForm.value).subscribe({
-            next: () => {
-                this.loading = false;
-                this.isOpen = false;
-                alert('Driver Assigned Successfully! 🚚');
-                this.assigned.emit(); // Parent should refresh list
-            },
-            error: (err) => {
-                console.error('Assignment failed', err);
-                alert('Failed to assign driver.');
-                this.loading = false;
-            }
-        });
-    }
+        alert('Driver Assigned Successfully! 🚚');
+        this.assigned.emit(); // Parent should refresh list
+      },
+      error: (err) => {
+        console.error('Assignment failed', err);
+        alert('Failed to assign driver.');
+        this.loading = false;
+      }
+    });
+  }
 }

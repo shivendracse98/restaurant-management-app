@@ -8,5 +8,7 @@ export interface TenantDetail {
   startDate: string;
   endDate: string;
   autoRenew: boolean;
+  groupId?: string;
+  planId?: string;
   features?: { [key: string]: boolean };
 }

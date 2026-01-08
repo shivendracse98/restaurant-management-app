@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -11,9 +11,10 @@ import { SuperAdminService } from '../services/super-admin.service';
     templateUrl: './super-admin-onboard.component.html',
     styleUrls: ['./super-admin-onboard.component.scss']
 })
-export class SuperAdminOnboardComponent {
+export class SuperAdminOnboardComponent implements OnInit {
     onboardForm: FormGroup;
     loading = false;
+    availablePlans: any[] = [];
 
     constructor(
         private fb: FormBuilder,
@@ -26,7 +27,23 @@ export class SuperAdminOnboardComponent {
             email: ['', [Validators.required, Validators.email]],
             password: ['', [Validators.required, Validators.minLength(6)]],
             phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-            address: ['', Validators.required]
+            address: ['', Validators.required],
+            // Default to empty or first plan later
+            packageType: ['', Validators.required],
+            trialMonths: [1, [Validators.required, Validators.min(1), Validators.max(12)]]
+        });
+    }
+
+    ngOnInit() {
+        this.superAdminService.getPublicPlans().subscribe({
+            next: (plans) => {
+                this.availablePlans = plans;
+                // Auto-select first plan if valid and not set
+                if (plans.length > 0 && !this.onboardForm.get('packageType')?.value) {
+                    this.onboardForm.patchValue({ packageType: plans[0].slug }); // Use SLUG as the value to send to backend
+                }
+            },
+            error: (err) => console.error('Failed to load plans', err)
         });
     }
 

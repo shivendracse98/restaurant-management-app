@@ -1,91 +1,153 @@
 <div class="partner-page-container">
 
-    <!-- Navbar (Simple) -->
+    <!-- Navbar -->
     <nav class="partner-nav">
-        <div class="logo" (click)="goHome()">
-            TasteTown <span class="badge">Partner</span>
+        <div class="logo">
+            <span class="brand">TasteTown</span> for Restaurants
         </div>
+        <button class="btn-outline" (click)="goHome()">Back to Home</button>
     </nav>
 
+    <!-- Content Wrapper -->
     <div class="content-wrapper">
 
-        <!-- LEFT: Hero Content -->
-        <div class="hero-text">
-            <h1>Partner with TasteTown</h1>
-            <p class="subtitle">Join thousands of restaurants who trust us to grow their business.</p>
+        <!-- LEFT COLUMN: Sales Pitch -->
+        <div class="pitch-column">
 
-            <div class="benefits-list">
-                <div class="benefit-item">
-                    <span class="icon">🚀</span>
-                    <div class="text">
-                        <h3>Increase Revenue</h3>
-                        <p>Get access to new customers and increase your daily orders.</p>
+            <!-- Hero -->
+            <div class="hero-text">
+                <h1>Grow your restaurant business. <span class="highlight">Keep more profit.</span></h1>
+                <p class="subtitle">The fair food delivery platform. Just 10% commission. No hidden fees.</p>
+            </div>
+
+            <!-- Trust Bar -->
+            <div class="trust-bar">
+                <p>TRUSTED BY</p>
+                <div class="logos">
+                    <span>Maa Ashtabhuja</span>
+                    <span>Burger King</span>
+                    <span>La Pino'z</span>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <!-- ROI Calculator -->
+            <div class="roi-section">
+                <h3>💰 See how much you save</h3>
+                <div class="calculator">
+                    <div class="input-group">
+                        <label>Daily Orders</label>
+                        <input type="number" [(ngModel)]="dailyOrders">
+                    </div>
+                    <div class="input-group">
+                        <label>Avg Order Value (₹)</label>
+                        <input type="number" [(ngModel)]="avgOrderValue">
                     </div>
                 </div>
-                <div class="benefit-item">
-                    <span class="icon">📈</span>
-                    <div class="text">
-                        <h3>Business Insights</h3>
-                        <p>Track sales, customer preferences, and growth with our dashboard.</p>
+
+                <div class="comparison-card">
+                    <div class="competitor">
+                        <span>Others (25%)</span>
+                        <strong class="red">-{{ competitorCost() | currency:'INR':'symbol':'1.0-0' }}</strong>
+                    </div>
+                    <div class="us">
+                        <span>TasteTown (10%)</span>
+                        <strong class="green">-{{ ourCost() | currency:'INR':'symbol':'1.0-0' }}</strong>
+                    </div>
+                    <div class="savings">
+                        You save <span class="highlight">{{ monthlySavings() | currency:'INR':'symbol':'1.0-0' }}</span>
+                        per month!
                     </div>
                 </div>
             </div>
+
+            <!-- Pricing Tiers -->
+            <div class="pricing-section">
+                <h3>Simple Pricing</h3>
+                <div class="pricing-grid">
+                    <div class="plan-card">
+                        <h4>Starter</h4>
+                        <div class="price">₹1,999<span>/mo</span></div>
+                        <ul>
+                            <li>✅ Order Management</li>
+                            <li>✅ Delivery Tracking</li>
+                        </ul>
+                    </div>
+                    <div class="plan-card featured">
+                        <div class="tag">Most Popular</div>
+                        <h4>Pro</h4>
+                        <div class="price">₹4,999<span>/mo</span></div>
+                        <ul>
+                            <li>✅ Advanced Analytics</li>
+                            <li>✅ Staff Management</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="faq-section">
+                <h3>Frequently Asked Questions</h3>
+                <details>
+                    <summary>When do I get paid?</summary>
+                    <p>We settle payouts weekly, every Tuesday directly to your bank account.</p>
+                </details>
+                <details>
+                    <summary>Is there a contract?</summary>
+                    <p>No, you can cancel your subscription anytime.</p>
+                </details>
+            </div>
+
         </div>
 
-        <!-- RIGHT: Lead Form -->
-        <div class="form-card">
-
-            <!-- SUCCESS STATE -->
-            <div *ngIf="submitted()" class="success-message">
-                <div class="check-icon">✅</div>
-                <h2>Request Submitted!</h2>
-                <p>Thank you for your interest. Our onboarding team will contact you at <strong>{{ formData().phone
-                        }}</strong> within 24 hours.</p>
-                <button class="btn-primary full-width" (click)="goHome()">Back to Home</button>
-            </div>
-
-            <!-- FORM STATE -->
-            <form *ngIf="!submitted()" (ngSubmit)="onSubmit()" #partnerForm="ngForm">
-                <h2>Get Started</h2>
-                <p class="form-sub">Fill the details below to register your restaurant.</p>
-
-                <div class="form-group">
-                    <label>Restaurant Name</label>
-                    <input type="text" name="resName" [(ngModel)]="formData().restaurantName" required
-                        placeholder="e.g. Spice Garden">
+        <!-- RIGHT COLUMN: Contact Form (Fixed on Desktop) -->
+        <div class="form-column">
+            <div class="form-card">
+                <!-- SUCCESS STATE -->
+                <div *ngIf="submitted()" class="success-message">
+                    <div class="check-icon">✅</div>
+                    <h2>Request Submitted!</h2>
+                    <p>Thank you! We will contact you at <strong>{{ formData().phone }}</strong> shortly.</p>
                 </div>
 
-                <div class="form-group">
-                    <label>Restaurant Owner Name</label>
-                    <input type="text" name="ownerName" [(ngModel)]="formData().ownerName" required
-                        placeholder="Your Full Name">
-                </div>
+                <!-- FORM STATE -->
+                <form *ngIf="!submitted()" (ngSubmit)="onSubmit()" #partnerForm="ngForm">
+                    <h2>Partner Request</h2>
+                    <p class="form-sub">Fill this form to get a callback.</p>
 
-                <div class="form-group">
-                    <label>City</label>
-                    <input type="text" name="city" [(ngModel)]="formData().city" required placeholder="e.g. Bhopal">
-                </div>
+                    <div class="form-group">
+                        <label>Restaurant Name</label>
+                        <input type="text" name="resName" [(ngModel)]="formData().restaurantName" required>
+                    </div>
 
-                <div class="row-group">
+                    <div class="form-group">
+                        <label>Owner Name</label>
+                        <input type="text" name="ownerName" [(ngModel)]="formData().ownerName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" name="city" [(ngModel)]="formData().city" required>
+                    </div>
+
                     <div class="form-group">
                         <label>Phone Number</label>
-                        <input type="tel" name="phone" [(ngModel)]="formData().phone" required
-                            placeholder="+91 99999 99999">
+                        <input type="tel" name="phone" [(ngModel)]="formData().phone" required>
                     </div>
+
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" name="email" [(ngModel)]="formData().email" required
-                            placeholder="owner@email.com">
+                        <input type="email" name="email" [(ngModel)]="formData().email" required>
                     </div>
-                </div>
 
-                <button type="submit" class="btn-primary full-width" [disabled]="!partnerForm.valid || loading()">
-                    <span *ngIf="loading()">Submitting...</span>
-                    <span *ngIf="!loading()">Submit Request</span>
-                </button>
-
-                <p class="disclaimer">By clicking Submit, you agree to our Terms & Conditions.</p>
-            </form>
+                    <button type="submit" class="btn-primary full-width" [disabled]="!partnerForm.valid || loading()">
+                        <span *ngIf="loading()">Sending...</span>
+                        <span *ngIf="!loading()">Request Callback</span>
+                    </button>
+                    <p class="disclaimer">No credit card required.</p>
+                </form>
+            </div>
         </div>
 
     </div>

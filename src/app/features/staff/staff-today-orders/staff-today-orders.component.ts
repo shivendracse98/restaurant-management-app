@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, ViewChild } from '@angular/core';
 import { OrderService } from '../../../core/services/order.service';
 import { Order } from '../../../models/order.model';
 import { CommonModule } from '@angular/common';
@@ -7,20 +7,30 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { FeatureFlagStore } from '../../../core/feature-flag/feature-flag.store';
+import { AssignDriverModalComponent } from '../../admin/admin-orders/components/assign-driver-modal/assign-driver-modal.component';
 
 @Component({
   selector: 'app-staff-today-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, AssignDriverModalComponent],
   templateUrl: './staff-today-orders.component.html',
   styleUrls: ['./staff-today-orders.component.scss']
 })
 export class StaffTodayOrdersComponent implements OnInit {
+  @ViewChild(AssignDriverModalComponent) driverModal!: AssignDriverModalComponent;
+
   todayOrders: Order[] = [];
   loading = true;
   todayDate = new Date().toLocaleDateString();
 
-  constructor(private orderService: OrderService) { }
+  activeTab: 'ALL' | 'DINE_IN' | 'DELIVERY' = 'ALL';
+
+  readonly featureFlagStore = inject(FeatureFlagStore);
+
+  constructor(private orderService: OrderService) {
+    this.featureFlagStore.loadFlags();
+  }
 
   ngOnInit(): void {
     this.fetchTodayOrders();
@@ -60,6 +70,25 @@ export class StaffTodayOrdersComponent implements OnInit {
         alert('Verification failed.');
       }
     });
+  }
+
+  get filteredOrders(): Order[] {
+    if (this.activeTab === 'ALL') return this.todayOrders;
+    if (this.activeTab === 'DELIVERY') return this.todayOrders.filter(o => o.orderType === 'DELIVERY');
+    // Dine-In tab includes Dine-In and others (non-delivery)
+    return this.todayOrders.filter(o => o.orderType !== 'DELIVERY');
+  }
+
+  setTab(tab: 'ALL' | 'DINE_IN' | 'DELIVERY'): void {
+    this.activeTab = tab;
+  }
+
+  openAssignDriver(order: any) {
+    this.driverModal.open(order.id);
+  }
+
+  onDriverAssigned() {
+    this.fetchTodayOrders();
   }
 
   getStatusClass(status: string): string {

@@ -1,0 +1,49 @@
+.full-width {
+    width: 100%;
+}
+
+.error-banner {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.list-container {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.restaurant-item {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.restaurant-item:hover {
+    background-color: #f5f5f5;
+}
+
+.restaurant-item.selected {
+    background-color: #e3f2fd;
+}
+
+.check-icon {
+    color: #1976d2;
+    margin-left: auto;
+}
+
+.empty-state {
+    padding: 20px;
+    text-align: center;
+    color: #757575;
+}

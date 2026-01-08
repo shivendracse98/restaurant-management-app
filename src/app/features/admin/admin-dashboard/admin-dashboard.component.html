@@ -1,11 +1,23 @@
 <div class="admin-dashboard">
 
   <header>
-    <h2>
-      <mat-icon>dashboard</mat-icon>
-      Admin Dashboard
-    </h2>
-    <p class="subtitle">Overview for {{ auth.currentUser()?.name }}</p>
+    <div class="header-left">
+      <h2>
+        <mat-icon>dashboard</mat-icon>
+        Admin Dashboard
+      </h2>
+      <p class="subtitle">Overview for {{ auth.currentUser()?.name }}</p>
+    </div>
+
+    <div class="header-actions">
+      <!-- View Toggle for Group Admins -->
+      <div class="view-toggle" *ngIf="canViewConsolidated">
+        <button class="btn-toggle" [class.active]="viewMode === 'SINGLE'"
+          (click)="toggleView('SINGLE')">Individual</button>
+        <button class="btn-toggle" [class.active]="viewMode === 'GROUP'" (click)="toggleView('GROUP')">Group
+          View</button>
+      </div>
+    </div>
   </header>
 
   <!-- LIVE STATS ROW -->
@@ -91,7 +103,7 @@
           </div>
           <h4>Manage Menu</h4>
         </div>
-        <p>Add new dishes, update prices, and organize categories.</p>
+        <p>Manage Local Menu, Master Items, and Overrides.</p>
       </div>
 
       <!-- Manage Offers -->
@@ -147,6 +159,17 @@
           <h4>Settings</h4>
         </div>
         <p>Brand identity, payment modes, and profile setup.</p>
+      </div>
+
+      <!-- Billings & Subscription -->
+      <div class="nav-card" routerLink="/admin/billing">
+        <div class="card-header">
+          <div class="card-icon">
+            <mat-icon>receipt_long</mat-icon>
+          </div>
+          <h4>Billing & Subscription</h4>
+        </div>
+        <p>View invoices, manage plan, and update payment method.</p>
       </div>
 
       <!-- Reviews -->

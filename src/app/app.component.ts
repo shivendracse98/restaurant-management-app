@@ -9,12 +9,13 @@ import { NetworkService } from './core/services/network.service';
 import { TenantService } from './core/services/tenant.service';
 import { ConfigService } from './core/services/config.service';
 
+import { FormsModule } from '@angular/forms';
 import { MobileBottomNavComponent } from './shared/components/mobile-bottom-nav/mobile-bottom-nav.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule, MobileBottomNavComponent],
+  imports: [CommonModule, RouterModule, FormsModule, MobileBottomNavComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
@@ -22,11 +23,14 @@ export class AppComponent implements OnInit, OnDestroy {
   toastVisible = false;
   toastMessage = '';
   cartCount = 0;
+  isLandingPage = false;
+
   private sub?: Subscription;
   private routerSub?: Subscription;
 
   currentTenantName = '';
   isMobileMenuOpen = false;
+  platformConfig = { platformName: 'TasteTown', supportEmail: '' }; // Default while loading
 
   toggleMobileMenu(): void {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
@@ -48,6 +52,11 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // Track tenant changes to update header
     this.tenantService.tenantId$.subscribe(id => {
+      // Load Platform Config
+      this.configService.getPlatformConfig().subscribe(config => {
+        console.log('✅ Platform Config Loaded:', config);
+        this.platformConfig = config;
+      });
       if (id) {
         this.configService.getAllTenants().subscribe(tenants => {
           const t = tenants.find(x => x.tenantId === id);
@@ -72,20 +81,28 @@ export class AppComponent implements OnInit, OnDestroy {
       this.cartCount = items.reduce((s, it) => s + it.qty, 0);
     });
 
-    // Router event logging
+    // Router event logging & Navbar Logic
     this.routerSub = this.router.events.subscribe(evt => {
-      if (evt instanceof NavigationStart) {
-        console.log('[Router] Start ->', evt.url);
-      } else if (evt instanceof RouteConfigLoadStart) {
-        console.log('[Router] Lazy load start ->', evt.route.path);
-      } else if (evt instanceof RouteConfigLoadEnd) {
-        console.log('[Router] Lazy load end ->', evt.route.path);
-      } else if (evt instanceof NavigationEnd) {
-        console.log('[Router] End ->', evt.urlAfterRedirects);
-      } else if (evt instanceof NavigationCancel) {
-        console.warn('[Router] Cancelled ->', evt.url);
-      } else if (evt instanceof NavigationError) {
-        console.error('[Router] Error ->', evt.error);
+      if (evt instanceof NavigationEnd) {
+        // Toggle Global Navbar visibility
+        // Hide on explicit Landing Page routes
+        const hiddenRoutes = ['/', '/about'];
+        // Also hide if URL starts with /# (anchor links on landing page)
+        const isAnchor = evt.urlAfterRedirects.startsWith('/#') || evt.urlAfterRedirects.includes('#');
+
+        this.isLandingPage = hiddenRoutes.includes(evt.urlAfterRedirects) ||
+          (evt.urlAfterRedirects === '/' || evt.urlAfterRedirects === '/about') ||
+          (this.isLandingPage && isAnchor); // Persist if anchor
+
+        // Better logic: Just check if exact match '/' or '/about' (ignoring params/anchors for now)
+        // Actually, Angular Router strips anchors often. using startWith might be safer for /
+        if (evt.urlAfterRedirects === '/' || evt.urlAfterRedirects === '/about' || evt.urlAfterRedirects.startsWith('/?')) {
+          this.isLandingPage = true;
+        } else {
+          this.isLandingPage = false;
+        }
+
+        console.log('[Router] End ->', evt.urlAfterRedirects, 'isLandingPage:', this.isLandingPage);
       }
     });
   }
@@ -114,12 +131,35 @@ export class AppComponent implements OnInit, OnDestroy {
     this.auth.logout();
     this.cart.clear();
     // Use replaceUrl so browser back doesn’t re-login
-    this.router.navigate(['/home'], { replaceUrl: true });
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 
   showToast(msg: string): void {
     this.toastMessage = msg;
     this.toastVisible = true;
     setTimeout(() => (this.toastVisible = false), 2000);
+  }
+
+  get availableRestaurants() {
+    return this.auth.currentUser()?.availableRestaurants || [];
+  }
+
+  isGroupAdmin() {
+    return this.availableRestaurants.length > 0;
+  }
+
+  switchContext(targetId: string) {
+    // Note: With ngModelChange, targetId is the value string directly
+    console.log('👉 Context/Restaurant Switch Triggered. Target ID:', targetId);
+
+    if (targetId) {
+      if (this.auth.currentUser()?.restaurantId === targetId) {
+        console.warn('⚠️ Target ID is same as Current ID. No action taken.');
+        return;
+      }
+      this.auth.switchRestaurant(targetId);
+    } else {
+      console.error('❌ Context Switch Failed: No Value selected.');
+    }
   }
 }

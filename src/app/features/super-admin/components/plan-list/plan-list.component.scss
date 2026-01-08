@@ -1,0 +1,93 @@
+.plans-container {
+    padding: 20px;
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+
+        h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+    }
+
+    // Responsive Table Wrapper
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    table {
+        width: 100%;
+        min-width: 600px; // Ensure table doesn't squash too much, forcing scroll
+
+        .mat-column-actions {
+            width: 120px;
+            text-align: right;
+            padding-right: 16px;
+        }
+
+        .mat-column-sortOrder {
+            width: 60px;
+            text-align: center;
+        }
+    }
+
+    // Mobile Tweaks
+    @media (max-width: 768px) {
+        padding: 10px;
+
+        .header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+
+            button {
+                width: 100%;
+            }
+        }
+
+        // Hide less important columns on strictly mobile view if needed
+        // or just rely on scroll. 
+        // Here we rely on scroll, but adjust padding.
+        .mat-mdc-cell,
+        .mat-mdc-footer-cell,
+        .mat-mdc-header-cell {
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+    }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+
+        &.active {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        &.inactive {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+    }
+
+    .text-muted {
+        font-size: 12px;
+        color: #7f8c8d;
+    }
+
+    .feature-tag {
+        font-size: 13px;
+        color: #555;
+    }
+}

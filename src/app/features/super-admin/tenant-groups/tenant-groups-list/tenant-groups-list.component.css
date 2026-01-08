@@ -1,0 +1,147 @@
+.sa-container {
+    padding: 24px;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #333;
+}
+
+.subtitle {
+    margin: 4px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.filter-card {
+    margin-bottom: 24px;
+    padding: 16px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.search-field {
+    flex: 1;
+}
+
+.table-container {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+}
+
+.group-name {
+    font-weight: 500;
+    color: #212121;
+}
+
+.owner-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.owner-info .primary {
+    font-weight: 500;
+}
+
+.owner-info .secondary {
+    font-size: 12px;
+    color: #757575;
+}
+
+/* Badges */
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+/* Status Colors */
+.status-badge.ACTIVE {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-badge.INACTIVE {
+    background-color: #f5f5f5;
+    color: #757575;
+}
+
+.status-badge.TRIAL {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.status-badge.SUSPENDED {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+/* Billing Model Colors */
+.model-badge.GROUP_LEVEL {
+    background-color: #e0f2f1;
+    color: #00695c;
+}
+
+.model-badge.PER_RESTAURANT {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.model-badge.HYBRID {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+    .sa-container {
+        padding: 16px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .header h1 {
+        font-size: 22px;
+    }
+
+    .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    /* Wrap table for horizontal scroll */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 800px;
+        /* Force scroll trigger */
+    }
+}

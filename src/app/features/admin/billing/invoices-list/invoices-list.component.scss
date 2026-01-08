@@ -1,0 +1,147 @@
+.invoices-container {
+    padding: 24px;
+    background-color: #F9FAFB;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+    }
+
+    .btn-back {
+        border: none;
+        background: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        color: #6B7280;
+        font-weight: 500;
+
+        &:hover {
+            color: #111827;
+        }
+    }
+
+    .actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn-secondary {
+        background: white;
+        border: 1px solid #D1D5DB;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        color: #374151;
+
+        &:hover {
+            background: #F3F4F6;
+        }
+    }
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #E5E7EB;
+    overflow: hidden;
+
+    .card-header {
+        padding: 24px;
+        border-bottom: 1px solid #F3F4F6;
+
+        h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #4B5563;
+        }
+    }
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+        text-align: left;
+        color: #6B7280;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 12px 24px;
+        border-bottom: 1px solid #E5E7EB;
+        background: #F9FAFB;
+    }
+
+    td {
+        padding: 16px 24px;
+        border-bottom: 1px solid #F3F4F6;
+        font-size: 14px;
+        color: #374151;
+    }
+
+    tr:hover {
+        background-color: #F9FAFB;
+    }
+}
+
+.badge {
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+
+    &.success {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    &.warning {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: #2563EB;
+    cursor: pointer;
+    font-weight: 500;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.card-footer {
+    padding: 16px 24px;
+    color: #6B7280;
+    font-size: 13px;
+    text-align: center;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #9CA3AF;
+}

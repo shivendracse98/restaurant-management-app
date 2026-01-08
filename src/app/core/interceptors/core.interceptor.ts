@@ -31,48 +31,52 @@ export const coreInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(clonedReq).pipe(
         catchError((error) => {
-            // 1. Handle 401 Unauthorized globally
+            // Log for Developers (Always)
+            console.error(`🚨 HTTP Error [${error.status}] at ${req.url}:`, error);
+
+            // 1. Handle 401 Unauthorized (Session Expired)
             if (error.status === 401) {
                 toastr.error('Session expired. Please login again.');
                 authService.logout();
-                return throwError(() => error); // Stop further processing
+                return throwError(() => error);
             }
 
-            // 2. Handle 0 / Network Error
+            // 2. Handle 403 Forbidden (Access Denied)
+            if (error.status === 403) {
+                // Suppress toast for specific background checks if needed (e.g. config)
+                const isConfigCheck = req.url.includes('/config') || req.url.includes('/offers');
+
+                if (!isConfigCheck) {
+                    toastr.error('Access Denied. You do not have permission to perform this action.', 'Permission Error');
+                }
+                return throwError(() => error);
+            }
+
+            // 3. Handle 500 Internal Server Error
+            if (error.status === 500) {
+                toastr.error('Something went wrong on our end. Please try again later.', 'Server Error');
+                return throwError(() => error);
+            }
+
+            // 4. Handle 0 (Network Error / Server Down)
             if (error.status === 0) {
                 toastr.error('Server unreachable. Please check your internet connection.', 'Network Error');
                 return throwError(() => error);
             }
 
-            // 3. Extract Meaningful Message
+            // 5. Default Handler (400, 404, etc.) - Extract meaningful message
             let message = 'An unexpected error occurred';
-
-            // Backend Custom Error JSON: { "message": "Order not found", ... }
             if (error.error && typeof error.error === 'object') {
                 if (error.error.message) {
                     message = error.error.message;
-                } else if (error.error.error) { // sometimes nested
+                } else if (error.error.error) {
                     message = error.error.error;
                 }
             } else if (error.message) {
-                // Flashback only if no backend body (client-side error)
-                // NOTE: HttpErrorResponse.message is usually generic "Http failure..." so we prefer backend body
                 if (!error.error) message = error.message;
             }
 
-            // 4. Show Toast Immediately (Unless Suppressed)
-            const isConfig403 = error.status === 403 && (
-                req.url.includes('/config') ||
-                req.url.includes('/offers')
-            );
-
-            if (!isConfig403) {
-                toastr.error(message, `Error (${error.status})`);
-            } else {
-                console.warn('⚠️ Suppressed Toast for 403 on Config:', req.url);
-            }
-
-            // Pass error along, but we've handled the UI notification
+            toastr.error(message, `Error (${error.status})`);
             return throwError(() => error);
         })
     );

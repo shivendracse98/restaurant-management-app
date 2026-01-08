@@ -1,0 +1,133 @@
+<div class="overrides-container">
+    <div class="header-section">
+        <h3>Menu Overrides</h3>
+        <p class="subtitle">Customize prices and availability for <strong>{{ getCurrentRestaurantName() }}</strong></p>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading items...</p>
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="!isLoading && items.length > 0" class="table-card">
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Category</th>
+                    <th>Master Price</th>
+                    <th>Overrides</th> <!-- Price / Status -->
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of items" [class.has-override]="hasOverride(item.id!)">
+                    <td class="name-col">
+                        <div class="item-info">
+                            <span class="name">{{ item.name }}</span>
+                            <span class="badge-new" *ngIf="!hasOverride(item.id!)">Default</span>
+                            <span class="badge-override" *ngIf="hasOverride(item.id!)">Overridden</span>
+                        </div>
+                    </td>
+                    <td>{{ item.category || '-' }}</td>
+                    <td class="price-original">₹{{ item.basePrice }}</td>
+
+                    <td class="override-status">
+                        <div *ngIf="hasOverride(item.id!); else noOverride">
+                            <div class="price-tag" *ngIf="getOverride(item.id!)?.overridePrice">
+                                ⚡ ₹{{ getOverride(item.id!)?.overridePrice }}
+                            </div>
+                            <div class="unavailable-tag" *ngIf="getOverride(item.id!)?.overrideAvailable === false">
+                                🚫 Unavailable
+                            </div>
+                            <div class="default-tag"
+                                *ngIf="!getOverride(item.id!)?.overridePrice && getOverride(item.id!)?.overrideAvailable !== false">
+                                (Matches Master)
+                            </div>
+                        </div>
+                        <ng-template #noOverride>
+                            <span class="text-muted">Same as Master</span>
+                        </ng-template>
+                    </td>
+
+                    <td>
+                        <button class="btn-edit" (click)="openOverrideModal(item)">
+                            {{ hasOverride(item.id!) ? 'Manage Override' : 'Set Override' }}
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div *ngIf="!isLoading && items.length === 0" class="empty-state">
+        <p>No master items found. Create items in the Master Menu first.</p>
+    </div>
+</div>
+
+<!-- OVERRIDE MODAL -->
+<div class="modal-backdrop" *ngIf="selectedItem" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <h2>Override: {{ selectedItem.name }}</h2>
+                <p class="modal-subtitle">Set specific rules for this restaurant</p>
+            </div>
+            <button class="close-btn" (click)="closeModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Master Info Box -->
+            <div class="info-box">
+                <div class="info-row">
+                    <span>Default Price:</span>
+                    <strong>₹{{ selectedItem.basePrice }}</strong>
+                </div>
+                <div class="info-row">
+                    <span>Master Status:</span>
+                    <span [class.text-green]="selectedItem.isAvailable" [class.text-red]="!selectedItem.isAvailable">
+                        {{ selectedItem.isAvailable ? 'Available' : 'Hidden' }}
+                    </span>
+                </div>
+            </div>
+
+            <form [formGroup]="overrideForm" (ngSubmit)="saveOverride()">
+
+                <!-- Price Override -->
+                <div class="form-group">
+                    <label>Override Price (₹)</label>
+                    <input type="number" formControlName="overridePrice"
+                        placeholder="Leave empty to use Master Price (₹{{selectedItem.basePrice}})">
+                    <small>Enter a new price only for this location.</small>
+                </div>
+
+                <!-- Availability Override -->
+                <div class="form-group toggle-group mt-4">
+                    <label>Availability</label>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="overrideAvailable">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-label">
+                        {{ overrideForm.get('overrideAvailable')?.value ? 'Available for Sale' : 'Marked Unavailable' }}
+                    </span>
+                </div>
+
+                <!-- Reason -->
+                <div class="form-group mt-4">
+                    <label>Reason (Optional)</label>
+                    <input type="text" formControlName="reason" placeholder="e.g. Premium Location, High Demand...">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-submit" [disabled]="isSaving">
+                        {{ isSaving ? 'Saving...' : 'Save Override' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

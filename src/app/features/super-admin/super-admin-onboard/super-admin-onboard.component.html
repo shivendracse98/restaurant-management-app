@@ -57,6 +57,29 @@
                 </div>
             </div>
 
+            <!-- Section: Plan Configuration -->
+            <div class="form-section">
+                <h3>📦 Plan Configuration</h3>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label>Package Type</label>
+                        <select formControlName="packageType">
+                            <option value="">Select Plan</option>
+                            <option *ngFor="let plan of availablePlans" [value]="plan.slug">
+                                {{ plan.name }} ({{ plan.currency }} {{ plan.basePrice }})
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group half">
+                        <label>Trial Duration (Months)</label>
+                        <input type="number" formControlName="trialMonths" min="1" max="12">
+                        <small>Default: 1 Month</small>
+                    </div>
+                </div>
+            </div>
+
             <div class="actions">
                 <button type="button" class="btn-secondary" routerLink="/super-admin/dashboard">Cancel</button>
                 <button type="submit" class="btn-primary" [disabled]="onboardForm.invalid || loading">

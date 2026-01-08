@@ -22,6 +22,11 @@ export interface PaymentConfig {
     freeDeliveryThreshold?: number;
 }
 
+export interface PlatformConfig {
+    platformName: string;
+    supportEmail: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -30,11 +35,26 @@ export class ConfigService {
 
     constructor(private http: HttpClient) { }
 
+    getApiBaseUrl(): string {
+        return environment.apiBaseUrl;
+    }
+
+
+
     getPaymentConfig(): Observable<PaymentConfig | null> {
         return this.http.get<PaymentConfig>(`${this.apiUrl}/payment`).pipe(
             catchError(err => {
                 console.error('Failed to load payment config', err);
                 return of(null);
+            })
+        );
+    }
+
+    getPlatformConfig(): Observable<PlatformConfig> {
+        return this.http.get<PlatformConfig>(`${environment.apiBaseUrl}/public/config/platform`).pipe(
+            catchError(err => {
+                console.error('Failed to load platform config', err);
+                return of({ platformName: 'TasteTown', supportEmail: 'support@tastetown.com' });
             })
         );
     }

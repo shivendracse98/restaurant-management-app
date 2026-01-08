@@ -2,58 +2,89 @@
 
   <!-- Header -->
   <div class="header">
-    <div>
-      <h1>Super Admin Dashboard</h1>
-      <p class="subtitle">Manage all restaurant tenants</p>
-    </div>
-    <div class="actions">
-      <button class="btn-onboard" routerLink="/super-admin/onboard">➕ Onboard New</button>
-    </div>
+    <h1>Super Admin Dashboard</h1>
+    <p class="subtitle">Overview of platform performance and tenant management</p>
+  </div>
+
+  <!-- Quick Actions (New Secondary Nav) -->
+  <div class="quick-actions-bar">
+    <button class="action-btn primary" routerLink="/super-admin/onboard">
+      <i class="fas fa-plus"></i> Onboard Tenant
+    </button>
+    <div style="width: 1px; background: #334155; height: 24px; margin: 0 10px;"></div> <!-- Divider -->
+    <button class="action-btn" routerLink="/super-admin/billing">
+      <i class="fas fa-file-invoice-dollar"></i> Billing
+    </button>
+    <button class="action-btn" routerLink="/super-admin/plans">
+      <i class="fas fa-tags"></i> Plans
+    </button>
+    <button class="action-btn" routerLink="/super-admin/groups">
+      <i class="fas fa-layer-group"></i> Groups
+    </button>
+    <button class="action-btn" routerLink="/super-admin/users">
+      <i class="fas fa-users-cog"></i> Team
+    </button>
+    <button class="action-btn" routerLink="/super-admin/settings">
+      <i class="fas fa-cogs"></i> Config
+    </button>
   </div>
 
   <!-- Metric Cards -->
   <div class="metrics-grid">
-    <div class="card metric-card">
-      <div class="icon-circle blue"><i class="fas fa-store"></i></div>
-      <div class="metric-info">
-        <span class="label">Total Restaurants</span>
-        <span class="value">{{ totalTenantsCount }}</span>
-      </div>
+    <!-- Card 1: Total Restaurants -->
+    <div class="metric-card">
+      <div class="label">Total Restaurants</div>
+      <ng-container *ngIf="!loading; else skelMetric">
+        <div class="value">{{ totalTenantsCount }}</div>
+        <div class="trend up">All Time</div>
+      </ng-container>
     </div>
 
-    <div class="card metric-card">
-      <div class="icon-circle green"><i class="fas fa-check-circle"></i></div>
-      <div class="metric-info">
-        <span class="label">Active Tenants</span>
-        <span class="value">{{ activeTenantsCount }}</span>
-      </div>
+    <!-- Card 2: Active Tenants -->
+    <div class="metric-card">
+      <div class="label">Active Tenants</div>
+      <ng-container *ngIf="!loading; else skelMetric">
+        <div class="value">{{ activeTenantsCount }}</div>
+        <div class="trend up">98% Retention</div> <!-- Mock trend -->
+      </ng-container>
     </div>
 
-    <div class="card metric-card">
-      <div class="icon-circle orange"><i class="fas fa-clock"></i></div>
-      <div class="metric-info">
-        <span class="label">Pending/Trial</span>
-        <span class="value">{{ pendingTenantsCount }}</span>
-      </div>
+    <!-- Card 3: Revenue -->
+    <div class="metric-card">
+      <div class="label">Platform Revenue</div>
+      <ng-container *ngIf="globalStats; else skelMetric">
+        <div class="value">{{ globalStats.totalPlatformRevenue | currency:'INR':'symbol':'1.0-0' }}</div>
+        <div class="trend up">FY 2024</div>
+      </ng-container>
     </div>
 
-    <div class="card metric-card">
-      <div class="icon-circle cyan"><i class="fas fa-dollar-sign"></i></div>
-      <div class="metric-info">
-        <span class="label">Est. Revenue</span>
-        <span class="value">{{ estimatedRevenue | currency }}</span>
-      </div>
+    <!-- Card 4: Orders -->
+    <div class="metric-card">
+      <div class="label">Total Orders</div>
+      <ng-container *ngIf="globalStats; else skelMetric">
+        <div class="value">{{ globalStats.totalPlatformOrders }}</div>
+        <div class="trend down">Live Stats</div>
+      </ng-container>
     </div>
   </div>
 
+  <!-- Reusable Metric Skeleton -->
+  <ng-template #skelMetric>
+    <div style="position: relative; height: 3rem; margin-top: 0.5rem;">
+      <div class="skeleton text" style="width: 50%; height: 2rem;"></div>
+      <div class="skeleton text" style="width: 30%; margin-top: 0.5rem;"></div>
+    </div>
+  </ng-template>
+
+
   <!-- Main Content Card -->
-  <div class="card content-card">
+  <div class="content-card">
 
     <!-- Controls Bar -->
     <div class="controls-bar">
       <div class="search-wrapper">
-        <i class="fas fa-search search-icon"></i>
-        <input type="text" placeholder="Search..." [(ngModel)]="searchTerm">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search by name, email or ID..." [(ngModel)]="searchTerm">
       </div>
 
       <div class="filters">
@@ -64,6 +95,8 @@
           (click)="filterStatus = 'TRIAL'">Pending</button>
         <button class="filter-pill" [class.active]="filterStatus === 'EXPIRED'"
           (click)="filterStatus = 'EXPIRED'">Expired</button>
+        <button class="filter-pill" [class.active]="filterStatus === 'SUSPENDED'"
+          (click)="filterStatus = 'SUSPENDED'">Suspended</button>
       </div>
     </div>
 
@@ -72,75 +105,125 @@
       <table class="modern-table">
         <thead>
           <tr>
-            <th>Logo</th>
-            <th>Restaurant Name</th>
-            <th>Email</th>
+            <th>Tenant Identity</th>
+            <th>Contact</th>
             <th>Status</th>
             <th>Subscription</th>
             <th>Delivery Mode</th>
-            <th>Actions</th>
+            <th style="text-align: right;">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let tenant of paginatedTenants">
-            <td>
-              <div class="logo-circle">{{ getInitials(tenant.restaurantName) }}</div>
-            </td>
-            <td>
-              <div class="name-col">
-                <span class="primary-text">{{ tenant.restaurantName }}</span>
-                <span class="secondary-text">{{ tenant.tenantId }}</span>
-              </div>
-            </td>
-            <td>{{ tenant.ownerEmail }}</td>
-            <td>
-              <span class="status-pill" [ngClass]="tenant.status.toLowerCase()">
-                {{ tenant.status }}
-              </span>
-            </td>
-            <td>
-              <div class="name-col">
-                <span class="primary-text">{{ tenant.endDate | date:'mediumDate' }}</span>
-                <span class="secondary-text" [class.urgent]="getDaysRemaining(tenant.endDate) < 7">
-                  {{ getDaysRemaining(tenant.endDate) }} days left
+          <!-- Loading Skeletons -->
+          <ng-container *ngIf="loading; else tableData">
+            <tr *ngFor="let i of [1,2,3,4,5]">
+              <td>
+                <div class="skeleton text" style="width: 120px;"></div>
+              </td>
+              <td>
+                <div class="skeleton text" style="width: 150px;"></div>
+              </td>
+              <td>
+                <div class="skeleton text" style="width: 60px;"></div>
+              </td>
+              <td>
+                <div class="skeleton text" style="width: 100px;"></div>
+              </td>
+              <td>
+                <div class="skeleton text" style="width: 40px;"></div>
+              </td>
+              <td>
+                <div class="skeleton text" style="width: 80px;"></div>
+              </td>
+            </tr>
+          </ng-container>
+
+          <ng-template #tableData>
+            <tr *ngFor="let tenant of paginatedTenants">
+              <!-- Identity Column -->
+              <td>
+                <div class="user-cell">
+                  <div class="avatar">{{ getInitials(tenant.restaurantName) }}</div>
+                  <div class="info">
+                    <span class="name">{{ tenant.restaurantName }}</span>
+                    <span class="email col-id">{{ tenant.tenantId }}</span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Contact -->
+              <td>{{ tenant.ownerEmail }}</td>
+
+              <!-- Status -->
+              <td>
+                <span class="status-badge" [ngClass]="tenant.status.toLowerCase()">
+                  {{ tenant.status }}
                 </span>
-              </div>
-            </td>
-            <td>
-              <!-- Fancy Switch -->
-              <label class="switch">
-                <input type="checkbox" [checked]="tenant.features?.['DELIVERY_MANAGEMENT'] === true"
-                  (change)="toggleFeature(tenant, 'DELIVERY_MANAGEMENT', $event)">
-                <span class="slider round"></span>
-              </label>
-            </td>
-            <td>
-              <div class="action-menu">
-                <button class="btn-icon" (click)="extendSubscription(tenant)" title="Extend Subscription">
-                  +1M
-                </button>
-                <button *ngIf="tenant.status !== 'SUSPENDED'" class="btn-icon danger" (click)="toggleStatus(tenant)"
-                  title="Suspend">
-                  🚫
-                </button>
-                <button *ngIf="tenant.status === 'SUSPENDED'" class="btn-icon success" (click)="toggleStatus(tenant)"
-                  title="Reactivate">
-                  ✅
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr *ngIf="filteredTenants.length === 0">
-            <td colspan="7" class="empty-state">No tenants found matching your search.</td>
-          </tr>
+              </td>
+
+              <!-- Subscription -->
+              <td>
+                <div class="info">
+                  <span class="name">{{ tenant.endDate | date:'mediumDate' }}</span>
+                  <span class="email" [class.urgent]="getDaysRemaining(tenant.endDate) < 7">
+                    {{ getDaysRemaining(tenant.endDate) }} days left
+                  </span>
+                </div>
+              </td>
+
+              <!-- Delivery Mode -->
+              <td>
+                <label class="switch">
+                  <input type="checkbox" [checked]="tenant.features?.['DELIVERY_MANAGEMENT'] === true"
+                    (change)="toggleFeature(tenant, 'DELIVERY_MANAGEMENT', $event)">
+                  <span class="slider round"></span>
+                </label>
+              </td>
+
+              <!-- Actions -->
+              <td style="text-align: right;">
+                <div class="quick-actions-bar" style="border:none; padding:0; margin:0; justify-content: flex-end;">
+                  <button class="action-btn" (click)="extendSubscription(tenant)" title="Extend Subscription">
+                    +1M
+                  </button>
+                  <button class="action-btn" (click)="openGroupDialog(tenant)" title="Manage Group">
+                    <i class="fas fa-layer-group"></i>
+                  </button>
+                  <button class="action-btn" (click)="openUpgradeDialog(tenant)" title="Change Plan">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button *ngIf="tenant.status !== 'SUSPENDED'" class="action-btn" style="color: #ef4444;"
+                    (click)="toggleStatus(tenant)" title="Suspend">
+                    <i class="fas fa-ban"></i>
+                  </button>
+                  <button *ngIf="tenant.status === 'SUSPENDED'" class="action-btn" style="color: #10b981;"
+                    (click)="toggleStatus(tenant)" title="Reactivate">
+                    <i class="fas fa-check"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredTenants.length === 0">
+              <td colspan="6" style="text-align: center; padding: 4rem; color: #94a3b8;">
+                <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p>No tenants found matching your search.</p>
+              </td>
+            </tr>
+          </ng-template>
         </tbody>
       </table>
     </div>
 
+    <!-- Group Dialog -->
+    <app-group-assignment-dialog *ngIf="showGroupDialog && selectedTenantForGroup"
+      [restaurantId]="selectedTenantForGroup.tenantId" [restaurantName]="selectedTenantForGroup.restaurantName"
+      (close)="closeGroupDialog()" (assigned)="onGroupAssigned()">
+    </app-group-assignment-dialog>
+
     <!-- Pagination -->
     <div class="pagination-bar" *ngIf="totalPages > 1">
-      <span class="page-info">Showing page {{ currentPage }} of {{ totalPages }}</span>
-      <div class="page-controls">
+      <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+      <div style="display: flex; gap: 5px;">
         <button (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
         <button *ngFor="let p of pagesArray" (click)="setPage(p)" [class.active]="p === currentPage">{{ p }}</button>
         <button (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>

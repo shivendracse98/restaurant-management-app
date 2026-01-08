@@ -30,4 +30,10 @@ export class AdminService {
     getAnalytics(period: string = 'daily'): Observable<AnalyticsPoint[]> {
         return this.http.get<AnalyticsPoint[]>(`${this.apiUrl}/analytics?period=${period}`);
     }
+
+    getGroupStats(groupId: string): Observable<DashboardStats> {
+        return this.http.get<DashboardStats>(`${this.apiUrl}/group-stats`, {
+            headers: { 'X-Group-ID': groupId }
+        });
+    }
 }

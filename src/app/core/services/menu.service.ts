@@ -15,14 +15,19 @@ export class MenuService {
 
   /**
    * ✅ NEW: Fetch all menu items from backend (db.json / API)
+   * Explicitly accepts tenantId to ensure correct context.
    */
-  getAllMenuItems(): Observable<FoodItem[]> {
-    return this.http.get<FoodItem[]>(this.apiUrl).pipe(
-      tap((data: any) => console.log('🍽️ Raw Menu Data from API:', data)),
+  getAllMenuItems(tenantId?: string): Observable<FoodItem[]> {
+    let url = this.apiUrl;
+    if (tenantId) {
+      url += `?tenant_id=${tenantId}`;
+    }
+
+    return this.http.get<FoodItem[]>(url).pipe(
+      tap((data: any) => console.log(`🍽️ Raw Menu Data from API for ${tenantId}:`, data)),
       catchError(err => {
         console.error('❌ API fetch failed. Showing empty menu to indicate DB disconnection.', err);
         return of([]); // Return empty to prove we are NOT using static data
-        // return this.getMenu(); // fallback DISABLED to ensure DB testing
       })
     );
   }

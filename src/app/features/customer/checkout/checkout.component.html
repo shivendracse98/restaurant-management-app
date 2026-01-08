@@ -76,6 +76,12 @@
         </small>
       </div>
 
+      <!-- Location Link (Optional) -->
+      <div class="form-group" *ngIf="form.get('orderType')?.value === 'DELIVERY'">
+        <label>📍 Google Maps Link (Optional)</label>
+        <input type="text" formControlName="locationLink" placeholder="Paste location link here" class="form-control" />
+      </div>
+
       <!-- Delivery Unavailable Warning -->
       <div class="alert alert-danger" *ngIf="form.get('orderType')?.value === 'DELIVERY' && deliveryError">
         🛑 {{ deliveryError }}

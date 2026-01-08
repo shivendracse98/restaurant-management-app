@@ -54,8 +54,22 @@
         <tr *ngFor="let order of sortedOrders">
           <td><span class="order-id">#{{ order.id }}</span></td>
           <td>
-            <div>{{ order.customerName }}</div>
-            <div style="font-size: 0.8em; color: #999;">{{ order.customerEmail }}</div>
+            <div>
+              <!-- Order Type Badges -->
+              <div class="order-type-badge-container">
+                {{ order.customerName }}
+                <span *ngIf="order.orderType === 'DELIVERY'" class="badge-pill badge-delivery" title="Delivery">
+                  🛵 Delivery
+                </span>
+                <span *ngIf="order.orderType === 'DINE_IN'" class="badge-pill badge-dinein" title="Dine-In">
+                  🍽️ Dine-In
+                </span>
+                <span *ngIf="order.orderType === 'TAKEAWAY'" class="badge-pill badge-pickup" title="Pickup">
+                  🥡 Pickup
+                </span>
+              </div>
+              <div style="font-size: 0.8em; color: #999;">{{ order.customerEmail }}</div>
+            </div>
           </td>
           <td style="font-weight: 700; color: #2D3436;">{{ order.total | currency:'INR' }}</td>
           <td>
@@ -90,9 +104,11 @@
               </button>
 
               <!-- Assign Driver Button (Feature Flagged) -->
+              <!-- RESTRICTED TO DELIVERY ORDERS ONLY -->
               @if (featureFlagStore.isFeatureEnabled('DELIVERY_MANAGEMENT')) {
-              <button *ngIf="order.status === 'READY' || order.status === 'PREPARING'" class="btn-assign"
-                (click)="openAssignDriver(order)" title="Assign Delivery Driver">
+              <button
+                *ngIf="(order.status === 'READY' || order.status === 'PREPARING') && order.orderType === 'DELIVERY'"
+                class="btn-assign" (click)="openAssignDriver(order)" title="Assign Delivery Driver">
                 🚚 Assign Driver
               </button>
               }

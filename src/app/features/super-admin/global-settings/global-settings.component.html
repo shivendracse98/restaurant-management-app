@@ -1,0 +1,143 @@
+<div class="settings-container">
+    <div class="header">
+        <h1>System Configuration</h1>
+        <p>Manage platform-wide settings, email providers, and payment gateways.</p>
+    </div>
+
+    <div *ngIf="loading" class="loading-shade">
+        <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <mat-tab-group animationDuration="0ms">
+        <!-- PLATFORM TAB -->
+        <mat-tab label="Platform">
+            <div class="tab-content">
+                <div class="settings-list">
+                    <mat-card *ngFor="let setting of platformSettings" class="setting-card">
+                        <div class="setting-header">
+                            <span class="setting-key">{{setting.description || setting.key}}</span>
+                            <span class="setting-meta" *ngIf="setting.editedBy">Last edited: {{setting.editedAt |
+                                date:'short'}}</span>
+
+                        </div>
+
+                        <div class="setting-body">
+                            <div *ngIf="!editMode[setting.key]" class="read-mode">
+                                <span class="value-display" [class.masked]="setting.isSecret">{{setting.value || '(Not
+                                    Set)'}}</span>
+                                <button mat-icon-button color="primary" (click)="enableEdit(setting.key, setting.value)"
+                                    [disabled]="!setting.isEditable">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                            </div>
+
+                            <div *ngIf="editMode[setting.key]" class="edit-mode">
+                                <mat-form-field appearance="outline" class="full-width">
+                                    <mat-label>Value</mat-label>
+                                    <input matInput [(ngModel)]="tempValues[setting.key]"
+                                        [type]="setting.isSecret ? 'password' : 'text'">
+                                </mat-form-field>
+                                <div class="actions">
+                                    <button mat-button (click)="cancelEdit(setting.key)">Cancel</button>
+                                    <button mat-raised-button color="primary"
+                                        (click)="saveSetting(setting)">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card>
+                    <div *ngIf="platformSettings.length === 0" class="empty-state">No Platform settings found.</div>
+                </div>
+            </div>
+        </mat-tab>
+
+        <!-- EMAIL TAB -->
+        <mat-tab label="Email Configuration">
+            <div class="tab-content">
+                <div class="actions-bar">
+                    <button mat-raised-button color="accent" (click)="testEmail()" [disabled]="testingConnection">
+                        <mat-icon>send</mat-icon> Test SMTP Connection
+                    </button>
+                </div>
+
+                <div class="settings-list">
+                    <mat-card *ngFor="let setting of emailSettings" class="setting-card">
+                        <!-- Same Card Structure -->
+                        <div class="setting-header">
+                            <span class="setting-key">{{setting.description || setting.key}}</span>
+                        </div>
+                        <div class="setting-body">
+                            <div *ngIf="!editMode[setting.key]" class="read-mode">
+                                <span class="value-display" [class.masked]="setting.isSecret">{{setting.value || '(Not
+                                    Set)'}}</span>
+                                <button mat-icon-button color="primary" (click)="enableEdit(setting.key, setting.value)"
+                                    [disabled]="!setting.isEditable">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                            </div>
+                            <div *ngIf="editMode[setting.key]" class="edit-mode">
+                                <mat-form-field appearance="outline" class="full-width">
+                                    <mat-label>Value</mat-label>
+                                    <input matInput [(ngModel)]="tempValues[setting.key]"
+                                        [type]="setting.isSecret ? 'password' : 'text'">
+                                </mat-form-field>
+                                <div class="actions">
+                                    <button mat-button (click)="cancelEdit(setting.key)">Cancel</button>
+                                    <button mat-raised-button color="primary"
+                                        (click)="saveSetting(setting)">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card>
+                </div>
+            </div>
+        </mat-tab>
+
+        <!-- PAYMENT TAB -->
+        <mat-tab label="Payment Settings">
+            <div class="tab-content">
+                <div class="actions-bar">
+                    <button mat-raised-button color="accent" (click)="testPayment('RAZORPAY')"
+                        [disabled]="testingConnection">
+                        <mat-icon>monetization_on</mat-icon> Test Razorpay
+                    </button>
+                </div>
+
+                <div class="settings-list">
+                    <mat-card *ngFor="let setting of paymentSettings" class="setting-card">
+                        <!-- Same Card Structure -->
+                        <div class="setting-header">
+                            <span class="setting-key">{{setting.description || setting.key}}</span>
+                        </div>
+                        <div class="setting-body">
+                            <div *ngIf="!editMode[setting.key]" class="read-mode">
+                                <span class="value-display" [class.masked]="setting.isSecret">{{setting.value || '(Not
+                                    Set)'}}</span>
+                                <button mat-icon-button color="primary" (click)="enableEdit(setting.key, setting.value)"
+                                    [disabled]="!setting.isEditable">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                            </div>
+                            <div *ngIf="editMode[setting.key]" class="edit-mode">
+                                <mat-form-field appearance="outline" class="full-width">
+                                    <mat-label>Value</mat-label>
+                                    <input matInput [(ngModel)]="tempValues[setting.key]"
+                                        [type]="setting.isSecret ? 'password' : 'text'">
+                                </mat-form-field>
+                                <div class="actions">
+                                    <button mat-button (click)="cancelEdit(setting.key)">Cancel</button>
+                                    <button mat-raised-button color="primary"
+                                        (click)="saveSetting(setting)">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card>
+                </div>
+            </div>
+        </mat-tab>
+
+        <!-- AUDIT LOGS TAB -->
+        <mat-tab label="Audit Logs">
+            <app-audit-logs></app-audit-logs>
+        </mat-tab>
+    </mat-tab-group>
+</div>

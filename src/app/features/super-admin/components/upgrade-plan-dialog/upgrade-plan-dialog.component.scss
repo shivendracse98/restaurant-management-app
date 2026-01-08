@@ -1,0 +1,27 @@
+.full-width {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.subtitle {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.warning-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: #e3f2fd;
+    color: #1565c0;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-size: 13px;
+
+    mat-icon {
+        font-size: 20px;
+        height: 20px;
+        width: 20px;
+    }
+}

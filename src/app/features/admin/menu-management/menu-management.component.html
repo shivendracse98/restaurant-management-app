@@ -1,119 +1,160 @@
 <div class="menu-management-container">
-  <div class="header">
+  <div class="header mb-4">
     <h2>🍽️ Menu Management</h2>
-    <button class="btn primary" (click)="openForm()" *ngIf="!showForm">
-      ➕ Add New Item
-    </button>
   </div>
 
-  <!-- Add/Edit Form -->
-  <div class="form-section" *ngIf="showForm">
-    <h3>{{ editingId ? 'Edit Item' : 'Add New Item' }}</h3>
-    <div class="form-group">
-      <label>Item Name</label>
-      <input type="text" [(ngModel)]="newItem.name" placeholder="Enter item name" />
-    </div>
+  <mat-tab-group animationDuration="0ms" class="bg-white rounded-lg shadow-sm">
 
-    <div class="form-group">
-      <label>Description</label>
-      <textarea [(ngModel)]="newItem.description" placeholder="Enter description"></textarea>
-    </div>
+    <!-- Tab 1: Local Menu (Standard) -->
+    <mat-tab label="Local Menu">
+      <div class="p-6">
 
-    <div class="form-row">
-      <div class="form-group">
-        <label>Price</label>
-        <input type="number" [(ngModel)]="newItem.price" placeholder="0" />
-      </div>
-
-      <div class="form-group">
-        <label>Category</label>
-        <input type="text" [(ngModel)]="newItem.category" placeholder="e.g., Pizza" />
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Product Image</label>
-      <div class="image-upload-container">
-        <input type="file" (change)="onFileSelected($event)" accept="image/*" id="fileInput" class="file-input">
-        <div *ngIf="isUploading">Uploading...</div>
-        <div *ngIf="uploadError" class="error">{{ uploadError }}</div>
-
-        <div *ngIf="newItem.imageUrl" class="image-preview">
-          <img [src]="newItem.imageUrl" alt="Preview">
-          <p class="uploaded-text">✅ Image Uploaded</p>
+        <!-- Local Header Actions -->
+        <div class="flex justify-between items-center mb-4" *ngIf="!showForm">
+          <h3 class="text-lg font-semibold text-gray-700">Restaurant Menu Items</h3>
+          <button class="btn primary" (click)="openForm()">
+            ➕ Add New Item
+          </button>
         </div>
-      </div>
-    </div>
 
-    <div class="form-group checkbox-group">
-      <label>
-        <input type="checkbox" [(ngModel)]="newItem.isVeg">
-        Is Vegetarian? 🌿
-      </label>
-      <label style="margin-left: 20px;">
-        <input type="checkbox" [(ngModel)]="newItem.isAvailable">
-        Is Available? (In Stock) ✅
-      </label>
-    </div>
+        <!-- Add/Edit Form -->
+        <div class="form-section bg-gray-50 p-4 rounded border mb-4" *ngIf="showForm">
+          <h3 class="text-lg font-bold mb-4">{{ editingId ? 'Edit Item' : 'Add New Item' }}</h3>
 
-    <div class="form-actions">
-      <button class="btn secondary" (click)="cancelForm()">Cancel</button>
-      <button class="btn primary" (click)="saveItem()">
-        {{ editingId ? 'Update' : 'Add' }} Item
-      </button>
-    </div>
-  </div>
+          <div class="form-group mb-4">
+            <label class="block font-medium mb-1">Item Name</label>
+            <input type="text" [(ngModel)]="newItem.name" placeholder="Enter item name"
+              class="w-full border rounded p-2" />
+          </div>
 
-  <!-- Search -->
-  <div class="search-section" *ngIf="!showForm">
-    <input type="text" [(ngModel)]="searchText" (input)="onSearch()" placeholder="Search items..."
-      class="search-input" />
-  </div>
+          <div class="form-group mb-4">
+            <label class="block font-medium mb-1">Description</label>
+            <textarea [(ngModel)]="newItem.description" placeholder="Enter description"
+              class="w-full border rounded p-2"></textarea>
+          </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading">Loading...</div>
+          <div class="form-row flex gap-4 mb-4 flex-wrap">
+            <div class="form-group flex-1 min-w-[200px]">
+              <label class="block font-medium mb-1">Price</label>
+              <input type="number" [(ngModel)]="newItem.price" placeholder="0" class="w-full border rounded p-2" />
+            </div>
 
-  <!-- Table -->
-  <div class="table-section" *ngIf="!loading && !showForm">
-    <table class="menu-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Status</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of filteredItems; trackBy: trackByItemId">
-          <td>{{ item.id }}</td>
-          <td>
-            {{ item.name }}
-            <span *ngIf="item.isVeg" title="Vegetarian">🌿</span>
-          </td>
-          <td>
-            <span class="badge" [style.background-color]="item.isAvailable ? '#e8f5e9' : '#ffebee'"
-              [style.color]="item.isAvailable ? '#2e7d32' : '#c62828'">
-              {{ item.isAvailable ? 'In Stock' : 'Out of Stock' }}
-            </span>
-          </td>
-          <td>{{ item.category }}</td>
-          <td>₹{{ item.price }}</td>
-          <td class="actions">
-            <button class="btn-edit" (click)="editItem(item)">✏️ Edit</button>
-            <button class="btn-delete" (click)="deleteItem(item)">
-              🗑️ Delete
+            <div class="form-group flex-1 min-w-[200px]">
+              <label class="block font-medium mb-1">Category</label>
+              <input type="text" [(ngModel)]="newItem.category" placeholder="e.g., Pizza"
+                class="w-full border rounded p-2" />
+            </div>
+          </div>
+
+          <div class="form-group mb-4">
+            <label class="block font-medium mb-1">Product Image</label>
+            <div class="image-upload-container">
+              <input type="file" (change)="onFileSelected($event)" accept="image/*" id="fileInput" class="file-input">
+              <div *ngIf="isUploading">Uploading...</div>
+              <div *ngIf="uploadError" class="error text-red-500">{{ uploadError }}</div>
+
+              <div *ngIf="newItem.imageUrl" class="image-preview mt-2">
+                <img [src]="newItem.imageUrl" alt="Preview" class="h-20 w-20 object-cover rounded">
+                <p class="uploaded-text text-green-600 text-sm">✅ Image Uploaded</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group checkbox-group flex flex-wrap gap-6 mb-6">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" [(ngModel)]="newItem.isVeg">
+              Is Vegetarian? 🌿
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" [(ngModel)]="newItem.isAvailable">
+              Is Available? (In Stock) ✅
+            </label>
+          </div>
+
+          <div class="form-actions flex justify-end gap-2">
+            <button class="btn secondary px-4 py-2 bg-gray-200 rounded" (click)="cancelForm()">Cancel</button>
+            <button class="btn primary px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" (click)="saveItem()">
+              {{ editingId ? 'Update' : 'Add' }} Item
             </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+          </div>
+        </div>
 
-  <!-- Empty State -->
-  <div *ngIf="filteredItems.length === 0 && !loading && !showForm" class="empty">
-    <p>No items found</p>
-  </div>
+        <!-- Search -->
+        <div class="search-section mb-4" *ngIf="!showForm">
+          <input type="text" [(ngModel)]="searchText" (input)="onSearch()" placeholder="Search items..."
+            class="search-input w-full border rounded p-2" />
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="loading text-center p-4">Loading...</div>
+
+        <!-- Table -->
+        <div class="table-section overflow-x-auto" *ngIf="!loading && !showForm"
+          style="-webkit-overflow-scrolling: touch; border-radius: 8px;">
+          <table class="menu-table min-w-[800px] w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 text-left">ID</th>
+                <th class="px-4 py-2 text-left">Name</th>
+                <th class="px-4 py-2 text-left">Status</th>
+                <th class="px-4 py-2 text-left">Category</th>
+                <th class="px-4 py-2 text-left">Price</th>
+                <th class="px-4 py-2 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let item of filteredItems; trackBy: trackByItemId" class="hover:bg-gray-50">
+                <td class="px-4 py-2">{{ item.id }}</td>
+                <td class="px-4 py-2">
+                  {{ item.name }}
+                  <span *ngIf="item.isVeg" title="Vegetarian">🌿</span>
+                  <span *ngIf="item.masterItemId"
+                    class="ml-2 px-2 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200"
+                    title="Managed by Master Menu">
+                    🔗 Master
+                  </span>
+                </td>
+                <td class="px-4 py-2">
+                  <span class="badge px-2 py-1 rounded text-xs font-semibold" [class.bg-green-100]="item.isAvailable"
+                    [class.text-green-800]="item.isAvailable" [class.bg-red-100]="!item.isAvailable"
+                    [class.text-red-800]="!item.isAvailable">
+                    {{ item.isAvailable ? 'In Stock' : 'Out of Stock' }}
+                  </span>
+                </td>
+                <td class="px-4 py-2">{{ item.category }}</td>
+                <td class="px-4 py-2">₹{{ item.price }}</td>
+                <td class="actions px-4 py-2 text-right space-x-2">
+                  <button class="btn-edit text-blue-600 hover:text-blue-900" (click)="editItem(item)">✏️ Edit</button>
+                  <button class="btn-delete text-red-600 hover:text-red-900" (click)="deleteItem(item)">
+                    🗑️ Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="filteredItems.length === 0 && !loading && !showForm" class="empty text-center p-8 text-gray-500">
+          <p>No items found</p>
+        </div>
+
+      </div>
+    </mat-tab>
+
+    <!-- Tab 2: Master Menu (Group Admin) -->
+    <mat-tab label="Master Menu" *ngIf="canViewConsolidated">
+      <div class="p-6">
+        <app-master-menu></app-master-menu>
+      </div>
+    </mat-tab>
+
+    <!-- Tab 3: Overrides (Restaurant Admin in Group) -->
+    <mat-tab label="Overrides" *ngIf="hasGroup">
+      <div class="p-6">
+        <app-menu-overrides></app-menu-overrides>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
 </div>

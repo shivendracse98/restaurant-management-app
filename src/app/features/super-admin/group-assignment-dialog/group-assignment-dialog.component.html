@@ -1,0 +1,51 @@
+<div class="dialog-overlay">
+    <div class="dialog-card">
+        <div class="dialog-header">
+            <h3>Manage Group for {{ restaurantName }}</h3>
+            <button class="close-btn" (click)="close.emit()">×</button>
+        </div>
+
+        <div class="dialog-body">
+            <p class="helper-text">Search for a Tenant Group to link this restaurant to. This will merge them into the
+                same network.</p>
+
+            <div class="search-box">
+                <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="search()"
+                    placeholder="Search by Group Name...">
+                <button (click)="search()" [disabled]="searching">
+                    <span *ngIf="searching">...</span>
+                    <span *ngIf="!searching">Search</span>
+                </button>
+            </div>
+
+            <div class="results-list" *ngIf="groups.length > 0">
+                <div class="group-item" *ngFor="let group of groups" [class.selected]="selectedGroup?.id === group.id"
+                    (click)="selectGroup(group)">
+                    <div class="group-info">
+                        <span class="group-name">{{ group.name }}</span>
+                        <span class="group-id">{{ group.id }}</span>
+                    </div>
+                    <div class="check" *ngIf="selectedGroup?.id === group.id">✓</div>
+                </div>
+            </div>
+
+            <div class="no-results" *ngIf="!searching && groups.length === 0 && searchQuery">
+                No groups found.
+            </div>
+
+            <div class="error-msg" *ngIf="error">{{ error }}</div>
+        </div>
+
+        <div class="dialog-footer">
+            <div class="selected-summary" *ngIf="selectedGroup">
+                Selected: <strong>{{ selectedGroup.name }}</strong>
+            </div>
+            <div class="actions">
+                <button class="btn-cancel" (click)="close.emit()">Cancel</button>
+                <button class="btn-confirm" [disabled]="!selectedGroup || loading" (click)="assign()">
+                    {{ loading ? 'Assigning...' : 'Assign to Group' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

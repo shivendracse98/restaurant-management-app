@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; // Import checking
+import { MatDialog } from '@angular/material/dialog';
 import { SuperAdminService } from '../services/super-admin.service';
 import { TenantDetail } from '../models/tenant-detail.model';
+import { UpgradePlanDialogComponent } from '../components/upgrade-plan-dialog/upgrade-plan-dialog.component';
 
 @Component({
   selector: 'app-super-admin-dashboard',
@@ -10,12 +12,24 @@ import { TenantDetail } from '../models/tenant-detail.model';
 })
 export class SuperAdminDashboardComponent implements OnInit {
   tenants: TenantDetail[] = [];
+  globalStats: any = null;
   loading = true;
 
-  constructor(private superAdminService: SuperAdminService) { }
+  constructor(
+    private superAdminService: SuperAdminService,
+    private dialog: MatDialog
+  ) { }
 
   ngOnInit(): void {
     this.loadTenants();
+    this.loadGlobalStats();
+  }
+
+  loadGlobalStats(): void {
+    this.superAdminService.getGlobalAnalytics().subscribe({
+      next: (data) => this.globalStats = data,
+      error: (err) => console.error('Failed to load global stats', err)
+    });
   }
 
   loadTenants(): void {
@@ -161,5 +175,45 @@ export class SuperAdminDashboardComponent implements OnInit {
         }
       });
     }
+  }
+
+  /* Group Management Dialog */
+  showGroupDialog = false;
+  selectedTenantForGroup: TenantDetail | null = null;
+
+  openGroupDialog(tenant: TenantDetail): void {
+    this.selectedTenantForGroup = tenant;
+    this.showGroupDialog = true;
+  }
+
+  closeGroupDialog(): void {
+    this.showGroupDialog = false;
+    this.selectedTenantForGroup = null;
+  }
+
+  onGroupAssigned(): void {
+    alert('Restaurant successfully added to the group!');
+    this.loadTenants(); // Refresh data
+  }
+
+  openUpgradeDialog(tenant: TenantDetail): void {
+    if (!tenant.groupId) {
+      alert('This restaurant is not associated with a group and needs migration before upgrading plan.');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(UpgradePlanDialogComponent, {
+      width: '500px',
+      data: {
+        groupId: tenant.groupId,
+        currentPlanId: tenant.planId
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadTenants();
+      }
+    });
   }
 }
