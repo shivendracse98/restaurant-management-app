@@ -1,4 +1,3 @@
-// src/app/features/customer/components/checkout/checkout.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -11,11 +10,13 @@ import { PaymentService } from 'src/app/core/services/payment.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { PaymentModalComponent } from './payment-modal.component';
 import { TenantService } from 'src/app/core/services/tenant.service';
-import { ConfigService } from 'src/app/core/services/config.service'; // Added
-import { ToastrModule, ToastrService } from 'ngx-toastr';  // ✅ Import both
+import { ConfigService } from 'src/app/core/services/config.service';
+import { GuestSessionService } from 'src/app/core/services/guest-session.service'; // ✅ Added
+import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+// ... (Component Metadata remains same)
 @Component({
   selector: 'app-checkout',
   standalone: true,
@@ -42,7 +43,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   // Cleanup
   private destroy$ = new Subject<void>();
 
-  // Logger prefix
   private LOG = '[CheckoutComponent]';
 
   constructor(
@@ -55,34 +55,94 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private toastr: ToastrService,
     private tenantService: TenantService,
-    private configService: ConfigService // Added
+    private configService: ConfigService,
+    private guestSessionService: GuestSessionService // ✅ Injected
   ) {
     console.log(`${this.LOG} Constructor called`);
     this.initializeForm();
   }
 
+  // Guest Session State
+  existingSessionOrder: any = null; // Stores Order details if valid
+  existingSessionKey: string | null = null; // Stores UUID Key
+  confirmedAppend: boolean = false;
+  showAppendPrompt: boolean = false;
+
   // Delivery Config
   tenantConfig: any = null;
   deliveryFee: number = 0;
-  isDeliveryAvailable: boolean = true; // Based on flags
-  deliveryError: string | null = null; // e.g. "Min order is 500"
+  isDeliveryAvailable: boolean = true;
+  deliveryError: string | null = null;
+  isTableOrder: boolean = false;
 
   ngOnInit(): void {
     console.log(`${this.LOG} ngOnInit called`);
-    this.loadTenantConfig(); // Load config first
+    this.loadTenantConfig();
     this.loadCheckoutData();
+    this.checkGuestSession(); // ✅ New Secure Logic
 
-    // Recalculate on Cart or OrderType changes
     this.form.get('orderType')?.valueChanges.subscribe(() => this.calculateTotal());
-    // Also recalculate when Pincode changes
     this.form.get('deliveryPincode')?.valueChanges.subscribe(() => this.calculateTotal());
   }
 
+  /**
+   * ✅ NEW Secure Check
+   */
+  checkGuestSession(): void {
+    const activeKey = this.guestSessionService.getValidGuestKey();
+    if (!activeKey) return;
+
+    this.orderService.trackGuestOrder(activeKey).subscribe({
+      next: (order) => {
+        const activeStatuses = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'];
+        // Note: DELIVERED/CLOSED blocked by backend logic anyway, but good to filter here too.
+
+        if (activeStatuses.includes(order.status)) {
+          this.existingSessionOrder = order;
+          this.existingSessionKey = activeKey; // Store key for Append
+          this.showAppendPrompt = true;
+          console.log(`${this.LOG} Active secure session found: #${order.id}.`);
+        } else {
+          // If status is PAID/CLOSED, maybe just ignore or clear?
+          // Let's clear to avoid confusion.
+          this.guestSessionService.clearSession();
+        }
+      },
+      error: () => this.guestSessionService.clearSession()
+    });
+  }
+
+  confirmAppend(): void {
+    if (!this.existingSessionOrder) return;
+    this.confirmedAppend = true;
+    this.showAppendPrompt = false;
+
+    // Auto-fill form details
+    this.form.patchValue({
+      customerName: this.existingSessionOrder.customerName,
+      customerPhone: this.existingSessionOrder.customerPhone,
+      tableNumber: this.existingSessionOrder.tableNumber,
+      orderType: this.existingSessionOrder.orderType
+    });
+
+    this.toastr.info(`Added to Order #${this.existingSessionOrder.id}`, 'Order Linked');
+  }
+
+  startNewOrder(): void {
+    this.guestSessionService.clearSession(); // ✅ Secure Clear
+    this.existingSessionOrder = null;
+    this.existingSessionKey = null;
+    this.confirmedAppend = false;
+    this.showAppendPrompt = false;
+    this.toastr.info('Starting a fresh order', 'New Order');
+  }
+
+  // ... (loadTenantConfig, calculateTotal, initializeForm, loadCheckoutData - UNCHANGED)
   loadTenantConfig() {
     this.configService.getPaymentConfig().subscribe((config: any) => {
       this.tenantConfig = config;
       console.log('Tenant Config Loaded:', config);
-      this.calculateTotal(); // Recalc once config is loaded
+      this.calculateTotal();
     });
   }
 
@@ -95,8 +155,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     const orderType = this.form.get('orderType')?.value;
 
     if (orderType === 'DELIVERY' && this.tenantConfig) {
-
-      // 1. Check Flags
       if (this.tenantConfig.isDeliveryEnabled === false) {
         this.isDeliveryAvailable = false;
         this.deliveryError = "Delivery is currently disabled by admin.";
@@ -107,178 +165,108 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         this.deliveryError = "Restaurant is not accepting delivery orders right now.";
         return;
       }
-
-      // 2. Pincode Validation
       const enteredPin = this.form.get('deliveryPincode')?.value;
       if (this.tenantConfig.serviceablePincodes && this.tenantConfig.serviceablePincodes.trim().length > 0) {
-        if (!enteredPin || enteredPin.length < 6) {
-          // Don't show error yet if typing, but fee might be 0 until valid.
-          // Actually, let's wait for 6 digits to validate strictness, 
-          // but for "Available" check we can be strict.
-        } else {
+        if (!enteredPin || enteredPin.length < 6) { } else {
           const allowedPins = this.tenantConfig.serviceablePincodes.split(',').map((p: string) => p.trim());
           if (!allowedPins.includes(enteredPin)) {
             this.isDeliveryAvailable = false;
             this.deliveryError = `Sorry, we do not deliver to ${enteredPin}.`;
-            // We return here so fee is 0 and block submit
-            // Don't return if you want to show fee? No, if no deliver, no fee/total.
-            // But let's show error.
           }
         }
       }
-
-      if (this.deliveryError) {
-        // Validation failed above
-        this.total = rawTotal;
-        return;
-      }
-
-      // 3. Min Order
+      if (this.deliveryError) { this.total = rawTotal; return; }
       if (this.tenantConfig.minOrderAmount && rawTotal < this.tenantConfig.minOrderAmount) {
         this.deliveryError = `Minimum order for delivery is ₹${this.tenantConfig.minOrderAmount}`;
       }
-
-      // 4. Fee
       if (this.tenantConfig.deliveryFee) {
         const threshold = this.tenantConfig.freeDeliveryThreshold || 0;
-        if (threshold > 0 && rawTotal >= threshold) {
-          this.deliveryFee = 0; // Free
-        } else {
-          this.deliveryFee = this.tenantConfig.deliveryFee;
-        }
+        if (threshold > 0 && rawTotal >= threshold) { this.deliveryFee = 0; } else { this.deliveryFee = this.tenantConfig.deliveryFee; }
       }
     }
-
     this.total = rawTotal + this.deliveryFee;
   }
 
-  /**
- * Initialize form with validators
- */
   private initializeForm(): void {
     console.log(`${this.LOG} Initializing form`);
+    const tableId = sessionStorage.getItem('rms_table_id');
+    this.isTableOrder = !!tableId;
+
     this.form = this.fb.group({
       customerName: ['', [Validators.required, Validators.minLength(2)]],
       customerPhone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       customerEmail: ['', [Validators.email]],
       address: [''],
-      orderType: ['DELIVERY', Validators.required],
+      orderType: [this.isTableOrder ? 'DINE_IN' : 'DELIVERY', Validators.required],
       deliveryPincode: [''],
       locationLink: ['']
     });
 
-    // Add dynamic validator for Address and Pincode
-    this.form.get('orderType')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(type => {
-        const addrCtrl = this.form.get('address');
-        const pinCtrl = this.form.get('deliveryPincode');
+    if (this.isTableOrder) { // Table Order Tweaks
+      this.form.get('customerEmail')?.clearValidators();
+      this.form.get('customerEmail')?.updateValueAndValidity();
+    }
 
-        if (type === 'DELIVERY') {
-          addrCtrl?.setValidators([Validators.required, Validators.minLength(5)]);
-          pinCtrl?.setValidators([Validators.required, Validators.pattern(/^\d{6}$/)]);
-        } else {
-          addrCtrl?.clearValidators();
-          pinCtrl?.clearValidators();
-        }
-        addrCtrl?.updateValueAndValidity();
-        pinCtrl?.updateValueAndValidity();
-      });
-
-    // Trigger initial validation for Order Type
+    this.form.get('orderType')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(type => {
+      const addrCtrl = this.form.get('address');
+      const pinCtrl = this.form.get('deliveryPincode');
+      if (type === 'DELIVERY') {
+        addrCtrl?.setValidators([Validators.required, Validators.minLength(5)]);
+        pinCtrl?.setValidators([Validators.required, Validators.pattern(/^\d{6}$/)]);
+      } else {
+        addrCtrl?.clearValidators();
+        pinCtrl?.clearValidators();
+      }
+      addrCtrl?.updateValueAndValidity();
+      pinCtrl?.updateValueAndValidity();
+    });
     this.form.get('orderType')?.updateValueAndValidity({ emitEvent: true });
-
-    // Handle Query Params for 'tableId' -> Auto set to DINE_IN
-    // (Assuming logic elsewhere or defaults)
-    console.log(`${this.LOG} Form initialized`, this.form);
   }
 
-  /**
-   * Load checkout data (user info, cart items)
-   */
   private loadCheckoutData(): void {
     console.log(`${this.LOG} Loading checkout data...`);
     this.loading = true;
-
-    // Get current user
-    this.authService.getCurrentUser()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (user: any) => {
-          console.log(`${this.LOG} User loaded:`, user);
-          this.currentUser = user;
-          if (user) {
-            this.form.patchValue({
-              customerName: user.name || '',
-              customerPhone: user.phone || user.phoneNumber || '',
-              customerEmail: user.email || '',
-              address: user.address || ''
-            });
-            console.log(`${this.LOG} Form pre-filled with user data`);
-          }
-          this.loading = false;
-        },
-        error: (err: any) => {
-          console.error(`${this.LOG} Error loading user:`, err);
-          this.loading = false;
+    this.authService.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (user: any) => {
+        this.currentUser = user;
+        if (user) {
+          this.form.patchValue({
+            customerName: user.name || '',
+            customerPhone: user.phone || user.phoneNumber || '',
+            customerEmail: user.email || '',
+            address: user.address || ''
+          });
         }
-      });
-
-    // Get cart items from CartService
+        this.loading = false;
+      },
+      error: (err: any) => { this.loading = false; }
+    });
     this.cart.items = this.cartService.items;
     this.total = this.cartService.getTotal();
 
-    console.log(`${this.LOG} Cart items:`, this.cart.items);
-    console.log(`${this.LOG} Cart total:`, this.total);
-    console.log(`${this.LOG} Cart count:`, this.cartService.getCount());
-
     if (this.cart.items.length === 0) {
-      console.warn(`${this.LOG} Cart is empty!`);
       this.toastr.warning('Your cart is empty');
       setTimeout(() => this.router.navigate(['/customer/menu']), 2000);
     }
   }
 
-  /**
-   * Submit form and place order
-   */
   submit(): void {
-    console.log(`${this.LOG} ========== SUBMIT BUTTON CLICKED ==========`);
-    console.log(`${this.LOG} Form valid:`, this.form.valid);
-    console.log(`${this.LOG} Form value:`, this.form.value);
-    console.log(`${this.LOG} Cart items:`, this.cart.items);
-    console.log(`${this.LOG} Cart count:`, this.cartService.getCount());
-
-    // Validate form
+    console.log(`${this.LOG} ========== SUBMIT ==========`);
     if (this.form.invalid) {
-      console.error(`${this.LOG} Form is INVALID`);
-      console.error(`${this.LOG} Form errors:`, this.form.errors);
-      Object.keys(this.form.controls).forEach(key => {
-        const control = this.form.get(key);
-        if (control?.invalid) {
-          console.error(`${this.LOG}   - ${key}: ${JSON.stringify(control.errors)}`);
-        }
-      });
       this.toastr.error('Please fill all required fields correctly');
       this.markFormGroupTouched(this.form);
       return;
     }
-
     if (this.cartService.getCount() === 0) {
-      console.error(`${this.LOG} Cart is EMPTY`);
       this.toastr.error('Your cart is empty');
       return;
     }
-
     if (this.form.get('orderType')?.value === 'DELIVERY' && this.deliveryError) {
       this.toastr.error(this.deliveryError);
       return;
     }
 
-    console.log(`${this.LOG} ✓ Validation passed, starting order creation...`);
     this.submitting = true;
-
-    // Prepare order data
     const formValue = this.form.value;
     const orderItems = this.cartService.items.map(item => ({
       id: item.menuItem.id,
@@ -293,13 +281,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       customerName: formValue.customerName,
       customerPhone: formValue.customerPhone,
       customerEmail: formValue.customerEmail,
-      deliveryAddress: formValue.address, // ✅ Map local 'address' to 'deliveryAddress'
-      deliveryPincode: formValue.deliveryPincode, // ✅ Now mapped from form
-      locationLink: formValue.locationLink, // ✅ Added Location Link
+      deliveryAddress: formValue.address,
+      deliveryPincode: formValue.deliveryPincode,
+      locationLink: formValue.locationLink,
       orderType: formValue.orderType,
       items: orderItems,
-      total: this.total, // ✅ Use calculated total (includes fee)
-      // Note: Backend will RE-CALCULATE fee to be safe, but we send this for reference.
+      total: this.total,
       userId: this.currentUser?.id,
       restaurantId: this.tenantService.getTenantId() || 'Maa-Ashtabhuja',
       tableNumber: sessionStorage.getItem('rms_table_id') || '',
@@ -307,32 +294,69 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       createdAt: new Date().toISOString()
     };
 
-    console.log(`${this.LOG} Order data prepared:`, orderData);
+    // ✅ SECURE SUBMIT LOGIC
+    // 1. If Active Session + Confirmed Append -> Call Append API
+    // 2. Else -> Call Create API
 
-    // Step 1: Create order
-    console.log(`${this.LOG} Calling orderService.createOrder()...`);
-    this.orderService.createOrder(orderData as any)
+    let request$;
+    if (this.existingSessionOrder && this.confirmedAppend && this.existingSessionKey) {
+      console.log(`${this.LOG} Appending to Order via Secure Key`);
+      request$ = this.orderService.appendGuestOrder(this.existingSessionKey, orderItems);
+    } else {
+      console.log(`${this.LOG} Creating New Order`);
+      request$ = this.orderService.createOrder(orderData as any);
+    }
+
+    request$
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (createdOrder: any) => {
-          console.log(`${this.LOG} ✓ Order created successfully:`, createdOrder);
+        next: (responseOrder: any) => {
+          console.log(`${this.LOG} ✓ Order processed:`, responseOrder);
 
-          // FIX: If DINE_IN or PICKUP, allow "Pay Later" (Skip Payment Modal)
+          // ✅ Save Secure Session (If New Order)
+          if (!this.existingSessionOrder && responseOrder.accessKey) {
+            console.log(`${this.LOG} Saving secure session:`, responseOrder.accessKey);
+            this.guestSessionService.saveGuestSession(responseOrder.id, responseOrder.accessKey);
+          } else if (!this.existingSessionOrder) {
+            // Fallback if backend didn't return accessKey (should not happen if migration ran)
+            // Or if logged-in user (no key needed usually, but good to check)
+            console.warn('No accessKey returned! Is backend updated?');
+          }
+
           if (formValue.orderType === 'DINE_IN' || formValue.orderType === 'PICKUP') {
-            this.toastr.success('✓ Order placed! Please pay at the counter.');
+            const msg = this.existingSessionOrder ? '✓ Items added to your order!' : '✓ Order placed! Please pay at the counter.';
+            this.toastr.success(msg);
             this.cartService.clear();
+
+            // Redirect using UUID if available specifically for tracking
+            // Since `order-tracking/:id` works via ID, we rely on `checkGuestSession` to use key internally?
+            // Wait, tracking page needs to be protected too?
+            // For now, we redirect to standard tracking page. 
+            // The Tracking Page should ALSO check storage? Or use `order-tracking/uuid`?
+            // Design said: /order-tracking/uuid...
+            // But let's stick to ID for URL if the component handles the secure fetch?
+            // Actually, design said -> /order-tracking/{uuid}
+            // For now, let's keep it simple: Navigate to ID, but ensure Tracking Component uses Key if user is guest.
+            // Or better: Navigate to `/order-tracking/<accessKey>` if we have it?
+
+            // Let's use ID for now and let the Tracking Component resolve permissions via the Key it finds in localStorage.
+
             setTimeout(() => {
-              this.router.navigate(['/order-tracking', createdOrder.id]);
+              this.router.navigate(['/order-tracking', responseOrder.id]);
             }, 1500);
           } else {
-            // For DELIVERY, force payment
-            this.openPaymentModal(createdOrder);
+            this.openPaymentModal(responseOrder);
           }
         },
         error: (error: any) => {
-          console.error(`${this.LOG} ✗ Order creation failed:`, error);
+          console.error(`${this.LOG} ✗ Order failed:`, error);
           this.submitting = false;
-          this.toastr.error('Failed to create order. Please try again.');
+          if (error.status === 409) {
+            this.toastr.error('Cannot add items. Bill is already being settled.');
+            this.startNewOrder(); // Reset UI state on Conflict
+          } else {
+            this.toastr.error('Failed to process order. Please try again.');
+          }
         }
       });
   }

@@ -32,7 +32,8 @@
       </div>
 
       <!-- Email -->
-      <div class="form-group">
+      <!-- Email (Hid for Table QR) -->
+      <div class="form-group" *ngIf="!isTableOrder">
         <label>📧 Email *</label>
         <input type="email" formControlName="customerEmail" placeholder="your@email.com" class="form-control" />
         <small *ngIf="form.get('customerEmail')?.hasError('email') && form.get('customerEmail')?.touched" class="error">
@@ -41,7 +42,8 @@
       </div>
 
       <!-- Address -->
-      <div class="form-group">
+      <!-- Address (Hid for Table QR) -->
+      <div class="form-group" *ngIf="!isTableOrder">
         <label>📍 Delivery Address <span *ngIf="form.get('orderType')?.value === 'DELIVERY'"
             style="color:red">*</span></label>
         <textarea formControlName="address" placeholder="Enter your delivery address" rows="3"
@@ -51,8 +53,8 @@
         </small>
       </div>
 
-      <!-- Order Type -->
-      <div class="form-group">
+      <!-- Order Type (Hid/Locked for Table QR) -->
+      <div class="form-group" *ngIf="!isTableOrder">
         <label>📦 Order Type *</label>
         <select formControlName="orderType" class="form-control">
           <option value="DELIVERY">🚚 Delivery</option>
@@ -125,5 +127,25 @@
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- APPEND CONFIRMATION MODAL -->
+<div class="checkout-overlay" *ngIf="showAppendPrompt && existingSessionOrder">
+  <div class="modal-card">
+    <h3>👋 Welcome Back to Table {{ existingSessionOrder.tableNumber }}</h3>
+    <p>We found an active order (#{{ existingSessionOrder.id }}) for <strong>{{ existingSessionOrder.customerName
+        }}</strong>.</p>
+    <p>Would you like to <strong>add these items</strong> to the existing order, or start a <strong>new order</strong>?
+    </p>
+
+    <div class="modal-actions">
+      <button class="btn-join" (click)="confirmAppend()">
+        ➕ Add to Order #{{ existingSessionOrder.id }}
+      </button>
+      <button class="btn-new" (click)="startNewOrder()">
+        🆕 Start New Order
+      </button>
+    </div>
   </div>
 </div>

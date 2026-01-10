@@ -6,6 +6,7 @@ export interface OrderItem {
   price: number;
   name?: string;
   status?: string;
+  hsnCode?: string;
 }
 
 export interface Order {
@@ -20,6 +21,11 @@ export interface Order {
   items: OrderItem[];
   total: number;
   totalAmount?: number; // Backend DTO field
+  subtotal?: number;
+  taxAmount?: number;
+  cgst?: number;
+  sgst?: number;
+  grandTotal?: number;
   status: OrderStatus;
   createdAt?: string;
   paymentId?: number;

@@ -1,328 +1,514 @@
 <div class="staff-pos-container">
-  <!-- Header -->
+  <!-- HEADER ROW -->
   <div class="header-row">
-    <div style="display: flex; gap: 15px; align-items: center;">
-      <h2>👨‍💼 Staff POS</h2>
-      <a routerLink="/staff/kitchen" class="btn secondary-btn"
-        style="text-decoration: none; padding: 5px 10px; font-size: 0.9rem;">
-        👨‍🍳 Kitchen View
-      </a>
+    <div>
+      <h2>
+        <span>🍽️</span>
+        Staff POS
+      </h2>
     </div>
+
+    <a routerLink="/staff/kitchen" class="kitchen-link" aria-label="Go to Kitchen Management">
+      🔥 Kitchen
+    </a>
+
+    <!-- TAB BUTTONS -->
     <div class="tab-buttons">
-      <button class="tab-btn" [class.active]="activeTab === 'ORDER'" (click)="switchTab('ORDER')">
-        🛒 Take Order
-      </button>
-      <button class="tab-btn" [class.active]="activeTab === 'TIFFIN'" (click)="switchTab('TIFFIN')">
-        🍱 Tiffin
-      </button>
-      <button class="tab-btn" [class.active]="activeTab === 'ONGOING'" (click)="switchTab('ONGOING')">
-        ⏳ Ongoing
-      </button>
-      <button class="tab-btn" [class.active]="activeTab === 'ONLINE'" (click)="switchTab('ONLINE')">
-        🔔 Online Orders <span *ngIf="onlineOrders.length > 0" class="badge-count">{{ onlineOrders.length }}</span>
-      </button>
-      <button class="tab-btn" [class.active]="activeTab === 'UNPAID'" (click)="switchTab('UNPAID')">
-        💳 Unpaid <span *ngIf="unpaidOrders.length > 0" class="badge-count" style="background:#c62828;">{{
-          unpaidOrders.length }}</span>
-      </button>
-      <button class="tab-btn" [class.active]="activeTab === 'REVENUE'" (click)="switchTab('REVENUE')">
-        📝 Shift Summary
-      </button>
-      <button class="tab-btn" [class.active]="activeTab === 'LEAVES'" (click)="switchTab('LEAVES')">
-        🏖️ My Leaves
-      </button>
-      <button class="tab-btn" [class.active]="activeTab === 'TODAY'" (click)="switchTab('TODAY')"
-        style="background: #2d3436; color: white;">
-        📋 Manage Orders
+      <button *ngFor="let tab of ['ORDER', 'TIFFIN', 'ONGOING', 'REVENUE', 'ONLINE', 'LEAVES', 'UNPAID', 'TODAY']"
+        class="tab-btn" [class.active]="activeTab === tab" (click)="activeTab = $any(tab)"
+        [attr.aria-label]="'Switch to ' + tab + ' tab'" [attr.aria-pressed]="activeTab === tab">
+        {{ tab }}
+        <span *ngIf="tab === 'UNPAID' && unpaidOrders.length > 0" class="badge-count">
+          {{ unpaidOrders.length }}
+        </span>
+        <span *ngIf="tab === 'ONLINE' && onlineOrders.length > 0" class="badge-count">
+          {{ onlineOrders.length }}
+        </span>
+        <span *ngIf="tab === 'ONGOING' && ongoingOrders.length > 0" class="badge-count">
+          {{ ongoingOrders.length }}
+        </span>
       </button>
     </div>
   </div>
 
-  <!-- Message -->
-  <div *ngIf="message" class="message">{{ message }}</div>
-
-  <!-- ========== UNPAID ORDERS TAB ========== -->
-  <div *ngIf="activeTab === 'UNPAID'" class="tab-content">
-    <h3>💳 Served & Unpaid Orders</h3>
-    <div class="table-wrapper">
-      <table class="orders-table" *ngIf="unpaidOrders.length > 0">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Customer</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let o of unpaidOrders">
-            <td>#{{ o.id }}</td>
-            <td>
-              {{ o.customerName || 'Guest' }}<br>
-              <small>{{ o.customerPhone }}</small>
-            </td>
-            <td>{{ o.items?.length || 0 }} items</td>
-            <td style="color: #c62828; font-weight: bold;">₹{{ o.totalAmount || o.total }}</td>
-            <td>
-              <span class="badge badge-delivered">SERVED / UNPAID</span>
-            </td>
-            <td>
-              <button class="btn share-btn" style="margin-right: 5px; background-color: #3498DB; color: white;"
-                (click)="shareBill(o)" title="View & Share Bill">
-                <i class="fa fa-file-text-o"></i> Bill
-              </button>
-              <button class="btn primary-btn" style="background-color: #E67E22; border-color: #E67E22;"
-                (click)="openPayment(o)">
-                💰 Collect Payment
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <p *ngIf="unpaidOrders.length === 0" class="no-data">No unpaid orders! All clear. 🎉</p>
+  <!-- SUCCESS MESSAGE -->
+  <div *ngIf="message" class="message" role="status" aria-live="polite">
+    {{ message }}
   </div>
 
-  <!-- ========== TODAY'S ORDERS (MANAGE DELIVERY) TAB ========== -->
-  <div *ngIf="activeTab === 'TODAY'" class="tab-content" style="padding: 0;">
-    <!-- Embedding the Staff Today Orders Component -->
-    <app-staff-today-orders></app-staff-today-orders>
-  </div>
-
-  <!-- ========== TAKE ORDER TAB ========== -->
-  <div *ngIf="activeTab === 'ORDER'" class="pos-layout">
-    <app-pos-order-taking [menuItems]="menuItems" [orderForm]="orderForm" [isLoading]="isLoading"
-      [isManageMode]="isManageMode" (placeOrderTrigger)="toggleCart()" (addToCart)="addItem($event)"
-      (toggleStock)="addItem($event)" (removeFromCartInput)="removeItemFromOrder($event)"
-      (clearCartTrigger)="clearCart()">
+  <!-- POS LAYOUT -->
+  <div class="pos-layout">
+    <!-- ===== ORDER TAB ===== -->
+    <app-pos-order-taking *ngIf="activeTab === TabType.ORDER" [menuItems]="menuItems" [orderForm]="orderForm"
+      [isLoading]="isLoading" [isManageMode]="isManageMode" (addToCart)="addItem($event)"
+      (removeFromCartInput)="removeItemFromOrder($event)" (clearCartTrigger)="clearCart()"
+      (placeOrderTrigger)="placeOrder()" (toggleStock)="toggleItemAvailability($event)">
     </app-pos-order-taking>
 
-    <!-- CART MODAL (Kept in Parent as it manages the Form + Submission Logic) -->
-    <div class="modal-backdrop" *ngIf="showCartModal" (click)="toggleCart()">
-      <div class="modal cart-modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>🛒 Current Order</h3>
-          <button class="close-btn" (click)="toggleCart()">✕</button>
-        </div>
-
-        <div class="modal-body">
-          <form [formGroup]="orderForm" class="order-form">
-            <div class="form-row two-col">
-              <div>
-                <label>Table # <span *ngIf="orderForm.get('orderType')?.value === 'DINE_IN'"
-                    style="color:red">*</span></label>
-                <input type="number" formControlName="tableNumber" placeholder="0 = Standing" class="highlight-input" />
-                <small style="color: #888; display: block; margin-top: 2px; font-size: 0.75rem;">
-                  (0: Walk-in, >0: Append)
-                </small>
-              </div>
-              <div>
-                <label>Type</label>
-                <select formControlName="orderType">
-                  <option value="DINE_IN">Dine In</option>
-                  <option value="TAKEAWAY">Takeaway</option>
-                  @if (featureFlagStore.isFeatureEnabled('DELIVERY_MANAGEMENT')) {
-                  <option value="DELIVERY">Delivery 🚚</option>
-                  }
-                </select>
-              </div>
-            </div>
-
-            <!-- Conditional Address for Delivery -->
-            <div class="form-row two-col" *ngIf="orderForm.get('orderType')?.value === 'DELIVERY'">
-              <div>
-                <label>Delivery Address <span style="color:red">*</span></label>
-                <textarea formControlName="address" rows="1" placeholder="Address..."></textarea>
-              </div>
-              <div>
-                <label>Pincode <span style="color:red">*</span></label>
-                <input type="text" formControlName="pincode" placeholder="e.g. 560001" />
-              </div>
-            </div>
-
-            <div class="form-row">
-              <label>Customer Name</label>
-              <input type="text" formControlName="customerName" placeholder="Guest Name" />
-            </div>
-
-            <div class="cart-items-list">
-              <div *ngFor="let item of cartItems; let i = index" class="cart-item">
-                <div class="item-name">{{ item.name }}</div>
-                <div class="item-price">₹{{ item.price }}</div>
-                <button class="remove-btn" (click)="removeItemFromOrder(i)">🗑️</button>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <div class="grand-total">Total: ₹{{ getTotal(cartItems) }}</div>
-          <button class="btn clear-btn" (click)="clearCart(); toggleCart()">Clear</button>
-          <button class="btn place-order-btn" (click)="placeOrder()"
-            [disabled]="!orderForm.valid || cartItems.length === 0 || isLoading">
-            {{ isLoading ? '⏳ Processing...' : '✅ Place Order' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== ONLINE ORDERS (VERIFICATION) TAB ========== -->
-  <div *ngIf="activeTab === 'ONLINE'" class="tab-content">
-    <h3>🔔 Online Verification Queue</h3>
-    <div class="table-wrapper">
-      <table class="orders-table" *ngIf="onlineOrders.length > 0">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Customer</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let o of onlineOrders">
-            <td>#{{ o.id }}</td>
-            <td>{{ o.customerName || 'Guest' }}<br><small>{{ o.customerPhone }}</small></td>
-            <td>{{ o.items?.length }} items</td>
-            <td>₹{{ o.total }}</td>
-            <td>
-              <div *ngIf="o.paymentStatus === 'VERIFICATION_PENDING'" style="color:orange; font-weight:bold;">⚠ Proof
-                Uploaded</div>
-              <div *ngIf="o.paymentMode === 'CASH' && o.status === 'PENDING'" style="color:blue; font-weight:bold;">💵
-                Pay
-                at Counter</div>
-              <div *ngIf="o.paymentProof" style="font-size:0.8em;">Ref: {{ o.paymentProof }}</div>
-            </td>
-            <td>
-              <button class="btn primary-btn" style="background-color: #27AE60;" (click)="verifyPayment(o)">
-                ✅ Verify & Accept
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <p *ngIf="onlineOrders.length === 0" class="no-data">No pending online orders! 🎉</p>
-  </div>
-
-  <!-- ========== TIFFIN TAB ========== -->
-  <div *ngIf="activeTab === 'TIFFIN'" class="tab-content">
-    <app-pos-tiffin [menuItems]="menuItems" [subscriptions]="subscriptionsList" [isLoading]="isLoading"
+    <!-- ===== TIFFIN TAB ===== -->
+    <app-pos-tiffin *ngIf="activeTab === TabType.TIFFIN" [subscriptions]="subscriptionsList" [menuItems]="menuItems"
       (createSubscription)="createSubscription($event)" (toggleStatus)="toggleSubscriptionStatus($event)">
     </app-pos-tiffin>
-  </div>
 
-  <!-- ========== ONGOING ORDERS TAB ========== -->
-  <div *ngIf="activeTab === 'ONGOING'" class="tab-content">
-    <app-pos-ongoing-orders [ongoingOrders]="ongoingOrders" [isLoading]="isLoading"
-      (verifyPayment)="verifyPayment($event)" (markAsServed)="markAsServed($event)" (openPayment)="openPayment($event)"
-      (shareBill)="shareBill($event)" (openEdit)="openEdit($event)">
+    <!-- ===== ONGOING ORDERS TAB ===== -->
+    <app-pos-ongoing-orders *ngIf="activeTab === TabType.ONGOING" [ongoingOrders]="ongoingOrders"
+      (openEdit)="openEdit($event)" (verifyPayment)="verifyPayment($event)" (openPayment)="openPayment($event)"
+      (shareBill)="shareBill($event)" (markAsServed)="markOrderServed($event)">
     </app-pos-ongoing-orders>
+
+    <!-- ===== REVENUE TAB ===== -->
+    <div *ngIf="activeTab === TabType.REVENUE" class="tab-content revenue-tab">
+      <h3>📊 Revenue Dashboard</h3>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Today's Revenue</div>
+          <div class="stat-value">₹{{ getTodayRevenueTotal() | number }}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Cash Orders</div>
+          <div class="stat-value">{{ getCashOrdersCount() }}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Online Orders</div>
+          <div class="stat-value">{{ getOnlineOrdersCount() }}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value">{{ todayOrders.length }}</div>
+        </div>
+      </div>
+
+      <!-- Revenue Chart -->
+      <div style="height: 300px; position: relative">
+        <canvas class="revenue-chart" *ngIf="revenueChartData.datasets && revenueChartData.datasets.length > 0"
+          baseChart [data]="revenueChartData" [options]="revenueChartOptions" type="bar"
+          aria-label="Last 7 days revenue chart">
+        </canvas>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="table-wrapper" *ngIf="todayOrders.length > 0">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Payment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of todayOrders">
+              <td>#{{ order.id }}</td>
+              <td>{{ order.customerName || 'Guest' }} <br /> {{ order.customerPhone }}</td>
+              <td>{{ order.items.length || 0 }} items</td>
+              <td>₹{{ order.total || order.totalAmount | number }}</td>
+              <td>
+                <span [ngSwitch]="order.status" class="badge"
+                  [class.badge-pending]="order.status === OrderStatus.PENDING"
+                  [class.badge-ready]="order.status === OrderStatus.READY"
+                  [class.badge-delivered]="order.status === OrderStatus.DELIVERED">
+                  {{ order.status }}
+                </span>
+              </td>
+              <td>
+                <span [ngSwitch]="order.paymentMode" class="badge"
+                  [class.badge-cash]="order.paymentMode === PaymentMode.CASH"
+                  [class.badge-upi]="order.paymentMode === PaymentMode.UPI">
+                  {{ order.paymentMode }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="todayOrders.length === 0" class="no-data">
+        No orders yet today. 🎯
+      </div>
+    </div>
+
+    <!-- ===== ONLINE ORDERS (PENDING PAYMENT) TAB ===== -->
+    <div *ngIf="activeTab === TabType.ONLINE" class="tab-content">
+      <h3>💳 Online Orders (Pending Verification)</h3>
+
+      <div class="table-wrapper" *ngIf="onlineOrders.length > 0">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Payment Status</th>
+              <th>Proof</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of onlineOrders">
+              <td>#{{ order.id }}</td>
+              <td>{{ order.customerName || 'Guest' }} <br /> {{ order.customerPhone }}</td>
+              <td>{{ order.items.length || 0 }} items</td>
+              <td>₹{{ order.total || order.totalAmount | number }}</td>
+              <td>
+                <span class="badge badge-pending">
+                  ⚠️ Awaiting Verification
+                </span>
+              </td>
+              <td>
+                <span *ngIf="order.paymentProof" class="badge-pending">
+                  💵 Proof: {{ order.paymentProof }}
+                </span>
+                <span *ngIf="!order.paymentProof">—</span>
+              </td>
+              <td>
+                <button class="btn primary-btn" (click)="verifyPayment(order)" [disabled]="isLoading"
+                  [attr.aria-label]="'Verify payment for order ' + order.id">
+                  ✅ Verify
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="onlineOrders.length === 0" class="no-data">
+        No pending online orders! 🎉
+      </div>
+    </div>
+
+    <!-- ===== LEAVES TAB ===== -->
+    <div *ngIf="activeTab === TabType.LEAVES" class="tab-content">
+      <h3>🏖️ Leave Requests</h3>
+
+      <button class="btn primary-btn" (click)="showLeaveModal = !showLeaveModal" aria-label="Request leave">
+        + Request Leave
+      </button>
+
+      <div class="table-wrapper" *ngIf="myLeaves.length > 0">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Date Applied</th>
+              <th>Period</th>
+              <th>Days</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Admin Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let leave of myLeaves">
+              <td>{{ leave.createdAt | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ leave.startDate | date: 'dd MMM' }} to {{ leave.endDate | date: 'dd MMM' }}</td>
+              <td>{{ getLeaveDuration(leave.startDate, leave.endDate) }} days</td>
+              <td>{{ leave.reason }}</td>
+              <td>
+                <span class="badge" [class.badge-pending]="leave.status === 'PENDING'"
+                  [class.badge-ready]="leave.status === 'APPROVED'" [class.badge-error]="leave.status === 'REJECTED'">
+                  {{ leave.status }}
+                </span>
+              </td>
+              <td>{{ leave.adminComments || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="myLeaves.length === 0" class="no-data">
+        No leave applications yet.
+      </div>
+    </div>
+
+    <!-- ===== UNPAID ORDERS TAB ===== -->
+    <div *ngIf="activeTab === TabType.UNPAID" class="tab-content">
+      <h3>💰 Unpaid Orders (Served)</h3>
+
+      <div class="table-wrapper" *ngIf="unpaidOrders.length > 0">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of unpaidOrders">
+              <td>#{{ order.id }}</td>
+              <td>
+                {{ order.customerName || 'Guest' }}
+                <br />
+                {{ order.customerPhone }}
+              </td>
+              <td>{{ order.items.length || 0 }} items</td>
+              <td>₹{{ order.total || order.totalAmount | number }}</td>
+              <td>
+                <span class="badge badge-delivered">
+                  SERVED / UNPAID
+                </span>
+              </td>
+              <td>
+                <button class="btn primary-btn" (click)="openPayment(order)" [disabled]="isLoading"
+                  [attr.aria-label]="'Collect payment for order ' + order.id">
+                  💵 Collect
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="unpaidOrders.length === 0" class="no-data">
+        No unpaid orders! All clear. 🎉
+      </div>
+    </div>
+
+    <!-- ===== TODAY'S ORDERS TAB ===== -->
+    <app-staff-today-orders *ngIf="activeTab === TabType.TODAY">
+    </app-staff-today-orders>
   </div>
 
-  <!-- ========== SHIFT SUMMARY TAB ========== -->
-  <div *ngIf="activeTab === 'REVENUE'" class="tab-content revenue-tab">
-    <h3>📝 Shift Summary (Today)</h3>
-
-    <div class="stats-row">
-      <div class="stat-box">
-        <div class="stat-label">Total Orders</div>
-        <div class="stat-value">{{ todayOrders.length }}</div>
-      </div>
-      <!-- Modified for Staff Privacy: Count only, no Revenue Amount -->
-      <div class="stat-box">
-        <div class="stat-label">Cash Orders</div>
-        <div class="stat-value">{{ getCashOrdersCount() }}</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Online/UPI Orders</div>
-        <div class="stat-value">{{ getOnlineOrdersCount() }}</div>
-      </div>
+  <!-- ===== FLOATING CART ===== -->
+  <div *ngIf="activeTab === TabType.ORDER && cartItems.length > 0" class="fab-cart-bar" (click)="toggleCart()"
+    role="button" tabindex="0" (keydown.enter)="toggleCart()" (keydown.space)="toggleCart()"
+    [attr.aria-label]="'View cart with ' + cartItems.length + ' items'">
+    <div class="fab-info">
+      <span>🛒 {{ cartItems.length }} items</span>
+      <span class="pipe">|</span>
+      <span class="total">₹{{ getTotal(cartItems) | number }}</span>
     </div>
+    <div class="fab-action">View Cart →</div>
+  </div>
 
-    <!-- Chart hidden for Staff as per privacy policy -->
-    <!-- <div class="chart-container" *ngIf="revenueChartData && revenueChartOptions">
-      <canvas baseChart [data]="revenueChartData" [options]="revenueChartOptions" type="bar"></canvas>
-    </div> -->
+  <!-- ===== CART MODAL (ENTERPRISE) ===== -->
+  <div *ngIf="showCartModal" class="modal-backdrop" role="dialog" aria-modal="true" (click)="toggleCart()">
+    <div class="modal cart-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🛒 Current Order</h3>
+        <button class="close-btn" (click)="toggleCart()" aria-label="Close cart">✕</button>
+      </div>
 
-    <div class="table-wrapper">
-      <table class="orders-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Customer</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let o of todayOrders">
-            <td>#{{ o.id }}</td>
-            <td>{{ o.customerName }}</td>
-            <td>{{ o.items?.length || 0 }} items</td>
-            <td>₹{{ o.total }}</td>
-            <td><span class="badge">{{ o.status }}</span></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="modal-body">
+        <form [formGroup]="orderForm" class="order-form">
+          <!-- Order Settings Row -->
+          <div class="form-row two-col">
+            <div>
+              <label>Order Type</label>
+              <select formControlName="orderType">
+                <option value="DINE_IN">🍽️ Dine In</option>
+                <option value="TAKEAWAY">🛍️ Takeaway</option>
+                <option value="DELIVERY">🚚 Delivery</option>
+              </select>
+            </div>
+            <div>
+              <label>Table # <span *ngIf="orderForm.value.orderType === 'DINE_IN'" style="color:red">*</span></label>
+              <input type="number" formControlName="tableNumber" placeholder="0 for Counter/Standing"
+                [class.highlight-input]="orderForm.value.orderType === 'DINE_IN'" />
+              <small style="color: #666; font-size: 0.8rem;">(Required for Dine In)</small>
+            </div>
+          </div>
+
+          <!-- Customer Info -->
+          <div class="form-row two-col">
+            <div>
+              <label>Customer Name <span style="color:red">*</span></label>
+              <input type="text" formControlName="customerName" placeholder="Guest Name" />
+            </div>
+            <div>
+              <label>Phone (Optional)</label>
+              <input type="text" formControlName="customerPhone" placeholder="Mobile Number" maxlength="10" />
+            </div>
+          </div>
+
+          <!-- Conditional Delivery Address -->
+          <div class="form-row two-col" *ngIf="orderForm.value.orderType === 'DELIVERY'">
+            <div>
+              <label>Delivery Address <span style="color:red">*</span></label>
+              <textarea formControlName="address" rows="1" placeholder="Full Address"></textarea>
+            </div>
+            <div>
+              <label>Pincode <span style="color:red">*</span></label>
+              <input type="text" formControlName="pincode" placeholder="e.g. 560001" />
+            </div>
+          </div>
+
+          <!-- Cart Items List -->
+          <h4 style="margin: 1rem 0 0.5rem; color: #E67E22; border-bottom: 1px solid #eee; padding-bottom: 5px;">Items
+          </h4>
+          <div class="cart-items-list" *ngIf="cartItems.length > 0; else emptyCart">
+            <div *ngFor="let item of cartItems; let i = index" class="cart-item">
+              <div class="item-info">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-price">₹{{ item.price }}</div>
+              </div>
+              <button class="btn-icon delete-btn" (click)="removeItemFromOrder(i)" aria-label="Remove item">
+                🗑️
+              </button>
+            </div>
+          </div>
+
+          <ng-template #emptyCart>
+            <div class="empty-state">Cart is empty. Add items from the menu!</div>
+          </ng-template>
+
+          <!-- Total Calculation -->
+          <!-- Total Calculation -->
+          <div class="cart-total-breakdown" *ngIf="cartItems.length > 0"
+            style="margin-top: 20px; border-top: 2px dashed #eee; padding-top: 10px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+              <span style="color: #666;">Subtotal:</span>
+              <span>₹{{ getCartSubtotal(cartItems) | number:'1.2-2' }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #666;">
+              <span>GST (CGST + SGST):</span>
+              <span>+ ₹{{ getCartTax(cartItems).totalTax | number:'1.2-2' }}</span>
+            </div>
+            <div class="cart-total"
+              style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; margin-top: 10px; color: #2C3E50;">
+              <span>Total To Pay:</span>
+              <span>₹{{ getCartGrandTotal(cartItems) | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn secondary-btn" (click)="clearCart()" [disabled]="cartItems.length === 0">
+          Clear
+        </button>
+        <button class="btn primary-btn" (click)="placeOrder()"
+          [disabled]="!orderForm.valid || cartItems.length === 0 || isLoading">
+          {{ isLoading ? '⏳ Processing...' : '✅ Place Order' }}
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- ========== LEAVES TAB ========== -->
-  <div *ngIf="activeTab === 'LEAVES'" class="tab-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h3>🏖️ My Leave History</h3>
-      <button class="btn primary-btn" (click)="openLeaveModal()">+ Apply for Leave</button>
-    </div>
+  <!-- ===== CONFLICT MODAL ===== -->
+  <div *ngIf="showConflictModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width: 600px">
+      <div class="modal-header">
+        <h3>⚠️ Table Already Has Active Orders</h3>
+        <button class="close-btn" (click)="closeConflictModal()" aria-label="Close dialog">
+          ✕
+        </button>
+      </div>
 
-    <div class="table-wrapper">
-      <table class="orders-table">
-        <thead>
-          <tr>
-            <th>DateApplied</th>
-            <th>Period</th>
-            <th>Days</th>
-            <th>Reason</th>
-            <th>Status</th>
-            <th>Admin Note</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let l of myLeaves">
-            <td>#{{ l.id }}</td>
-            <td>{{ l.startDate }} to {{ l.endDate }}</td>
-            <td>
-              {{ getLeaveDuration(l.startDate, l.endDate) }} Days
-            </td>
-            <td>{{ l.reason }}</td>
-            <td>
-              <span class="badge" [class.badge-ready]="l.status === 'APPROVED'"
-                [class.badge-pending]="l.status === 'PENDING'"
-                [style.background-color]="l.status === 'REJECTED' ? '#ffebee' : ''"
-                [style.color]="l.status === 'REJECTED' ? '#c62828' : ''">
-                {{ l.status }}
-              </span>
-            </td>
-            <td>{{ l.adminComments || '-' }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="modal-body">
+        <p>Table #{{ orderForm.value.tableNumber }} has the following active order(s):</p>
+
+        <div *ngFor="let order of conflictOrders"
+          style="margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 6px">
+          <strong>Order #{{ order.id }}</strong>
+          <p>Status: {{ order.status }}</p>
+          <p>Items: {{ order.items.length || 0 }}</p>
+          <p>Total: ₹{{ order.total || order.totalAmount }}</p>
+        </div>
+
+        <p style="margin-top: 20px; font-weight: 600; color: #E67E22;">What would you like to do?</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn secondary-btn" (click)="closeConflictModal()" aria-label="Close without action">
+          Cancel
+        </button>
+        <button class="btn primary-btn" (click)="confirmNewBill()" aria-label="Start a new bill for this table">
+          Start New Bill
+        </button>
+        <button *ngIf="conflictOrders.length === 1" class="btn primary-btn" (click)="confirmAppend(conflictOrders[0])"
+          aria-label="Add items to existing order">
+          Add to Order #{{ conflictOrders[0].id }}
+        </button>
+      </div>
     </div>
-    <p *ngIf="myLeaves.length === 0" class="no-data">No leave applications yet.</p>
   </div>
 
-  <!-- LEAVE APPLICATION MODAL -->
-  <div class="modal-backdrop" *ngIf="showLeaveModal" (click)="closeLeaveModal()">
+  <!-- ===== BILL MODAL ===== -->
+  <div *ngIf="showBillModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal cart-modal">
+      <div class="modal-header">
+        <h3>🧾 Share Bill - Order #{{ viewBillOrder?.id }}</h3>
+        <button class="close-btn" (click)="closeBillModal()" aria-label="Close bill modal">
+          ✕
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="viewBillOrder">
+        <div style="margin-bottom: 15px">
+          <strong>Customer:</strong> {{ viewBillOrder.customerName || 'Guest' }}
+          <br />
+          <strong>Phone:</strong> {{ viewBillOrder.customerPhone }}
+          <br />
+          <strong>Total:</strong>
+          <div style="margin-top: 5px; border-top: 1px dashed #ccc; padding-top: 5px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span>Subtotal:</span>
+              <span>₹{{ (viewBillOrder.subtotal || getOrderCalculatedSubtotal(viewBillOrder.items)) | number:'1.2-2'
+                }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.9em; color: #666;">
+              <span>Tax (CGST+SGST):</span>
+              <span>₹{{ (viewBillOrder.taxAmount || 0) | number:'1.2-2' }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 5px;">
+              <span>Grand Total:</span>
+              <span>₹{{ (viewBillOrder.grandTotal || viewBillOrder.total || viewBillOrder.totalAmount) | number:'1.2-2'
+                }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px">
+          <strong>Items:</strong>
+          <div class="cart-items-list">
+            <div *ngFor="let item of viewBillOrder.items" class="cart-item">
+              <div class="item-name">{{ item.name }}</div>
+              <div>
+                <span class="item-price">₹{{ item.price }}</span>
+                <span style="color: #999">x{{ item.qty || 1 }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 10px; background: #f5f5f5; border-radius: 6px; margin-bottom: 15px">
+          <strong>Share via:</strong>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn secondary-btn" (click)="closeBillModal()" aria-label="Close modal">
+          Cancel
+        </button>
+        <button class="btn btn-outline" (click)="printBill(viewBillOrder!)" aria-label="Print tax invoice"
+          style="margin-right: auto;border: 1px solid #ccc;">
+          🖨️ Print Bill
+        </button>
+        <button class="btn primary-btn" (click)="confirmShare('WHATSAPP')" aria-label="Share via WhatsApp">
+          📱 WhatsApp
+        </button>
+        <button class="btn primary-btn" (click)="confirmShare('SMS')" aria-label="Share via SMS">
+          💬 SMS
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LEAVE APPLICATION MODAL ===== -->
+  <div class="modal-backdrop" *ngIf="showLeaveModal" (click)="showLeaveModal = false">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>🏖️ Apply for Leave</h3>
-        <button class="close-btn" (click)="closeLeaveModal()">×</button>
+        <button class="close-btn" (click)="showLeaveModal = false">×</button>
       </div>
       <div class="modal-body">
         <form [formGroup]="leaveForm" (ngSubmit)="applyForLeave()">
@@ -339,7 +525,7 @@
             <textarea formControlName="reason" rows="3" placeholder="e.g. Family Function"></textarea>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn" (click)="closeLeaveModal()">Cancel</button>
+            <button type="button" class="btn" (click)="showLeaveModal = false">Cancel</button>
             <button type="submit" class="btn primary-btn" [disabled]="leaveForm.invalid || isLoading">Submit
               Application</button>
           </div>
@@ -348,57 +534,7 @@
     </div>
   </div>
 
-  <!-- ========== EDIT ORDER MODAL ========== -->
-  <div *ngIf="showEditModal && editOrder" class="modal-backdrop">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Edit Order #{{ editOrder.id }}</h3>
-        <button class="close-btn" (click)="closeEdit()">✕</button>
-      </div>
-
-      <div class="modal-body">
-        <!-- Add Items Grid -->
-        <h4>Add Items</h4>
-        <div class="menu-grid-small">
-          <div class="menu-item-small" *ngFor="let item of filteredMenu">
-            <img [src]="item.imageUrl" [alt]="item.name" />
-            <div class="item-info-small">
-              <div class="item-name-small">{{ item.name }}</div>
-              <div class="item-price-small">₹{{ item.price }}</div>
-              <button class="btn" (click)="addItemToEdit(item)">+ Add</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Edit Items -->
-        <h4>Order Items</h4>
-        <div class="edit-items">
-          <div *ngFor="let item of editOrder.items; let i = index" class="edit-item">
-            <div class="edit-item-info">
-              <div class="edit-item-name">{{ item.name }}</div>
-              <div class="edit-item-price">₹{{ item.price }}</div>
-            </div>
-
-            <div class="qty-control">
-              <button class="qty-btn" (click)="decreaseQty(item)">−</button>
-              <span class="qty">{{ item.qty }}</span>
-              <button class="qty-btn" (click)="increaseQty(item)">+</button>
-            </div>
-
-            <button class="remove-btn" (click)="removeItemFromEdit(i)">Remove</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn" (click)="closeEdit()">Cancel</button>
-        <button class="btn primary-btn" (click)="saveEdit()">Save Changes</button>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- Payment Modal -->
+  <!-- ===== PAYMENT MODAL ===== -->
   <div class="modal-backdrop" *ngIf="showPaymentModal" (click)="closePayment()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -408,11 +544,13 @@
       </div>
       <div class="modal-body">
         <h4>{{ pendingTiffinPayload ? 'Subscription Total:' : 'Total Amount:' }} <span
-            style="color: #27AE60; font-size: 1.2rem;">₹{{ payOrder?.totalAmount || payOrder?.total
+            style="color: #27AE60; font-size: 1.2rem;">₹{{ payOrder?.totalAmount || payOrder?.total ||
+            pendingTiffinPayload?.finalAmount
             }}</span></h4>
 
         <!-- QR Code Section -->
-        <div *ngIf="paymentMode === 'UPI' && paymentConfig?.upiQrImageUrl" style="text-align: center; margin: 1rem 0;">
+        <div *ngIf="paymentMode === PaymentMode.UPI && paymentConfig?.upiQrImageUrl"
+          style="text-align: center; margin: 1rem 0;">
           <img [src]="paymentConfig?.upiQrImageUrl" alt="Scan to Pay"
             style="width: 150px; height: 150px; border: 2px solid #27AE60; padding: 5px; border-radius: 10px;">
           <div style="margin-top: 5px; font-weight: 600; color: #555;">{{ paymentConfig?.upiId }}</div>
@@ -421,11 +559,13 @@
         <div class="form-row" style="margin-top: 1.5rem;">
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 700;">Select Payment Mode:</label>
           <div class="payment-options" style="display: flex; gap: 1rem;">
-            <button class="btn" [class.active-mode]="paymentMode === 'CASH'" (click)="paymentMode = 'CASH'"
+            <button class="btn" [class.active-mode]="paymentMode === PaymentMode.CASH"
+              (click)="paymentMode = PaymentMode.CASH"
               style="flex: 1; border: 2px solid #ddd; background: white; color: #333;">
               💵 Cash
             </button>
-            <button class="btn" [class.active-mode]="paymentMode === 'UPI'" (click)="paymentMode = 'UPI'"
+            <button class="btn" [class.active-mode]="paymentMode === PaymentMode.UPI"
+              (click)="paymentMode = PaymentMode.UPI"
               style="flex: 1; border: 2px solid #ddd; background: white; color: #333;">
               📱 UPI / Online
             </button>
@@ -441,75 +581,4 @@
     </div>
   </div>
 
-  <!-- Bill / Share Modal -->
-  <div class="modal-backdrop" *ngIf="showBillModal && viewBillOrder" (click)="closeBillModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>🧾 Order Summary #{{ viewBillOrder.id }}</h3>
-        <button class="close-btn" (click)="closeBillModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="bill-details"
-          style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-family: monospace;">
-          <div style="border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px;">
-            <strong>Customer:</strong> {{ viewBillOrder.customerName }}<br>
-            <strong>Phone:</strong> {{ viewBillOrder.customerPhone }}<br>
-            <strong>Date:</strong> {{ viewBillOrder.createdAt | date:'short' }}
-          </div>
-          <div *ngFor="let item of viewBillOrder.items"
-            style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-            <span>{{ item.qty }}x {{ item.name }}</span>
-            <span>₹{{ item.price * item.qty }}</span>
-          </div>
-          <div
-            style="border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1em;">
-            <span>TOTAL</span>
-            <span>₹{{ viewBillOrder.total }}</span>
-          </div>
-        </div>
-
-        <h4 style="margin-bottom: 10px;">Share Bill via:</h4>
-        <div class="payment-options" style="display: flex; gap: 1rem;">
-          <button class="btn" style="flex: 1; background: #25D366; color: white;" (click)="confirmShare('WHATSAPP')">
-            <i class="fa fa-whatsapp"></i> WhatsApp
-          </button>
-          <button class="btn" style="flex: 1; background: #3498DB; color: white;" (click)="confirmShare('SMS')">
-            <i class="fa fa-commenting-o"></i> SMS / Text
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- CONFLICT MODAL (Shared Table) -->
-  <div class="modal-backdrop" *ngIf="showConflictModal" (click)="closeConflictModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>⚠️ Table Occupied</h3>
-        <button class="close-btn" (click)="closeConflictModal()">×</button>
-      </div>
-      <div class="modal-body">
-        <p>This table already has active orders. What would you like to do?</p>
-
-        <div class="existing-orders-list" style="margin: 15px 0;">
-          <div *ngFor="let ord of conflictOrders"
-            style="background: #fff3e0; padding: 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #ffe0b2; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <strong>{{ ord.customerName || 'Guest' }}</strong>
-              <div style="font-size: 0.85em; color: #666;">#{{ ord.id }} • {{ ord.items?.length }} items</div>
-            </div>
-            <button class="btn secondary-btn" (click)="confirmAppend(ord)">
-              Append Items
-            </button>
-          </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 10px; border-top: 1px solid #eee; padding-top: 15px;">
-          <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Or start a fresh bill for a new customer?</p>
-          <button class="btn primary-btn" style="width: 100%;" (click)="confirmNewBill()">
-            ✨ Start New Separate Bill
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>

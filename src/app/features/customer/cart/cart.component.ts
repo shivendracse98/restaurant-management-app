@@ -86,17 +86,7 @@ export class CartComponent implements OnInit {
 
   /** Explicit navigation to checkout page */
   goToCheckout() {
-    if (!this.auth.isLoggedIn()) {
-      // Improved: seamless redirect with context
-      this.router.navigate(['/login'], {
-        queryParams: {
-          returnUrl: '/checkout',
-          reason: 'checkout'
-        }
-      });
-      return;
-    }
-
+    // ALLOW GUEST: Proceed directly to checkout
     // Store coupon for Checkout component
     sessionStorage.setItem('applied_coupon', JSON.stringify({
       code: this.couponCode,

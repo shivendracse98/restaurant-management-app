@@ -191,4 +191,61 @@ export class TenantGroupDetailComponent implements OnInit {
             }
         });
     }
+
+    // --- Export Logic ---
+
+    exportReport(): void {
+        if (!this.analytics || !this.analytics.breakdown || this.analytics.breakdown.length === 0) {
+            alert('No data to export.');
+            return;
+        }
+
+        const data = this.analytics.breakdown;
+        const csvRows = [];
+
+        // Headers
+        const headers = ['Restaurant', 'Branch ID', 'Revenue', 'Orders', 'AOV'];
+        csvRows.push(headers.join(','));
+
+        // Rows
+        for (const row of data) {
+            const values = [
+                `"${row.name}"`, // Quote strings
+                row.restaurantId,
+                row.revenue.toFixed(2),
+                row.orders,
+                row.averageOrderValue.toFixed(2)
+            ];
+            csvRows.push(values.join(','));
+        }
+
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.setAttribute('hidden', '');
+        a.setAttribute('href', url);
+        a.setAttribute('download', `performance_breakdown_${this.groupId}.csv`);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    downloadInvoice(invoiceId: number): void {
+        this.superAdminService.downloadInvoicePdf(invoiceId).subscribe({
+            next: (blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `invoice_${invoiceId}.pdf`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            },
+            error: (err) => {
+                console.error('Download failed', err);
+                alert('Failed to download invoice. Please try again.');
+            }
+        });
+    }
 }

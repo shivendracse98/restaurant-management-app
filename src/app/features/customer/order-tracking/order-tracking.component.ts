@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { OrderService } from 'src/app/core/services/order.service';
+import { GuestSessionService } from 'src/app/core/services/guest-session.service';
 import { Subscription, interval } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -17,16 +18,18 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
     order: any = null;
     loading = true;
     private pollSub: Subscription | null = null;
-
-    // Status milestones
     private milestones = ['PENDING', 'PREPARING', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+
+    isGuest = false;
 
     constructor(
         private route: ActivatedRoute,
-        private orderService: OrderService
+        private orderService: OrderService,
+        private guestSessionService: GuestSessionService
     ) { }
 
     ngOnInit(): void {
+        this.checkIfGuest();
         this.orderId = this.route.snapshot.paramMap.get('id');
         if (this.orderId) {
             this.loadOrder();
@@ -34,9 +37,28 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
         }
     }
 
+    checkIfGuest(): void {
+        const guestKey = this.guestSessionService.getValidGuestKey();
+        this.isGuest = !!guestKey;
+    }
+
     loadOrder(): void {
-        if (!this.orderId) return;
-        this.orderService.getOrder(Number(this.orderId)).subscribe({
+        const guestKey = this.guestSessionService.getValidGuestKey();
+        let request$;
+
+        if (guestKey) {
+            const sessionId = this.guestSessionService.getValidOrderId();
+            if (sessionId && String(sessionId) === String(this.orderId)) {
+                request$ = this.orderService.trackGuestOrder(guestKey);
+            } else {
+                request$ = this.orderService.getOrder(Number(this.orderId));
+            }
+        } else {
+            if (!this.orderId) return;
+            request$ = this.orderService.getOrder(Number(this.orderId));
+        }
+
+        request$.subscribe({
             next: (data: any) => {
                 this.order = data;
                 this.loading = false;
@@ -49,9 +71,18 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
     }
 
     startPolling(): void {
-        // Poll every 30 seconds to check for status updates
-        this.pollSub = interval(30000)
-            .pipe(switchMap(() => this.orderService.getOrder(Number(this.orderId!))))
+        this.pollSub = interval(15000)
+            .pipe(
+                switchMap(() => {
+                    const guestKey = this.guestSessionService.getValidGuestKey();
+                    const sessionId = this.guestSessionService.getValidOrderId();
+
+                    if (guestKey && sessionId && String(sessionId) === String(this.orderId)) {
+                        return this.orderService.trackGuestOrder(guestKey);
+                    }
+                    return this.orderService.getOrder(Number(this.orderId!));
+                })
+            )
             .subscribe((data: any) => {
                 this.order = data;
             });
@@ -60,11 +91,8 @@ export class OrderTrackingComponent implements OnInit, OnDestroy {
     isStepActive(step: string): boolean {
         if (!this.order) return false;
         if (this.order.status === 'CANCELLED') return false;
-
         const currentIndex = this.milestones.indexOf(this.order.status);
         const stepIndex = this.milestones.indexOf(step);
-
-        // If order has passed this step, it is active
         return currentIndex >= stepIndex;
     }
 

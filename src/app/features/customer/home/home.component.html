@@ -1,140 +1,376 @@
 <div class="home-container">
 
-  <!-- 1. HERO SECTION (Zomato Style) -->
-  <div class="hero-section">
-    <div class="hero-content">
-      <h1 class="brand-title">TasteTown</h1>
-      <p class="brand-subtitle">Discover the best food & drinks in your city</p>
+  <!-- ===== 1. STICKY NAVBAR ===== -->
+  <nav class="navbar" [class.scrolled]="isScrolled">
+    <div class="navbar-inner">
+      <div class="logo-section">
+        <span class="logo-icon">🍔</span>
+        <span class="logo-text">TasteTown</span>
+      </div>
 
-      <!-- Smart Search Bar -->
-      <div class="search-bar-wrapper">
-        <div class="location-box">
-          <span class="icon">📍</span>
-          <input type="text" value="Bhopal, India" readonly class="loc-input">
+      <div class="nav-items">
+        <a href="#value-props" class="nav-link">Why TasteTown?</a>
+        <a href="#testimonials" class="nav-link">Reviews</a>
+        <button class="btn-account" (click)="navigateToProfile()">
+          👤 My Account
+        </button>
+        <button class="btn-cart" (click)="navigateToCart()">
+          🛒 <span class="cart-count" *ngIf="cartCount() > 0">{{ cartCount() }}</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== 2. HERO SECTION (Premium) ===== -->
+  <header class="hero-section">
+    <div class="hero-background">
+      <div class="gradient-blob blob-1"></div>
+      <div class="gradient-blob blob-2"></div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">
+          <span class="gradient-text">Order from Local Favorites</span>
+          <br>
+          <span>Fair Pricing. Fresh Food. Fast Delivery.</span>
+        </h1>
+        <p class="hero-subtitle">
+          ⚡ 30-45 min delivery | 💚 Support local restaurants | 🛡️ Safe & hygienic
+        </p>
+      </div>
+
+      <!-- Search Bar (Premium) -->
+      <div class="search-bar-container">
+        <div class="search-bar">
+          <div class="search-field location-field">
+            <span class="search-icon">📍</span>
+            <input type="text" [value]="userLocation()" readonly class="search-input location-input"
+              (click)="openLocationModal()">
+          </div>
+
+          <div class="search-divider"></div>
+
+          <div class="search-field search-main">
+            <span class="search-icon">🔍</span>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+              placeholder="Restaurant, cuisine, or dish..." class="search-input search-input-main"
+              (focus)="showSearchSuggestions = true" (blur)="onSearchBlur()">
+          </div>
         </div>
-        <div class="divider"></div>
-        <div class="search-box">
-          <span class="icon">🔍</span>
-          <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-            placeholder="Search for restaurant, cuisine or a dish" class="search-input">
+
+        <!-- Search Suggestions Dropdown -->
+        <div *ngIf="showSearchSuggestions && searchQuery().length > 0" class="search-suggestions">
+          <div *ngFor="let suggestion of getSearchSuggestions()" class="suggestion-item"
+            (click)="searchQuery.set(suggestion); showSearchSuggestions = false">
+            🔍 {{ suggestion }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-number">{{ restaurantCount > 0 ? restaurantCount : '125+' }}</span>
+          <span class="stat-label">Restaurants</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">{{ deliveryTime }}</span>
+          <span class="stat-label">Avg. Delivery</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">4.8★</span>
+          <span class="stat-label">Rating</span>
         </div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- 2. CATEGORY FILTERS (Chips) -->
-  <div class="filters-section">
-    <div class="chips-scroll">
-      <button *ngFor="let cat of categories" class="chip-btn" (click)="filterByCategory(cat.name)">
-        {{ cat.icon }} {{ cat.name }}
-      </button>
+  <!-- ===== 3. CATEGORY FILTER (Horizontal Scroll) ===== -->
+  <section class="filters-section">
+    <div class="filters-inner">
+      <div class="categories-scroll">
+        <button *ngFor="let cat of categories" [class.active]="activeCategory() === cat.name" class="category-chip"
+          (click)="filterByCategory(cat.name)">
+          <span class="chip-icon">{{ cat.icon }}</span>
+          <span class="chip-text">{{ cat.name }}</span>
+        </button>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <!-- 3. RESTAURANT GRID -->
-  <div class="content-section">
-    <h2 class="section-title">
-      {{ searchQuery() ? 'Search Results' : 'Delivery Restaurants in Bhopal' }}
-    </h2>
+  <!-- ===== 4. MAIN CONTENT AREA ===== -->
+  <main class="main-content">
+
+    <!-- Header with Sorting -->
+    <div class="content-header">
+      <div>
+        <h2 class="section-heading">
+          {{ searchQuery() ? 'Search Results' : 'Restaurants Delivering Near You' }}
+        </h2>
+        <p class="section-subtitle">
+          {{ filteredRestaurants().length }} restaurants available
+        </p>
+      </div>
+
+      <div class="sort-controls">
+        <select [(ngModel)]="sortBy" (change)="applySorting()" class="sort-select">
+          <option value="recommended">Recommended</option>
+          <option value="rating">Rating</option>
+          <option value="delivery-time">Delivery Time</option>
+          <option value="discount">Discount</option>
+          <option value="nearest">Nearest</option>
+        </select>
+      </div>
+    </div>
 
     <!-- Loading State -->
-    <div *ngIf="loading()" class="loading-state">
-      <div class="spinner"></div>
-      <p>Finding the best kitchens...</p>
+    <div *ngIf="loading()" class="loading-container">
+      <div class="spinner-premium">
+        <div class="spinner-ring"></div>
+      </div>
+      <p class="loading-text">Finding best restaurants for you...</p>
     </div>
 
     <!-- Empty State -->
     <div *ngIf="!loading() && filteredRestaurants().length === 0" class="empty-state">
-      <p>😞 No restaurants found matching "{{ searchQuery() }}"</p>
-      <button class="btn-clear" (click)="searchQuery.set('')">Clear Search</button>
+      <div class="empty-icon">🍽️</div>
+      <h3>No restaurants found</h3>
+      <p>We couldn't find restaurants matching "{{ searchQuery() }}"</p>
+      <button class="btn-primary" (click)="clearSearch()">
+        Clear Search
+      </button>
     </div>
 
-    <!-- The Grid -->
-    <div class="restaurants-grid" *ngIf="!loading()">
-      <app-restaurant-card *ngFor="let res of filteredRestaurants()" [data]="res"
-        (cardClick)="onRestaurantSelect($event)">
+    <!-- Restaurants Grid -->
+    <div class="restaurants-grid" *ngIf="!loading() && filteredRestaurants().length > 0">
+      <app-restaurant-card *ngFor="let restaurant of filteredRestaurants()" [data]="restaurant"
+        [isPromoted]="isPromotedRestaurant(restaurant.id)" (cardClick)="onRestaurantSelect($event)">
       </app-restaurant-card>
     </div>
-  </div>
 
-  <!-- 4. WHY TASTETOWN (Value Props) -->
-  <div class="value-props-section">
-    <div class="props-grid">
-      <div class="prop-card">
-        <div class="icon-circle">⚡</div>
-        <h3>Super Fast Delivery</h3>
-        <p>Doorstep delivery within 45 mins.</p>
-      </div>
-      <div class="prop-card">
-        <div class="icon-circle">🛡️</div>
-        <h3>Safe & Hygienic</h3>
-        <p>100% sanitized kitchens & riders.</p>
-      </div>
-      <div class="prop-card">
-        <div class="icon-circle">💰</div>
-        <h3>Best Prices</h3>
-        <p>No hidden fees. Honest pricing.</p>
+  </main>
+
+  <!-- ===== 5. TRUST & BENEFITS SECTION ===== -->
+  <section class="trust-section" id="value-props">
+    <div class="trust-content">
+      <h2 class="section-heading">Why Choose TasteTown?</h2>
+
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <div class="benefit-icon">⚡</div>
+          <h3>Super Fast Delivery</h3>
+          <p>Average 30-45 minute delivery to your doorstep</p>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon">💚</div>
+          <h3>Support Local</h3>
+          <p>Fair pricing for restaurants. Quality food for you.</p>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon">🛡️</div>
+          <h3>Safe & Hygienic</h3>
+          <p>100% verified kitchens. Contactless delivery.</p>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon">💰</div>
+          <h3>Best Prices</h3>
+          <p>No hidden fees. Transparent pricing always.</p>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon">🏆</div>
+          <h3>Quality Assured</h3>
+          <p>4.8★ rating from 50,000+ happy customers</p>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon">📱</div>
+          <h3>Easy to Use</h3>
+          <p>Simple app. Fast checkout. Real-time tracking.</p>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- 5. FOOTER (Detailed & Concise) -->
-  <footer class="pro-footer">
-    <div class="footer-inner">
+  <!-- ===== 6. TESTIMONIALS ===== -->
+  <section class="testimonials-section" id="testimonials">
+    <div class="testimonials-content">
+      <h2 class="section-heading">What Our Customers Say</h2>
+      <p class="section-subtitle">Trusted by 50,000+ happy customers</p>
 
-      <!-- Brand & About -->
-      <div class="col-section">
-        <h2 class="brand-name">TasteTown</h2>
-        <p class="copyright">© 2025 All rights reserved</p>
-        <p class="desc-text mt-2">
-          A modern restaurant tech platform simplifying operations from orders to billing.
-        </p>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="rating">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-text">
+            "TasteTown delivers hot food faster than anyone else. The restaurants are amazing and prices are honest."
+          </p>
+          <div class="testimonial-author">
+            <div class="avatar">A</div>
+            <div>
+              <p class="author-name">Amit Kumar</p>
+              <p class="author-title">Software Engineer</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="rating">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-text">
+            "Best app for ordering food. The app is so clean and easy to use. Love supporting local restaurants!"
+          </p>
+          <div class="testimonial-author">
+            <div class="avatar">P</div>
+            <div>
+              <p class="author-name">Priya Sharma</p>
+              <p class="author-title">Student</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="rating">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-text">
+            "I'm a restaurant owner on TasteTown. The low commission helps me keep prices fair for customers."
+          </p>
+          <div class="testimonial-author">
+            <div class="avatar">R</div>
+            <div>
+              <p class="author-name">Raj Patel</p>
+              <p class="author-title">Restaurant Owner</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 7. PROMOTIONAL BANNER ===== -->
+  <section class="promo-banner">
+    <div class="promo-content">
+      <h3>First Order? Get 40% Off!</h3>
+      <p>Use code: <strong>FIRST40</strong></p>
+      <button class="btn-promo" (click)="applyPromoCode('FIRST40')">
+        Claim Offer
+      </button>
+    </div>
+  </section>
+
+  <!-- ===== 8. HOW IT WORKS ===== -->
+  <section class="how-it-works">
+    <div class="how-content">
+      <h2 class="section-heading">How It Works</h2>
+
+      <div class="steps-container">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-icon">🔍</div>
+          <h4>Browse</h4>
+          <p>Explore 500+ dishes from 100+ restaurants</p>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-icon">🛒</div>
+          <h4>Order</h4>
+          <p>Add items and checkout in 30 seconds</p>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-icon">🚴</div>
+          <h4>Deliver</h4>
+          <p>Real-time tracking of your order</p>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-icon">😋</div>
+          <h4>Enjoy</h4>
+          <p>Hot food at your doorstep</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 9. FOOTER (Professional) ===== -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3 class="footer-brand">TasteTown</h3>
+        <p class="footer-tagline">Fair. Fresh. Fast.</p>
+        <div class="social-links">
+          <a href="https://facebook.com" target="_blank" class="social-link">f</a>
+          <a href="https://twitter.com" target="_blank" class="social-link">𝕏</a>
+          <a href="https://instagram.com" target="_blank" class="social-link">📷</a>
+        </div>
       </div>
 
-      <!-- Company -->
-      <div class="col-section">
+      <div class="footer-section">
         <h4>Company</h4>
-        <div class="info-block">
-          <strong>Careers</strong>
-          <p>Building practical tech. Join us if you love food-tech & solving real problems.</p>
-        </div>
-        <div class="info-block">
-          <strong>Team</strong>
-          <p>Built by experts in operations, engineering, and design.</p>
-        </div>
+        <ul class="footer-links">
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/careers">Careers</a></li>
+          <li><a href="/blog">Blog</a></li>
+          <li><a href="/press">Press</a></li>
+        </ul>
       </div>
 
-      <!-- Contact & Support -->
-      <div class="col-section">
-        <h4>Contact & Support</h4>
-        <div class="info-block">
-          <strong>Help</strong>
-          <p>Onboarding & setup support available.</p>
-        </div>
-        <div class="info-block">
-          <strong>Partner</strong>
-          <p>Restaurant or delivery partner? Grow with us.</p>
-        </div>
-        <div class="contact-details">
-          <p>📧 shivendra.cse.98&#64;gmail.com</p>
-          <p>📞 6267526722</p>
-          <p>📍 India</p>
-        </div>
+      <div class="footer-section">
+        <h4>For Restaurants</h4>
+        <ul class="footer-links">
+          <li><a href="/for-restaurants">Partner With Us</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+          <li><a href="/success-stories">Success Stories</a></li>
+          <li><a routerLink="/for-restaurants/contact">Contact Sales</a></li>
+        </ul>
       </div>
 
-      <!-- Legal -->
-      <div class="col-section">
+      <div class="footer-section">
+        <h4>Support</h4>
+        <ul class="footer-links">
+          <li><a href="/help">Help Center</a></li>
+          <li><a href="/faq">FAQ</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+          <li><a href="/feedback">Send Feedback</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
         <h4>Legal</h4>
-        <div class="info-block">
-          <strong>Terms</strong>
-          <p>Governs platform usage & subscriptions.</p>
-        </div>
-        <div class="info-block">
-          <strong>Privacy</strong>
-          <p>We protect your data responsibly.</p>
-        </div>
+        <ul class="footer-links">
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/refund">Refund Policy</a></li>
+          <li><a href="/cookies">Cookie Policy</a></li>
+        </ul>
       </div>
 
+      <div class="footer-section contact-section">
+        <h4>Contact</h4>
+        <p class="contact-item">📧 support&#64;tastetown.in</p>
+        <p class="contact-item">📞 1800-TASTE-1</p>
+        <p class="contact-item">📍 Bhopal, India</p>
+        <p class="contact-item operating-hours">Operating 11 AM - 11 PM</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="trust-badges">
+        <span class="badge">🔒 SSL Secure</span>
+        <span class="badge">✓ Verified</span>
+        <span class="badge">⭐ 4.8 Rating</span>
+      </div>
+      <p class="copyright">© 2025 TasteTown. All rights reserved.</p>
     </div>
   </footer>
 

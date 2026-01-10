@@ -125,6 +125,56 @@
                 </div>
             </div>
 
+            <!-- CARD 5: LEGAL & TAX (New) -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2>🏛️ Legal & Tax</h2>
+                    <p>Compliance details for Invoices</p>
+                </div>
+                <div class="card-body">
+
+                    <!-- Tax Toggle -->
+                    <div class="form-group mb-4">
+                        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded"
+                            style="border: 1px solid #e0e0e0;">
+                            <div>
+                                <label class="mb-0 font-weight-bold">Is GST Registered?</label>
+                                <small class="text-muted d-block">Turn ON if your annual turnover > ₹20 Lakhs (or as
+                                    advised by CA).</small>
+                                <small class="text-primary d-block mt-1"
+                                    *ngIf="configForm.get('isGstRegistered')?.value">
+                                    ✅ Tax will be calculated on orders.
+                                </small>
+                            </div>
+                            <mat-slide-toggle formControlName="isGstRegistered" color="primary"></mat-slide-toggle>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>GSTIN Number</label>
+                                <input type="text" formControlName="gstIn" placeholder="e.g. 29AAAAA0000A1Z5"
+                                    [class.is-invalid]="configForm.get('isGstRegistered')?.value && !configForm.get('gstIn')?.value"
+                                    class="form-control">
+                                <small class="text-danger"
+                                    *ngIf="configForm.get('isGstRegistered')?.value && !configForm.get('gstIn')?.value">
+                                    Required for Tax Invoices
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>FSSAI License No.</label>
+                                <input type="text" formControlName="fssaiLicense" placeholder="e.g. 1001234567890"
+                                    class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
 
             <!-- CARD 4: DELIVERY MANAGEMENT -->
             @if (featureFlagStore.isFeatureEnabled('DELIVERY_MANAGEMENT')) {

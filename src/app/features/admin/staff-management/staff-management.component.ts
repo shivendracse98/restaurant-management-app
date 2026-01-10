@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -13,6 +13,8 @@ import { StaffService } from '../../../core/services/staff.service';
 import { LeaveService, LeaveResponse } from '../../../core/services/leave.service';
 import { AuthService, User } from '../../../core/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { Subject, timer } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'app-staff-management',
@@ -33,7 +35,7 @@ import { ToastrService } from 'ngx-toastr';
     templateUrl: './staff-management.component.html',
     styleUrls: ['./staff-management.component.scss']
 })
-export class StaffManagementComponent implements OnInit {
+export class StaffManagementComponent implements OnInit, OnDestroy {
     // Staff Tab Data
     staffList: User[] = [];
     staffColumns: string[] = ['name', 'email', 'phone', 'role', 'actions'];
@@ -44,6 +46,7 @@ export class StaffManagementComponent implements OnInit {
 
     // Basic loader
     loading = false;
+    private destroy$ = new Subject<void>();
 
     // Add Staff Form (Inline)
     addStaffForm!: FormGroup;
@@ -64,11 +67,12 @@ export class StaffManagementComponent implements OnInit {
         this.loadLeaves();
 
         // Poll for new leaves every 15 seconds
-        import('rxjs').then(rxjs => {
-            rxjs.timer(15000, 15000).subscribe(() => {
+        // Poll for new leaves every 15 seconds
+        timer(15000, 15000)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(() => {
                 this.loadLeaves();
             });
-        });
     }
 
     initForm(): void {
@@ -174,4 +178,10 @@ export class StaffManagementComponent implements OnInit {
             error: () => this.toastr.error('Action failed')
         });
     }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
 }
+

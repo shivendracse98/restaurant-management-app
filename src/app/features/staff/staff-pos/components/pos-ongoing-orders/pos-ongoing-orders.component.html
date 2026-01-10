@@ -68,9 +68,9 @@
                         <button class="btn primary-btn" (click)="openEdit.emit(o)">Edit</button>
                         <button class="btn primary-btn"
                             style="margin-left: 5px; background-color: #9C27B0; border-color: #9C27B0;"
-                            *ngIf="o.status === 'PENDING' || o.status === 'PREPARING' || o.status === 'READY'"
+                            *ngIf="o.status === 'PENDING' || o.status === 'PREPARING' || o.status === 'READY' || o.status === 'OUT_FOR_DELIVERY'"
                             (click)="markAsServed.emit(o)">
-                            Serve
+                            {{ o.status === 'OUT_FOR_DELIVERY' ? '✅ Delivered' : 'Serve' }}
                         </button>
                         <button class="btn primary-btn"
                             style="margin-left: 5px; background-color: #E67E22; border-color: #E67E22;"

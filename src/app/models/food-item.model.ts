@@ -9,4 +9,6 @@ export interface FoodItem {
     isAvailable?: boolean;
     isVeg?: boolean;
     masterItemId?: string;
+    hsnCode?: string;
+    gstRate?: number; // Default 5.0
 }

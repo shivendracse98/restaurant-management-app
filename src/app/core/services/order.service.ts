@@ -13,6 +13,7 @@ import { TenantService } from './tenant.service';
 })
 export class OrderService {
   private apiUrl = `${environment.apiBaseUrl}/orders`;
+  private apiUrlGuest = `${environment.apiBaseUrl}/public/guest/orders`; // ✅ Secure Guest API
 
   // Cache subject
   private ordersSubject = new BehaviorSubject<Order[]>([]);
@@ -60,6 +61,33 @@ export class OrderService {
     );
   }
 
+  /**
+   * ✅ Secure Guest Tracking (UUID)
+   */
+  trackGuestOrder(accessKey: string): Observable<Order> {
+    return this.http.get<Order>(`${this.apiUrlGuest}/track/${accessKey}`).pipe(
+      map(o => this.mapBackendOrderToFrontend(o))
+    );
+  }
+
+  /**
+   * ✅ Secure Guest Append (UUID)
+   */
+  appendGuestOrder(accessKey: string, items: any[]): Observable<Order> {
+    // Map items to Backend DTO
+    const payload = items.map((i: any) => ({
+      menuItemId: i.menuItemId || i.id,
+      itemName: i.name || i.itemName,
+      quantity: i.qty,
+      pricePerUnit: i.price,
+      subtotal: i.qty * i.price
+    }));
+
+    return this.http.put<Order>(`${this.apiUrlGuest}/${accessKey}/append`, payload).pipe(
+      map(o => this.mapBackendOrderToFrontend(o))
+    );
+  }
+
   // Helper to centralize mapping (extracted from loadOrders)
   private mapBackendOrderToFrontend(backendOrder: any): Order {
     const metadata = backendOrder.notes ? JSON.parse(backendOrder.notes) : {};
@@ -67,12 +95,23 @@ export class OrderService {
       ...backendOrder,
       ...metadata,
       total: backendOrder.totalAmount || backendOrder.total,
+      // Map Tax Fields
+      subtotal: backendOrder.subtotal,
+      taxAmount: backendOrder.taxAmount,
+      cgst: backendOrder.cgst,
+      sgst: backendOrder.sgst,
+      grandTotal: backendOrder.grandTotal,
+
       items: (backendOrder.items || []).map((i: any) => ({
         menuItemId: i.menuItemId,
         qty: i.quantity || i.qty,
         name: i.itemName || i.name,
         price: i.pricePerUnit || i.price,
-        status: i.status
+        status: i.status,
+        hsnCode: i.hsnCode, // Ensure HSN is mapped if sent
+        subtotal: i.subtotal,
+        taxAmount: i.taxAmount,
+        gstRate: i.gstRate
       }))
     };
   }
@@ -193,12 +232,24 @@ export class OrderService {
             address: newOrder.deliveryAddress || order.address,
             pincode: newOrder.deliveryPincode || order.pincode,
             total: newOrder.totalAmount || payload.totalAmount,
+
+            // Map Tax Fields from Backend Response
+            subtotal: newOrder.subtotal,
+            taxAmount: newOrder.taxAmount,
+            cgst: newOrder.cgst,
+            sgst: newOrder.sgst,
+            grandTotal: newOrder.grandTotal,
+
             // Ensure items are also mapped
             items: (newOrder.items || payload.items).map((i: any) => ({
               menuItemId: i.menuItemId,
               qty: i.quantity || i.qty,
               name: i.itemName || i.name,
-              price: i.pricePerUnit || i.price
+              price: i.pricePerUnit || i.price,
+              status: i.status,
+              hsnCode: i.hsnCode,
+              subtotal: i.subtotal,
+              taxAmount: i.taxAmount
             }))
           };
         }),

@@ -112,5 +112,11 @@ export class PosTiffinComponent {
     };
 
     this.createSubscription.emit(payload);
+    this.tiffinForm.reset({
+      frequency: 'DAILY',
+      durationMonths: 1,
+      type: 'LUNCH',
+      pricePerMeal: 100
+    });
   }
 }

@@ -55,7 +55,14 @@ export class AdminSettingsComponent implements OnInit {
             serviceablePincodes: [''],
             deliveryFee: [0, [Validators.min(0)]],
             minOrderAmount: [0, [Validators.min(0)]],
-            freeDeliveryThreshold: [0, [Validators.min(0)]]
+            freeDeliveryThreshold: [0, [Validators.min(0)]],
+
+            // Legal
+
+            // Legal
+            gstIn: [''],
+            fssaiLicense: [''],
+            isGstRegistered: [false]
         });
 
         // Load flags on init to sync state
@@ -103,7 +110,12 @@ export class AdminSettingsComponent implements OnInit {
                     serviceablePincodes: data?.serviceablePincodes || '',
                     deliveryFee: data?.deliveryFee || 0,
                     minOrderAmount: data?.minOrderAmount || 0,
-                    freeDeliveryThreshold: data?.freeDeliveryThreshold || 0
+                    freeDeliveryThreshold: data?.freeDeliveryThreshold || 0,
+
+                    // Legal
+                    gstIn: data?.gstIn || '',
+                    fssaiLicense: data?.fssaiLicense || '',
+                    isGstRegistered: data?.isGstRegistered !== undefined ? data.isGstRegistered : false
                 });
 
                 if (data?.logoUrl) this.logoPreview = data.logoUrl;
@@ -183,7 +195,12 @@ export class AdminSettingsComponent implements OnInit {
             serviceablePincodes: formValue.serviceablePincodes ? formValue.serviceablePincodes.trim() : '',
             deliveryFee: formValue.deliveryFee,
             minOrderAmount: formValue.minOrderAmount,
-            freeDeliveryThreshold: formValue.freeDeliveryThreshold
+            freeDeliveryThreshold: formValue.freeDeliveryThreshold,
+
+            // Legal
+            gstIn: formValue.gstIn,
+            fssaiLicense: formValue.fssaiLicense,
+            isGstRegistered: formValue.isGstRegistered
         };
 
         this.configService.updateConfig(payload).subscribe({

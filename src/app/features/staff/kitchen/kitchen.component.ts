@@ -245,6 +245,7 @@ export class KitchenComponent implements OnInit, OnDestroy {
   readyOrders: Order[] = [];
   lastUpdated = new Date();
   isLive = false;
+  private prevPendingCount = -1;
 
   private destroy$ = new Subject<void>();
 
@@ -335,7 +336,7 @@ export class KitchenComponent implements OnInit, OnDestroy {
   }
 
   playNotificationSound(): void {
-    const audio = new Audio('assets/notification.mp3');
+    const audio = new Audio('/assets/notification.mp3');
     audio.play().catch(e => console.warn('Audio play blocked', e));
   }
 
@@ -346,9 +347,26 @@ export class KitchenComponent implements OnInit, OnDestroy {
     const active = allOrders.filter(o => o.status !== 'CANCELLED' && o.status !== 'DELIVERED');
 
     // Mismatched type workaround for strict checking if any
-    this.pendingOrders = active.filter(o => (o.status as any) === 'CONFIRMED');
+    // SHOW: CONFIRMED (Paid/Verified) OR PENDING (Dine-In/Pay-Later)
+    const newPending = active.filter(o =>
+      o.status === 'CONFIRMED' ||
+      (o.status === 'PENDING' && o.orderType === 'DINE_IN')
+    );
+
+    // Check if we have MORE pending orders than before (New Order Arrived via Poll/Refresh)
+    // We ignore if count is same or less (served/moved)
+    // Initial load (prev = -1) usually shouldn't beep to avoid noise on refresh, 
+    // but if user wants it, we can. Let's start with > 0 check to ensure it's not just initial noise if preferred.
+    // For now, let's beep if valid increase.
+    if (this.prevPendingCount !== -1 && newPending.length > this.prevPendingCount) {
+      this.playNotificationSound();
+    }
+
+    this.pendingOrders = newPending;
     this.preparingOrders = active.filter(o => o.status === 'PREPARING');
     this.readyOrders = active.filter(o => o.status === 'READY');
+
+    this.prevPendingCount = this.pendingOrders.length;
   }
 
   updateStatus(order: Order, newStatus: string) {
@@ -373,8 +391,8 @@ export class KitchenComponent implements OnInit, OnDestroy {
     const updated = { ...order, status: newStatus as any };
 
     // Add to new list
-    if (newStatus === 'CONFIRMED') this.pendingOrders.push(updated); // Backend 'CONFIRMED' = Kitchen 'New'
-    else if (newStatus === 'PENDING') { /* Do nothing, wait for verification */ }
+    if (newStatus === 'CONFIRMED') this.pendingOrders.push(updated);
+    else if (newStatus === 'PENDING') this.pendingOrders.push(updated); // Also show PENDING
     else if (newStatus === 'PREPARING') this.preparingOrders.push(updated);
     else if (newStatus === 'READY') this.readyOrders.push(updated);
   }

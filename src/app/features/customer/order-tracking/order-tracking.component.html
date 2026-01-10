@@ -63,7 +63,10 @@
         <!-- Actions -->
         <div class="actions">
             <button class="btn-refresh" (click)="loadOrder()">🔄 Refresh Status</button>
-            <a routerLink="/orders" class="btn-back">⬅ Back to Orders</a>
+
+            <!-- Conditional Navigation -->
+            <a *ngIf="isGuest" routerLink="/menu" class="btn-back">🍽️ Back to Menu</a>
+            <a *ngIf="!isGuest" routerLink="/orders" class="btn-back">⬅ Back to Orders</a>
         </div>
     </div>
 

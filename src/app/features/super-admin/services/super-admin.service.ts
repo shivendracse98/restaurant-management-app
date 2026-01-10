@@ -192,6 +192,10 @@ export class SuperAdminService {
         return this.http.get(`${this.apiUrl}/billing/invoices/${id}`);
     }
 
+    downloadInvoicePdf(id: number): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/billing/invoices/${id}/download`, { responseType: 'blob' });
+    }
+
     // --- Platform Staff Management ---
     getPlatformUsers(): Observable<any[]> {
         return this.http.get<any[]>(`${this.apiUrl}/users`);

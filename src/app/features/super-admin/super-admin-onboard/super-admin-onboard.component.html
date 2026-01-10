@@ -67,9 +67,28 @@
                         <select formControlName="packageType">
                             <option value="">Select Plan</option>
                             <option *ngFor="let plan of availablePlans" [value]="plan.slug">
-                                {{ plan.name }} ({{ plan.currency }} {{ plan.basePrice }})
+                                {{ plan.name }}
                             </option>
                         </select>
+                        <!-- Price Breakdown -->
+                        <div *ngIf="selectedPlan" class="price-breakdown"
+                            style="margin-top: 8px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.9em; color: #555;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Base Price:</span>
+                                <span>{{ selectedPlan.currency }} {{ selectedPlan.basePrice | number }}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; color: #666;">
+                                <span>GST (18%):</span>
+                                <span>+ {{ selectedPlan.currency }} {{ (selectedPlan.basePrice * 0.18) | number:'1.0-2'
+                                    }}</span>
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 5px; border-top: 1px dashed #ccc; padding-top: 5px; color: #333;">
+                                <span>Total Payable:</span>
+                                <span>{{ selectedPlan.currency }} {{ (selectedPlan.basePrice * 1.18) | number:'1.0-2'
+                                    }}</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group half">

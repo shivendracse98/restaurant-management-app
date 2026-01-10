@@ -1,0 +1,60 @@
+<div class="restaurant-card" [class.promoted]="isPromoted" (click)="onCardClick()">
+
+    <!-- Image Container -->
+    <div class="image-container">
+        <img [src]="data.image || 'assets/images/restaurant-placeholder.jpg'" [alt]="data.name"
+            class="restaurant-image">
+
+        <!-- Promoted Badge -->
+        <div *ngIf="isPromoted" class="promoted-badge">
+            ⭐ Promoted
+        </div>
+
+        <!-- Discount Badge -->
+        <div *ngIf="data.discount" class="discount-badge">
+            {{ data.discount }}% OFF
+        </div>
+
+        <!-- Delivery Fee Badge -->
+        <div class="delivery-badge">
+            <span *ngIf="data.deliveryFee === 0" class="free-delivery">FREE</span>
+            <span *ngIf="data.deliveryFee > 0">₹{{ data.deliveryFee }}</span>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="card-content">
+        <h3 class="restaurant-name">{{ data.name }}</h3>
+
+        <div class="restaurant-meta">
+            <span class="cuisine">{{ data.cuisine || 'Multi-Cuisine' }}</span>
+            <span class="separator">•</span>
+            <span class="rating">
+                ⭐ {{ data.rating || 'New' }}
+            </span>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat">
+                <span class="stat-icon">⏱️</span>
+                <span>{{ data.deliveryTime || '30-45' }} min</span>
+            </div>
+            <div class="stat">
+                <span class="stat-icon">📍</span>
+                <span>{{ data.distance || 'Near you' }}</span>
+            </div>
+        </div>
+
+        <!-- Offer Tag -->
+        <div *ngIf="data.offerText" class="offer-tag">
+            {{ data.offerText }}
+        </div>
+    </div>
+
+    <!-- Hover Overlay -->
+    <div class="hover-overlay">
+        <button class="btn-view">View Menu →</button>
+    </div>
+
+</div>

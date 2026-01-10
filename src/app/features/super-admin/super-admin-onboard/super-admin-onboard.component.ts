@@ -49,6 +49,11 @@ export class SuperAdminOnboardComponent implements OnInit {
 
     get f() { return this.onboardForm.controls; }
 
+    get selectedPlan() {
+        const slug = this.onboardForm.get('packageType')?.value;
+        return this.availablePlans.find(p => p.slug === slug);
+    }
+
     onSubmit() {
         if (this.onboardForm.invalid) return;
 

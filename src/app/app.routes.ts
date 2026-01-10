@@ -36,18 +36,18 @@ export const routes: Routes = [
   { path: 'menu', component: MenuListComponent },
   { path: 'menu/:id', component: FoodDetailComponent },
   { path: 'cart', component: CartComponent },
-  { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
+  // ALLOW GUEST ACCESS
+  { path: 'checkout', component: CheckoutComponent },
   {
     path: 'orders',
     loadComponent: () => import('./features/customer/order-history/order-history.component').then(m => m.OrderHistoryComponent),
     canActivate: [authGuard]
   },
 
-  // ✅ NEW: Order Tracking (for post-payment)
   {
     path: 'order-tracking/:id',
     loadComponent: () => import('./features/customer/order-tracking/order-tracking.component').then(m => m.OrderTrackingComponent),
-    canActivate: [authGuard, customerGuard]
+    // ALLOW GUEST ACCESS
   },
 
 
@@ -197,6 +197,12 @@ export const routes: Routes = [
   { path: 'help', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'help' } },
   { path: 'terms', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'terms' } },
   { path: 'privacy', loadComponent: () => import('./features/public/static-content/static-content.component').then(m => m.StaticContentComponent), data: { type: 'privacy' } },
+  // ✅ NEW: Tax Invoice Print View
+  {
+    path: 'invoice/:id',
+    loadComponent: () => import('./features/shared/invoice-print/invoice-print.component').then(m => m.InvoicePrintComponent)
+  },
+
   // ✅ Catch-all wildcard route (must be last)
   { path: '**', redirectTo: 'home' }
 ];

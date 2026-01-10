@@ -49,7 +49,9 @@ export class MenuManagementComponent implements OnInit {
     imageUrl: '',
     category: '',
     isVeg: true,
-    isAvailable: true // Default In Stock
+    isAvailable: true, // Default In Stock
+    hsnCode: '',
+    gstRate: 5 // Default Restaurant GST
   };
 
   showForm = false;
@@ -135,7 +137,9 @@ export class MenuManagementComponent implements OnInit {
       imageUrl: '',
       category: '',
       isVeg: true, // Default to Veg
-      isAvailable: true // Default In Stock
+      isAvailable: true, // Default In Stock
+      hsnCode: '',
+      gstRate: 5
     };
   }
 

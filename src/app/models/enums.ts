@@ -9,6 +9,7 @@ export enum OrderStatus {
     PENDING = 'PENDING',
     PREPARING = 'PREPARING',
     READY = 'READY',
+    OUT_FOR_DELIVERY = 'OUT_FOR_DELIVERY',
     DELIVERED = 'DELIVERED',
     PAID = 'PAID',
     CONFIRMED = 'CONFIRMED',
@@ -27,7 +28,10 @@ export enum PaymentStatus {
     SUCCESS = 'SUCCESS',
     FAILED = 'FAILED',
     CANCELLED = 'CANCELLED',
-    REFUNDED = 'REFUNDED'
+    REFUNDED = 'REFUNDED',
+    VERIFICATION_PENDING = 'VERIFICATION_PENDING',
+    PAID = 'PAID',
+    COMPLETED = 'COMPLETED'
 }
 
 export enum PaymentMethod {

@@ -35,7 +35,7 @@
 
           <div class="form-row flex gap-4 mb-4 flex-wrap">
             <div class="form-group flex-1 min-w-[200px]">
-              <label class="block font-medium mb-1">Price</label>
+              <label class="block font-medium mb-1">Price (₹)</label>
               <input type="number" [(ngModel)]="newItem.price" placeholder="0" class="w-full border rounded p-2" />
             </div>
 
@@ -43,6 +43,26 @@
               <label class="block font-medium mb-1">Category</label>
               <input type="text" [(ngModel)]="newItem.category" placeholder="e.g., Pizza"
                 class="w-full border rounded p-2" />
+            </div>
+          </div>
+
+          <div class="form-row flex gap-4 mb-4 flex-wrap">
+            <div class="form-group flex-1 min-w-[200px]">
+              <label class="block font-medium mb-1">HSN/SAC Code</label>
+              <input type="text" [(ngModel)]="newItem.hsnCode" placeholder="e.g., 21069000"
+                class="w-full border rounded p-2" />
+            </div>
+
+            <div class="form-group flex-1 min-w-[200px]">
+              <label class="block font-medium mb-1">GST Rate (%)</label>
+              <select [(ngModel)]="newItem.gstRate" class="w-full border rounded p-2">
+                <option [ngValue]="0">0% (Nil Rated)</option>
+                <option [ngValue]="2.5">2.5%</option>
+                <option [ngValue]="5">5% (Restaurant Default)</option>
+                <option [ngValue]="12">12%</option>
+                <option [ngValue]="18">18% (Alcohol/Premium)</option>
+                <option [ngValue]="28">28%</option>
+              </select>
             </div>
           </div>
 
